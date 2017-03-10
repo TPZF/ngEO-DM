@@ -1,19 +1,8 @@
-import { NgeoService } from './../../services/ngeo';
-/**
- * Import decorators and services from angular
- */
+
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-/**
- * Import the ngrx configured store
- */
-// import { Store } from '@ngrx/store';
-// import { AppState } from '../../store/appState.store';
 
-// Allow us to use Notification API here.
-// declare var Notification: any;
-
-import * as path from 'path';
+import { NgeoService } from './../../services/ngeo';
 
 @Component({
   selector: 'download-manager',

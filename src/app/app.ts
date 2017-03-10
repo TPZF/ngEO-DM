@@ -1,3 +1,4 @@
+import { SearchComponent } from './components/search/search.component';
 /*
  * Angular Modules
  */
@@ -24,17 +25,17 @@ import { DownloadManagerComponent } from './components/downloadManager/download-
 import { routes } from './app.routes';
 
 @NgModule({
-    imports: [
-        BrowserModule,
-        FormsModule,
-        ReactiveFormsModule,
-        HttpModule,
-        MaterialModule.forRoot(),
-        RouterModule.forRoot(routes, { useHash: true })
-    ],
-    providers: [NgeoService],
-    declarations: [AppComponent, DownloadManagerComponent],
-    bootstrap: [AppComponent]
+  imports: [
+    BrowserModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpModule,
+    MaterialModule.forRoot(),
+    RouterModule.forRoot(routes, { useHash: true })
+  ],
+  providers: [NgeoService],
+  declarations: [AppComponent, DownloadManagerComponent],
+  bootstrap: [AppComponent]
 })
 export class AppModule { }
 platformBrowserDynamic().bootstrapModule(AppModule);
