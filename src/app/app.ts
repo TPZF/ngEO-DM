@@ -11,6 +11,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { HttpModule } from '@angular/http';
 import { MaterialModule } from '@angular/material';
+import { Md2Module } from 'md2';
 
 /**
  * Services
@@ -31,10 +32,11 @@ import { routes } from './app.routes';
     ReactiveFormsModule,
     HttpModule,
     MaterialModule.forRoot(),
+    Md2Module.forRoot(),
     RouterModule.forRoot(routes, { useHash: true })
   ],
   providers: [NgeoService],
-  declarations: [AppComponent, DownloadManagerComponent],
+  declarations: [AppComponent, SearchComponent, DownloadManagerComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
