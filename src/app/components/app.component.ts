@@ -36,6 +36,9 @@ export class AppComponent implements OnInit {
   }
 
   private navLinks = [{
+    url: '/login',
+    label: 'User'
+  }, {
     url: '/home',
     label: 'Download manager'
   }, {
