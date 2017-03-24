@@ -1,3 +1,4 @@
+import { AuthenticationService } from './../../services/authentication.service';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -16,12 +17,15 @@ import { Router } from '@angular/router';
         <search></search>
       </md-tab>
     </md-tab-group>
-    <button class="logout" md-raised-button color="primary" (click)="logout()">Logout</button>
+    <div class="userInfo">
+      Logged as : {{authenticationService.currentUser.username}}
+      <button md-raised-button color="primary" (click)="logout()">Logout</button>
+    </div>
     `
 })
 export class HomeComponent implements OnInit {
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private authenticationService: AuthenticationService) {
   }
 
   ngOnInit() {
