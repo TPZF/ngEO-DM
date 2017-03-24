@@ -9,7 +9,7 @@ $theme: mat-light-theme($primary, $accent);
 @include angular-material-theme($theme);
 
 .m2app-dark {
-  $dark-primary: mat-palette($mat-pink, 700, 500, 900);
+  $dark-primary: mat-palette($mat-yellow, 700, 500, 900);
   $dark-accent:  mat-palette($mat-blue-grey, A200, A100, A400);
   $dark-warn:    mat-palette($mat-deep-orange);
 
