@@ -1,6 +1,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { NgeoService } from './../../services/ngeo';
 
@@ -44,7 +45,7 @@ export class LoginComponent implements OnInit {
   private password: string = "";
   private downloadManagerName: string = "";
   private isProcessing: boolean = false;
-  constructor(private _ngeoService: NgeoService) {
+  constructor(private _ngeoService: NgeoService, private router: Router) {
   }
 
   ngOnInit() {
@@ -54,7 +55,7 @@ export class LoginComponent implements OnInit {
    * Login user to entered download manager
    */
   login() {
-    console.log("Login to DM");
+    this.router.navigate(['/home']);
   }
 
   /**

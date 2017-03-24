@@ -21,6 +21,7 @@ import { NgeoService } from './services/ngeo';
  * Components
  */
 import { AppComponent } from './components/app.component';
+import { HomeComponent } from './components/home/home.component';
 import { DownloadManagerComponent } from './components/downloadManager/download-manager.component';
 import { SearchComponent } from './components/search/search.component';
 import { LoginComponent } from './components/login/login.component';
@@ -38,7 +39,7 @@ import { routes } from './app.routes';
     RouterModule.forRoot(routes, { useHash: true })
   ],
   providers: [NgeoService],
-  declarations: [AppComponent, SearchComponent, DownloadManagerComponent, LoginComponent],
+  declarations: [AppComponent, HomeComponent, SearchComponent, DownloadManagerComponent, LoginComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
