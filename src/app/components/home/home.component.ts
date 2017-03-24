@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 /*
  * App Component
  */
 @Component({
   selector: 'home',
-  // styleUrls: ['./home.component.scss'],
+  styleUrls: ['./home.component.scss'],
   template: `
     <md-tab-group>
       <md-tab label="Download manager">
@@ -15,13 +16,18 @@ import { Component, OnInit } from '@angular/core';
         <search></search>
       </md-tab>
     </md-tab-group>
+    <button class="logout" md-raised-button color="primary" (click)="logout()">Logout</button>
     `
 })
 export class HomeComponent implements OnInit {
 
-  isDarkTheme: boolean = false;
+  constructor(private router: Router) {
+  }
+
   ngOnInit() {
   }
 
-  checkAuthentication() { }
+  logout() {
+    this.router.navigate(['/login']);
+  }
 }
