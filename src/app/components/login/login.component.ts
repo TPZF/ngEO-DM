@@ -1,3 +1,4 @@
+import { DownloadManagerService } from './../../services/download-manager.service';
 import { AuthenticationService } from './../../services/authentication.service';
 
 import { Component, OnInit } from '@angular/core';
@@ -82,7 +83,7 @@ export class LoginComponent implements OnInit {
   private downloadManagerName: string = "";
   private downloadManagers = [];
   private selectedDownloadManager;
-  constructor(private _ngeoService: NgeoService, private router: Router, private authenticationService: AuthenticationService) {
+  constructor(private downloadManagerService: DownloadManagerService, private router: Router, private authenticationService: AuthenticationService) {
   }
 
   ngOnInit() {
@@ -96,7 +97,7 @@ export class LoginComponent implements OnInit {
     this.authenticationService.login(this.username, this.password).subscribe((data) => {
       this.loaders['authentication'] = false;
       this.loaders['select'] = true;
-      this._ngeoService.getDownloadManagers(this.username).subscribe((downloadManagersRes) => {
+      this.downloadManagerService.getDownloadManagers(this.username).subscribe((downloadManagersRes) => {
         this.loaders['select'] = false;
         this.step = 1;
         this.downloadManagers = downloadManagersRes['downloadmanagers'];
@@ -117,7 +118,12 @@ export class LoginComponent implements OnInit {
    * Select the available download manager
    */
   private select() {
-    console.log(this.selectedDownloadManager);
+    // Store selected download manager on service to be able to access to it from other pages..
+    // TODO: Really think about how to manage data flow in Angular 2 app
+    this.downloadManagerService.select(this.downloadManagers.find((value, index, obj) => {
+      return value.downloadManagerFriendlyName == this.selectedDownloadManager;
+    }));
+    // Go to home page containing the principal interface
     this.router.navigate(['/home']);
   }
 
@@ -126,7 +132,7 @@ export class LoginComponent implements OnInit {
    */
   private register() {
     this.loaders['register'] = true;
-    this._ngeoService.registerDownloadManager(this.username, this.downloadManagerName).subscribe((res) => {
+    this.downloadManagerService.registerDownloadManager(this.username, this.downloadManagerName).subscribe((res) => {
       this.loaders['register'] = false;
       this.downloadManagers.push(res.downloadmanager);
     })

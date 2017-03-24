@@ -18,6 +18,7 @@ import { Md2Module } from 'md2';
  */
 import { NgeoService } from './services/ngeo';
 import { AuthenticationService } from './services/authentication.service';
+import { DownloadManagerService } from './services/download-manager.service';
 
 /**
  * Components
@@ -40,7 +41,7 @@ import { routes } from './app.routes';
     Md2Module.forRoot(),
     RouterModule.forRoot(routes, { useHash: true })
   ],
-  providers: [NgeoService, AuthenticationService],
+  providers: [NgeoService, AuthenticationService, DownloadManagerService],
   declarations: [AppComponent, HomeComponent, SearchComponent, DownloadManagerComponent, LoginComponent],
   bootstrap: [AppComponent]
 })
