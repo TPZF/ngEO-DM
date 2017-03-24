@@ -5,7 +5,8 @@ import { Observable } from 'rxjs/Observable';
 @Injectable()
 export class DownloadManagerService {
   private baseUrl: string = 'http://localhost:3000/ngeo'
-  private downloadManager = null;
+  public downloadManager = {
+  };
 
   constructor(private _http: Http) {
   }
@@ -15,8 +16,20 @@ export class DownloadManagerService {
    *
    * @param downloadManager
    */
-  select(downloadManager) {
+  public select(downloadManager) {
     this.downloadManager = downloadManager;
+  }
+
+  /**
+   * Get data access requests for the given dat
+   * @param downloadManager
+   */
+  public loadDataAccessRequests() {
+    // FIXME: download manager isn't used currently, we retrieve all available requests from LWS
+    // TODO: check dlManagerId ...
+    return this._http.get(this.baseUrl + '/dataAccessRequestStatuses').map((res) => {
+      return res.json();
+    })
   }
 
   /**

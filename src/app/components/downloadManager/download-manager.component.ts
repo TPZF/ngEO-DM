@@ -9,12 +9,25 @@ import { NgeoService } from './../../services/ngeo';
   selector: 'download-manager',
   template: `
     <h1 class="test">Current download manager: {{downloadManagerService.downloadManager.downloadManagerFriendlyName}}</h1>
-    <md-card color="primary" *ngFor="let feature of features">
-      <md-card-title-group>
-        <md-card-title style="text-overflow: ellipsis; max-width: 400px; overflow: hidden;">{{feature.properties.identifier}}</md-card-title>
-        <md-card-subtitle [innerHtml]="feature.properties.summary['#']"></md-card-subtitle>
-          <img md-card-md-image src="{{feature.properties.link[2]['@'].href}}">
-      </md-card-title-group>
+    <md-card color="primary" *ngFor="let dar of darStatuses">
+      <md-card-header>
+        <md-card-title style="text-overflow: ellipsis; max-width: 400px; overflow: hidden;">{{dar.ID}}</md-card-title>
+        <md-card-subtitle [innerHtml]="dar.type"></md-card-subtitle>
+      </md-card-header>
+      <md-card-content>
+        <div style="max-width: 400px; text-overflow: ellipsis; overflow: hidden; display: block;" *ngFor="let product of dar.productStatuses">
+          ProductURL : {{product.productURL}}
+          Expected size : {{product.expectedSize}}
+          <section class="example-section">
+            <md-progress-bar
+                color="primary"
+                mode="determinate"
+                [value]="33"
+                bufferValue="75">
+            </md-progress-bar>
+          </section>
+        </div>
+      </md-card-content>
     </md-card>
     <button md-raised-button color="primary" (click)="retrieveData()">Search</button>
     <md-progress-spinner style="display: inline-block; height: 16px; width: 16px;" *ngIf="isSearching" mode="indeterminate"></md-progress-spinner>
@@ -24,8 +37,8 @@ import { NgeoService } from './../../services/ngeo';
 export class DownloadManagerComponent implements OnInit {
 
   isSearching: boolean = false;
-  features: Array<any> = [];
-  constructor(private _ngeoService: NgeoService, private downloadManagerService: DownloadManagerService) {
+  darStatuses: Array<any> = [];
+  constructor(private downloadManagerService: DownloadManagerService) {
   }
 
   ngOnInit() {
@@ -33,9 +46,9 @@ export class DownloadManagerComponent implements OnInit {
 
   retrieveData() {
     this.isSearching = true;
-    this._ngeoService.retrieveSomething().subscribe((data) => {
+    this.downloadManagerService.loadDataAccessRequests().subscribe((res) => {
       this.isSearching = false;
-      this.features = data.features;
+      this.darStatuses = res.dataAccessRequestStatuses;
     });
   }
 }
