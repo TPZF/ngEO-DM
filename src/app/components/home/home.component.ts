@@ -18,7 +18,7 @@ import { Router } from '@angular/router';
       </md-tab>
     </md-tab-group>
     <div class="userInfo">
-      Logged as : {{authenticationService.currentUser.username}}
+      Logged as : {{authenticationService.currentUser?.username}}
       <button md-raised-button color="primary" (click)="logout()">Logout</button>
     </div>
     `
