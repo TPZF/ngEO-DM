@@ -30,7 +30,7 @@ import { NgeoService } from './../../services/ngeo';
           </md-grid-tile>
           <md-grid-tile>
             <button md-raised-button color="primary" (click)="login()">Login</button>
-            <md-progress-spinner style="display: inline-block; height: 16px; width: 16px;" *ngIf="isLoading" mode="indeterminate"></md-progress-spinner>
+            <md-progress-spinner style="display: inline-block; height: 16px; width: 16px;" *ngIf="loaders['authentication']" mode="indeterminate"></md-progress-spinner>
           </md-grid-tile>
         </md-grid-list>
       </md-tab>
@@ -44,6 +44,7 @@ import { NgeoService } from './../../services/ngeo';
                   <md-option *ngFor="let dm of downloadManagers" [value]="dm.downloadManagerFriendlyName">{{ dm.downloadManagerFriendlyName }}</md-option>
                 </md-select>
                 <button [disabled]="!selectedDownloadManager" style="margin: 0px 10px" md-raised-button color="primary" (click)="select()">Select</button>
+                <md-progress-spinner style="display: inline-block; height: 16px; width: 16px;" *ngIf="loaders['select']" mode="indeterminate"></md-progress-spinner>
               </md-card-content>
             </md-card>
           </md-grid-tile>
@@ -55,6 +56,7 @@ import { NgeoService } from './../../services/ngeo';
                   <input mdInput [(ngModel)]="downloadManagerName" placeholder="Download manager name">
                 </md-input-container>
                 <button [disabled]="!downloadManagerName" style="margin: 0px 10px" md-raised-button color="primary" (click)="register()">Register</button>
+                <md-progress-spinner style="display: inline-block; height: 16px; width: 16px;" *ngIf="loaders['register']" mode="indeterminate"></md-progress-spinner>
               </md-card-content>
             </md-card>
           </md-grid-tile>
@@ -72,7 +74,11 @@ export class LoginComponent implements OnInit {
   private step: number = 0;
   private username: string = "";
   private password: string = "";
-  private isLoading: boolean = false;
+  private loaders = {
+    "register": false,
+    "select": false,
+    "authentication": false
+  };
   private downloadManagerName: string = "";
   private downloadManagers = [];
   private selectedDownloadManager;
@@ -86,16 +92,21 @@ export class LoginComponent implements OnInit {
    * Login user to entered download manager
    */
   private login() {
-    this.isLoading = true;
+    this.loaders['authentication'] = true;
     this.authenticationService.login(this.username, this.password).subscribe((data) => {
+      this.loaders['authentication'] = false;
+      this.loaders['select'] = true;
       this._ngeoService.getDownloadManagers(this.username).subscribe((downloadManagersRes) => {
+        this.loaders['select'] = false;
         this.step = 1;
-        this.isLoading = false;
         this.downloadManagers = downloadManagersRes['downloadmanagers'];
       })
     });
   }
 
+  /**
+   * Logout & move to first step
+   */
   private logout() {
     this.authenticationService.logout().subscribe(() => {
       this.step = 0;
@@ -114,6 +125,10 @@ export class LoginComponent implements OnInit {
    * Register the given download manager
    */
   private register() {
-    console.log("Registering DM");
+    this.loaders['register'] = true;
+    this._ngeoService.registerDownloadManager(this.username, this.downloadManagerName).subscribe((res) => {
+      this.loaders['register'] = false;
+      this.downloadManagers.push(res.downloadmanager);
+    })
   }
 }
