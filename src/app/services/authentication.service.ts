@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Http, Headers, Response } from '@angular/http';
-import { Observable, Subject } from 'rxjs';
-import 'rxjs/add/operator/map'
+import { Http } from '@angular/http';
+//import { Observable, Subject } from 'rxjs';
+//import 'rxjs/add/operator/map';
 
 @Injectable()
 export class AuthenticationService {
-  constructor(private http: Http) { }
 
   private currentUser: any = null;
+
+  constructor(private http: Http) { }
+
 
   /**
    * Login with the given username & password
@@ -20,8 +22,8 @@ export class AuthenticationService {
     this.currentUser = {
       username: username,
       password: password
-    }
-    return Observable.of(this.currentUser);
+    };
+    //return Observable.of(this.currentUser);
   }
 
   /**
@@ -29,6 +31,10 @@ export class AuthenticationService {
    */
   public logout() {
     this.currentUser = null;
-    return Observable.of(this.currentUser);
+    //return Observable.of(this.currentUser);
+  }
+
+  public getCurrentUser(): any {
+    return this.currentUser;
   }
 }
