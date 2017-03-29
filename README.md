@@ -2,6 +2,9 @@
 
 Application used with ngEO-LWS designed to manage download subscriptions.
 
+## Install
+* `npm install`
+
 ## Dev
 Two step command:
 * `npm run watch` : Watch the code changes
