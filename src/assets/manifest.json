@@ -1,0 +1,9 @@
+{
+  "name": "ngEO Download manager",
+  "short_name": "ngEO Download manager",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fff",
+  "description": "ngEO Download manager",
+  "lang": "en-US"
+}
