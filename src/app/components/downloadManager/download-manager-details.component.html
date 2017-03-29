@@ -1,0 +1,8 @@
+
+<md-card class="downloadmanager" *ngIf="downloadManager">
+    <md-card-title>{{downloadManager.downloadManagerFriendlyName}}</md-card-title>
+    <md-card-content>
+        <button class="btnClose" color="primary" md-fab [routerLink]="['/downloadManagers']"><md-icon>close</md-icon></button>
+    </md-card-content>
+</md-card>
+

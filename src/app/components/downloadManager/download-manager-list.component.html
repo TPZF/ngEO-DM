@@ -1,0 +1,10 @@
+<md-nav-list class="downloadmanagers">
+    <a md-list-item *ngFor="let downloadManager of downloadManagers" [routerLink]="['/downloadManagers', downloadManager.downloadManagerId]" [routerLink]="['/downloadManagers', downloadManager.downloadManagerId]">
+        <md-icon md-list-avatar [ngClass]="{'active': isActive(downloadManager) }" [mdTooltip]="'Status : ' + downloadManager.status" mdTooltipPosition="above">cloud_download</md-icon>
+        <h3 md-line>{{downloadManager.downloadManagerFriendlyName}}</h3>
+        <p md-line>
+            <span>IP : {{downloadManager.ipAddress}}</span>
+            <span class="last-access">- last access : {{downloadManager.lastAccessDate | date}}</span>
+        </p>
+    </a>
+</md-nav-list>

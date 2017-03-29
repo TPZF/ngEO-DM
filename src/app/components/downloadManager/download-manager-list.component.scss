@@ -1,0 +1,14 @@
+md-nav-list.downloadmanagers {
+    
+    .last-access {
+        color: grey;
+    }
+
+    md-icon.active {
+        color: green;
+    }
+
+    a.mat-list-item {
+        border-bottom:1px solid #DDD;
+    }
+}

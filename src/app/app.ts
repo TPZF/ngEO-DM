@@ -27,6 +27,8 @@ import { DownloadManagerService } from './services/download-manager.service';
  * Components
  */
 import { AppComponent } from './components/app.component';
+import { DownloadManagerDetailsComponent } from './components/downloadManager/download-manager-details.component';
+import { DownloadManagerListComponent } from './components/downloadManager/download-manager-list.component';
 import { LoginComponent } from './components/login/login.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SearchComponent } from './components/search/search.component';
@@ -50,6 +52,8 @@ import { routes } from './app.routes';
   ],
   declarations: [
     AppComponent, 
+    DownloadManagerDetailsComponent,
+    DownloadManagerListComponent, 
     LoginComponent,
     NavbarComponent, 
     SearchComponent 
