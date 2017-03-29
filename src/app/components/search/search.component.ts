@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 
-import { NgeoService } from './../../services/ngeo';
+import { NgeoService } from './../../services/ngeo.service';
 
 @Component({
   selector: 'search',
