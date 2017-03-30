@@ -3,6 +3,8 @@ import { Http, Headers, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
+import { ErrorService } from './error.service';
+
 import { DownloadManager } from './../models/download-manager';
 
 @Injectable()
@@ -19,18 +21,20 @@ export class DownloadManagerService {
    * @function constructor
    * @param http
    */
-  constructor(private http: Http) { }
+  constructor(private http: Http, private _errorService: ErrorService) { }
 
   /**
    * @function getDownloadManagers
+   * @param {string} userId - optional
    */
-  getDownloadManagers(): Observable<DownloadManager[]> {
+  // TODO filter on userId
+  getDownloadManagers(userId?: string): Observable<DownloadManager[]> {
     return this.http
     .get(this.downloadManagersUrl)
     .map((response) => {
       return response.json().downloadmanagers;
     })
-    .catch(this._handleError);
+    .catch(this._errorService.handleError);
   }
 
   /**
@@ -78,33 +82,6 @@ export class DownloadManagerService {
     }).map((res) => {
       return res.json();
     })
-  }
-
-  /**
-   * Get registered download managers for the given user
-   * @param username
-   */
-  public getDownloadManagers2(username: string) {
-    return this.http.get(this.baseUrl + '/downloadManagers').map((res) => {
-      return res.json();
-    });
-  }
-  /**
-   * @function handleError
-   * @param error 
-   */
-  private _handleError(error: Response | any) {
-    // In a real world app, you might use a remote logging infrastructure
-    let errMsg: string;
-    if (error instanceof Response) {
-      const body = error.json() || '';
-      const err = JSON.stringify(body);
-      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-    } else {
-      errMsg = error.message ? error.message : error.toString();
-    }
-    console.error(errMsg);
-    return Observable.throw(errMsg);
   }
 
 }
