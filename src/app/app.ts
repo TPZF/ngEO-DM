@@ -21,12 +21,15 @@ import { Md2Module } from 'md2';
  */
 import { NgeoService } from './services/ngeo.service';
 import { AuthenticationService } from './services/authentication.service';
+import { DarStatusService } from './services/dar-status.service';
 import { DownloadManagerService } from './services/download-manager.service';
+import { ErrorService } from './services/error.service';
 
 /**
  * Components
  */
 import { AppComponent } from './components/app.component';
+import { DarStatusListComponent } from './components/darStatus/dar-status-list.component';
 import { DownloadManagerDetailsComponent } from './components/downloadManager/download-manager-details.component';
 import { DownloadManagerListComponent } from './components/downloadManager/download-manager-list.component';
 import { LoginComponent } from './components/login/login.component';
@@ -48,10 +51,13 @@ import { routes } from './app.routes';
   providers: [
     NgeoService, 
     AuthenticationService, 
-    DownloadManagerService
+    DarStatusService,
+    DownloadManagerService,
+    ErrorService
   ],
   declarations: [
     AppComponent, 
+    DarStatusListComponent,
     DownloadManagerDetailsComponent,
     DownloadManagerListComponent, 
     LoginComponent,
