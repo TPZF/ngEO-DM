@@ -19,7 +19,6 @@ export class DownloadManagerDetailsComponent implements OnInit {
   private downloadManager: DownloadManager;
 
   constructor(private downloadManagerService: DownloadManagerService, private route: ActivatedRoute) {
-
   }
 
   // Load data ones component is ready

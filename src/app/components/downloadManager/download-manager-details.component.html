@@ -1,8 +1,6 @@
 
-<md-card class="downloadmanager" *ngIf="downloadManager">
-    <md-card-title>{{downloadManager.downloadManagerFriendlyName}}</md-card-title>
-    <md-card-content>
-        <button class="btnClose" color="primary" md-fab [routerLink]="['/downloadManagers']"><md-icon>close</md-icon></button>
-    </md-card-content>
-</md-card>
-
+<div class="downloadmanager" *ngIf="downloadManager">
+    <h2>{{downloadManager.downloadManagerFriendlyName}}</h2>
+    <ngeo-dar-status-list [downloadManagerId]="downloadManager.downloadManagerId"></ngeo-dar-status-list>
+    <button class="btnClose" color="primary" md-fab [routerLink]="['/downloadManagers']"><md-icon>close</md-icon></button>
+</div>
