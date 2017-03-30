@@ -1,0 +1,15 @@
+md-card.darstatus {
+    margin-bottom:10px;
+    md-card.productstatus {
+        box-shadow:none;
+        background-color: #EFEFEF;
+        md-card-title {
+            word-break: break-all;
+        }
+    }
+    .menu-actions {
+        position:absolute;
+        right:5px;
+        top:5px;
+    }
+}
