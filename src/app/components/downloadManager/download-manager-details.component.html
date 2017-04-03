@@ -2,5 +2,5 @@
 <div class="downloadmanager" *ngIf="downloadManager">
     <h2>{{downloadManager.downloadManagerFriendlyName}}</h2>
     <ngeo-dar-status-list [downloadManagerId]="downloadManager.downloadManagerId"></ngeo-dar-status-list>
-    <button class="btnClose" color="primary" md-fab [routerLink]="['/downloadManagers']"><md-icon>close</md-icon></button>
 </div>
+<button class="nav-btn" color="accent" md-icon-button [routerLink]="['/downloadManagers']" title="Return to list"><md-icon>close</md-icon></button>
