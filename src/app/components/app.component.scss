@@ -1,10 +1,11 @@
 @import '~@angular/material/core/theming/all-theme';
 @include mat-core();
 
+// Primary, accent dand warn color
 $primary: mat-palette($mat-deep-purple);
 $accent:  mat-palette($mat-amber, A200, A100, A400);
-
-$theme: mat-light-theme($primary, $accent);
+$warn:    mat-palette($mat-deep-orange);
+$theme: mat-light-theme($primary, $accent, $warn);
 
 @include angular-material-theme($theme);
 
@@ -58,5 +59,16 @@ body {
   h1 {
     font-size: 20px;
     text-align: center;
+  }
+  main {
+    position: relative;
+  }
+  button.nav-btn {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+  }
+  .full-width {
+    width: 100%;
   }
 }
