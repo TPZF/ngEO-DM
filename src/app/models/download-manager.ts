@@ -1,5 +1,5 @@
 export class DownloadManager {
-  downloadManagerId: string;
+  downloadManagerId?: string;
   downloadManagerFriendlyName: string;
   userId: string;
   status: string;
