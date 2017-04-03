@@ -11,7 +11,7 @@ import { AuthenticationService } from './../../services/authentication.service';
 })
 export class LoginComponent implements OnInit {
 
-  private username: string = '';
+  private username: string = 'anonymous';
   private password: string = '';
 
   constructor(
