@@ -1,21 +1,22 @@
+<p *ngIf="(darStatuses | async)?.length === 0">No Data Access Request for this download manager.</p>
 <md-card class="darstatus" *ngFor="let darStatus of darStatuses | async">
-    <md-card-header>
-        <md-card-title>
-            {{darStatus.type + ' : ' + darStatus.ID}}
-        </md-card-title>
-        <md-card-subtitle>{{darStatus.productStatuses.length}} product<span *ngIf="darStatus.productStatuses.length>1">s</span></md-card-subtitle>
-        <md-button-toggle-group class="menu-actions" [(ngModel)]="darStatus.status">
-            <md-button-toggle value="0">
-            <md-icon>stop</md-icon>
-            </md-button-toggle>
-            <md-button-toggle value="5" *ngIf="darStatus.status!=0">
-            <md-icon>pause</md-icon>
-            </md-button-toggle>
-            <md-button-toggle value="10">
-            <md-icon>play_arrow</md-icon>
-            </md-button-toggle>
-        </md-button-toggle-group>
-    </md-card-header>
+    <md-card-title>
+        {{(darStatus.name ? darStatus.name : darStatus.ID)}}
+    </md-card-title>
+    <md-card-subtitle><strong>{{darStatus.type}}</strong> with <strong>{{darStatus.productStatuses.length}} product<span *ngIf="darStatus.productStatuses.length>1">s</span></strong>,
+     downloaded at <strong>{{darStatus.downloadDirectory}}</strong>
+    </md-card-subtitle>
+    <md-button-toggle-group class="menu-actions" [(ngModel)]="darStatus.status">
+        <md-button-toggle value="0">
+        <md-icon>stop</md-icon>
+        </md-button-toggle>
+        <md-button-toggle value="5" *ngIf="darStatus.status!=0">
+        <md-icon>pause</md-icon>
+        </md-button-toggle>
+        <md-button-toggle value="10">
+        <md-icon>play_arrow</md-icon>
+        </md-button-toggle>
+    </md-button-toggle-group>
     <md-card-content>
         <md-card class="productstatus" *ngFor="let product of darStatus.productStatuses">
            <md-card-header>
