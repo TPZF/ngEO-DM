@@ -10,6 +10,8 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
+import { ProgressHttpModule } from 'angular-progress-http';
+import { NgxElectronModule } from 'ngx-electron';
 /**
  * Material design
  */
@@ -24,18 +26,29 @@ import { AuthenticationService } from './services/authentication.service';
 import { DarStatusService } from './services/dar-status.service';
 import { DownloadManagerService } from './services/download-manager.service';
 import { ErrorService } from './services/error.service';
+import { ProductService } from './services/product.service';
 
 /**
  * Components
  */
 import { AppComponent } from './components/app.component';
 import { DarStatusListComponent } from './components/darStatus/dar-status-list.component';
+import { DarStatusItemComponent } from './components/darStatus/dar-status-item.component';
+
 import { DownloadManagerDetailsComponent } from './components/downloadManager/download-manager-details.component';
 import { DownloadManagerListComponent } from './components/downloadManager/download-manager-list.component';
 import { LoginComponent } from './components/login/login.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SearchComponent } from './components/search/search.component';
 
+/**
+ * Pipes
+ */
+import { FileSizePipe } from './pipes/file-size.pipe';
+
+/**
+ * Routes
+ */
 import { routes } from './app.routes';
 
 @NgModule({
@@ -45,24 +58,29 @@ import { routes } from './app.routes';
     HttpModule,
     MaterialModule.forRoot(),
     Md2Module.forRoot(),
+    NgxElectronModule,
+    ProgressHttpModule,
     ReactiveFormsModule,
     RouterModule.forRoot(routes, { useHash: true })
   ],
   providers: [
-    NgeoService, 
-    AuthenticationService, 
+    NgeoService,
+    AuthenticationService,
     DarStatusService,
     DownloadManagerService,
-    ErrorService
+    ErrorService,
+    ProductService
   ],
   declarations: [
-    AppComponent, 
+    AppComponent,
     DarStatusListComponent,
+    DarStatusItemComponent,
     DownloadManagerDetailsComponent,
-    DownloadManagerListComponent, 
+    DownloadManagerListComponent,
+    FileSizePipe,
     LoginComponent,
-    NavbarComponent, 
-    SearchComponent 
+    NavbarComponent,
+    SearchComponent
   ],
   bootstrap: [AppComponent]
 })

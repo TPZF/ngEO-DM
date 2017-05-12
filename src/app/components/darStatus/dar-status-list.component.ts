@@ -12,7 +12,7 @@ import { DarStatus } from './../../models/dar-status';
 })
 // Component class implementing OnInit
 export class DarStatusListComponent implements OnInit {
-  
+
   @Input() downloadManagerId: string;
 
   // Private property for binding
