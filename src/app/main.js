@@ -1,11 +1,12 @@
-const { app, autoUpdater, BrowserWindow, globalShortcut, ipcMain, Menu, shell, Tray } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, Menu, shell, Tray } = require('electron');
 
 // auto uploader
 const configuration = require('./conf/configuration.json');
 const appVersion = require('./package.json').version;
 const os = require('os').platform();
-const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/${os}/latest/?v=${appVersion}`;
-autoUpdater.setFeedURL(urlLatestDownloadManager);
+const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/releases/latest/`;
+const updater = require('electron-simple-updater');
+updater.init(urlLatestDownloadManager);
 
 // browser-window creates a native window
 let mainWindow = null;
@@ -41,14 +42,14 @@ ipcMain.on('OpenPath', (event, arg) => {
  * AutoUpdater section
  * -------------------------------------------
  */
-autoUpdater.on('error', (error) => {
+updater.on('error', (error) => {
   console.log(error);
 });
-autoUpdater.on('update-not-available', () => {
+updater.on('update-not-available', () => {
   console.log('Update not availbale');
 });
-autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall();
+updater.on('update-downloaded', () => {
+  updater.quitAndInstall();
 });
 
 
@@ -58,6 +59,9 @@ autoUpdater.on('update-downloaded', () => {
  * -------------------------------------------
  */
 app.on('ready', () => {
+  // auto update
+  updater.checkForUpdates();
+
   // create tray
   createTray();
   // create window
