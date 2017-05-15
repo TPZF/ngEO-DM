@@ -1,4 +1,11 @@
-const { app, BrowserWindow, globalShortcut, ipcMain, Menu, shell, Tray } = require('electron');
+const { app, autoUpdater, BrowserWindow, globalShortcut, ipcMain, Menu, shell, Tray } = require('electron');
+
+// auto uploader
+const configuration = require('./conf/configuration.json');
+const appVersion = require('./package.json').version;
+const os = require('os').platform();
+const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/${os}/latest/?v=${appVersion}`;
+autoUpdater.setFeedURL(urlLatestDownloadManager);
 
 // browser-window creates a native window
 let mainWindow = null;
@@ -11,6 +18,11 @@ if (app.dock) {
   app.dock.hide();
 }
 
+/**
+ * -------------------------------------------
+ * IPC section
+ * -------------------------------------------
+ */
 ipcMain.on('setCurrentPath', (event, arg) => {
   if (arg !== '') {
     currentPath = arg;
@@ -24,9 +36,33 @@ ipcMain.on('OpenPath', (event, arg) => {
   }
 })
 
+/**
+ * -------------------------------------------
+ * AutoUpdater section
+ * -------------------------------------------
+ */
+autoUpdater.on('error', (error) => {
+  console.log(error);
+});
+autoUpdater.on('update-not-available', () => {
+  console.log('Update not availbale');
+});
+autoUpdater.on('update-downloaded', () => {
+  autoUpdater.quitAndInstall();
+});
+
+
+/**
+ * -------------------------------------------
+ * App section
+ * -------------------------------------------
+ */
 app.on('ready', () => {
+  // create tray
   createTray();
+  // create window
   createWindow();
+  // Ctrl + Q >> close and quit !
   globalShortcut.register('CommandOrControl+Q', () => {
     mainWindow.close();
   })
@@ -47,6 +83,12 @@ app.on('window-all-closed', () => {
   }
 });
 
+
+/**
+ *
+ * @function createWindow
+ *
+ */
 const createWindow = () => {
   // Initialize the window to our specified dimensions
   mainWindow = new BrowserWindow({
@@ -54,7 +96,7 @@ const createWindow = () => {
     height: 900,
     show: false,
     frame: true,
-    resizable: true,
+    resizable: false,
     transparent: true
   });
 
@@ -62,7 +104,7 @@ const createWindow = () => {
   mainWindow.loadURL('file://' + __dirname + '/index.html');
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
 
   // Clear out the main window when the app is closed
   mainWindow.on('closed', () => {
@@ -104,7 +146,11 @@ const createWindow = () => {
   })
 };
 
-// Creates tray image & toggles window on click
+/**
+ * Creates tray image & toggles window on click
+ *
+ * @function createTray
+ */
 const createTray = () => {
   mainTray = new Tray('/home/omanoel/Documents/dev/ngEO-DM/src/assets/icon.png');
   const contextMenu = Menu.buildFromTemplate([
@@ -120,6 +166,9 @@ const createTray = () => {
   });
 };
 
+/**
+ * @function getWindowPosition
+ */
 const getWindowPosition = () => {
   const windowBounds = mainWindow.getBounds()
   const trayBounds = mainTray.getBounds()
@@ -133,6 +182,9 @@ const getWindowPosition = () => {
   return {x: x, y: y}
 };
 
+/**
+ * @function showWindow
+ */
 const showWindow = () => {
   const position = getWindowPosition()
   mainWindow.setPosition(position.x, position.y, false)
@@ -140,6 +192,9 @@ const showWindow = () => {
   mainWindow.focus()
 };
 
+/**
+ * @function toggleWindow
+ */
 const toggleWindow = () => {
   if (mainWindow.isVisible()) {
     mainWindow.hide()
