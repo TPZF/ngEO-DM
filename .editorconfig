@@ -3,9 +3,9 @@
 # top-most EditorConfig file
 root = true
 
-[*.{js,ts,css,html}]
-indent_style = space
-indent_size = 2
+[*.{js,json,ts,css,html}]
+indent_style = tab
+indent_size = 4
 end_of_line = lf
 charset = utf-8
 insert_final_newline = false
