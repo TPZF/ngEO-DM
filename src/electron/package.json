@@ -1,0 +1,11 @@
+{
+  "name": "app",
+  "description": "Simple download manager application buit with Electron and Angular",
+  "version": "0.1.0",
+  "author": "Telespazio France",
+  "main": "main.js",
+  "dependencies": {
+    "electron-log": "^2.2.6",
+    "electron-simple-updater": "^1.2.0"
+  }
+}

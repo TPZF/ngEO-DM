@@ -19,14 +19,14 @@ var config = {
 
   // our angular app
   entry: {
-    'polyfills': './src/polyfills.ts',
-    'vendor': './src/vendor.ts',
+    'polyfills': './src/app/polyfills.ts',
+    'vendor': './src/app/vendor.ts',
     'app': './src/app/app',
   },
 
   // Config for our build files
   output: {
-    path: helpers.root('src/app/dist'),
+    path: helpers.root('src/electron'),
     filename: '[name].js',
     sourceMapFilename: '[name].map',
     chunkFilename: '[id].chunk.js'
@@ -116,7 +116,7 @@ var config = {
     //
     // See: https://www.npmjs.com/package/copy-webpack-plugin
     new CopyWebpackPlugin([{
-      from: 'src/assets',
+      from: 'src/app/assets',
       to: 'assets'
     }]),
     new webpack.ContextReplacementPlugin(

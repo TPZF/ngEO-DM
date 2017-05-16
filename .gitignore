@@ -2,9 +2,14 @@
 node_modules
 
 # Build directories
+build
 dist
+releases
 ngeo-DM*
 .log
+src/electron/node_modules/**/*.*
+src/electron/assets/**/*.*
+src/electron/*.map
 
 # IDE/dev
 .vscode
