@@ -10,6 +10,9 @@ ngeo-DM*
 src/electron/node_modules/**/*.*
 src/electron/assets/**/*.*
 src/electron/*.map
+src/electron/polyfills.js
+src/electron/vendor.js
+src/electron/log.txt
 
 # IDE/dev
 .vscode
