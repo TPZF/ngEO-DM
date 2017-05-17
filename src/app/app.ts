@@ -23,6 +23,7 @@ import { Md2Module } from 'md2';
  */
 import { NgeoService } from './services/ngeo.service';
 import { AuthenticationService } from './services/authentication.service';
+import { ConfigurationService } from './services/configuration.service';
 import { DarStatusService } from './services/dar-status.service';
 import { DownloadManagerService } from './services/download-manager.service';
 import { ErrorService } from './services/error.service';
@@ -66,6 +67,7 @@ import { routes } from './app.routes';
   providers: [
     NgeoService,
     AuthenticationService,
+	ConfigurationService,
     DarStatusService,
     DownloadManagerService,
     ErrorService,
@@ -85,4 +87,8 @@ import { routes } from './app.routes';
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+const isDev = process.env.TODO_DEV ? process.env.TODO_DEV.trim() == 'true' : false;
+if (!isDev) {
+  enableProdMode();
+}
 platformBrowserDynamic().bootstrapModule(AppModule);

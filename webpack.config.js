@@ -119,6 +119,10 @@ var config = {
       from: 'src/app/assets',
       to: 'assets'
     }]),
+    new CopyWebpackPlugin([{
+      from: 'src/app/conf',
+      to: 'conf'
+    }]),
     new webpack.ContextReplacementPlugin(
       /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
       __dirname
