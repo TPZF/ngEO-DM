@@ -26,7 +26,7 @@ var config = {
 
   // Config for our build files
   output: {
-    path: helpers.root('src/electron'),
+    path: helpers.root('src/electron/vendor'),
     filename: '[name].js',
     sourceMapFilename: '[name].map',
     chunkFilename: '[id].chunk.js'
