@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
 import { AuthenticationService } from './authentication.service';
+import { ConfigurationService } from './configuration.service';
 import { ErrorService } from './error.service';
 
 import { DownloadManager } from './../models/download-manager';
@@ -13,19 +14,23 @@ export class DownloadManagerService {
 
   public currentDownloadManager = {};
 
-  private baseUrl: string = 'http://localhost:3000/ngeo';
+  private baseUrl: string;
+  private downloadManagersUrl: string;
 
   private headers = new Headers({ 'Content-Type': 'application/json' });
-  private downloadManagersUrl = this.baseUrl + '/downloadManagers';  // URL to web api
 
   /**
    * @function constructor
    * @param http
    */
   constructor(
-    private http: Http, 
+    private http: Http,
     private _authenticationService: AuthenticationService,
-    private _errorService: ErrorService) { }
+    private _configurationService: ConfigurationService,
+    private _errorService: ErrorService) {
+		this.baseUrl = _configurationService.get().qsHost;
+		this.downloadManagersUrl = this.baseUrl + '/downloadManagers';
+	}
 
   /**
    * @function getDownloadManagers
@@ -56,7 +61,7 @@ export class DownloadManagerService {
   public registerDownloadManager(downloadManagerInsert: any) {
 
     let userId = this._authenticationService.getCurrentUser().username;
-    
+
     let itemToAdd: DownloadManager = {
       downloadManagerFriendlyName: downloadManagerInsert.downloadManagerFriendlyName,
       userId: userId,
@@ -66,7 +71,7 @@ export class DownloadManagerService {
     };
 
     return this.http
-      .post(this.baseUrl + '/downloadManagers', {downloadmanager: itemToAdd})
+      .post(this.downloadManagersUrl, {downloadmanager: itemToAdd})
       .map((res) => res.json());
   }
 
