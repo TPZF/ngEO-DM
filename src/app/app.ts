@@ -28,6 +28,7 @@ import { DarStatusService } from './services/dar-status.service';
 import { DownloadManagerService } from './services/download-manager.service';
 import { ErrorService } from './services/error.service';
 import { ProductService } from './services/product.service';
+import { SettingsService } from './services/settings.service';
 
 /**
  * Components
@@ -35,9 +36,9 @@ import { ProductService } from './services/product.service';
 import { AppComponent } from './components/app.component';
 import { DarStatusListComponent } from './components/darStatus/dar-status-list.component';
 import { DarStatusItemComponent } from './components/darStatus/dar-status-item.component';
-
 import { DownloadManagerDetailsComponent } from './components/downloadManager/download-manager-details.component';
 import { DownloadManagerListComponent } from './components/downloadManager/download-manager-list.component';
+import { SettingsComponent } from './components/settings/settings.component';
 import { LoginComponent } from './components/login/login.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SearchComponent } from './components/search/search.component';
@@ -71,7 +72,8 @@ import { routes } from './app.routes';
     DarStatusService,
     DownloadManagerService,
     ErrorService,
-    ProductService
+    ProductService,
+	SettingsService
   ],
   declarations: [
     AppComponent,
@@ -80,6 +82,7 @@ import { routes } from './app.routes';
     DownloadManagerDetailsComponent,
     DownloadManagerListComponent,
     FileSizePipe,
+	SettingsComponent,
     LoginComponent,
     NavbarComponent,
     SearchComponent

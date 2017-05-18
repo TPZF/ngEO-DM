@@ -4,6 +4,8 @@ const nativeImage = require('electron').nativeImage;
 
 const isDev = process.env.TODO_DEV ? process.env.TODO_DEV.trim() == "true" : false;
 
+let settings = require('electron-settings');
+
 // log
 const log = require('electron-log');
 log.transports.file.level = 'warn';
@@ -41,13 +43,45 @@ ipcMain.on('setCurrentPath', (event, arg) => {
 		currentPath = arg;
 		event.returnValue = 'set current path';
 	}
-})
+});
 
 ipcMain.on('OpenPath', (event, arg) => {
 	if (arg !== '') {
 		shell.showItemInFolder(arg);
 	}
-})
+});
+
+ipcMain.on('settings-choosepath', (event) => {
+	let myPaths = dialog.showOpenDialog(mainWindow, {
+		title: 'Choose path directory for downloads',
+		properties: ['openDirectory']
+	});
+	if (typeof myPaths !== 'undefined') {
+		event.sender.send('settings-choosepath-reply', myPaths[0]);
+	}
+});
+
+ipcMain.on('settings-get', (event, arg) => {
+	if (arg !== '') {
+		let val = settings.get(arg);
+		if (typeof val !== 'undefined') {
+			event.returnValue = val;
+		} else {
+			event.returnValue = '';
+		}
+	}
+});
+
+ipcMain.on('settings-getall', (event, arg) => {
+	event.returnValue = settings.getAll();
+});
+
+ipcMain.on('settings-set', (event, key, value) => {
+	if ((key !== '') && (value !== '')) {
+		settings.set(key, value);
+		event.returnValue = 'done';
+	}
+});
 
 /**
  * -------------------------------------------
@@ -132,8 +166,8 @@ const createWindow = () => {
 	// Initialize the window to our specified dimensions
 	mainWindow = new BrowserWindow({
 		parent: topWindow,
-		x:100,
-		y:100,
+		x: 100,
+		y: 100,
 		backgroundColor: '#FFFFFF',
 		icon: pathIcon,
 		show: false,

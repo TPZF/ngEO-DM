@@ -1,0 +1,16 @@
+<md-card class="settings">
+    <md-card-content>
+		<h2>Settings for ngEO download manager</h2>
+		<md-input-container class="full-width">
+			<input mdInput [(ngModel)]="_usernameF" placeholder="Username" required>
+		</md-input-container>
+		<md-input-container class="full-width">
+			<input mdInput type="password" [(ngModel)]="_passwordF" placeholder="Password" required>
+		</md-input-container>
+		<md-input-container class="full-width">
+			<input mdInput [(ngModel)]="_downloadPathF" placeholder="Choose directory for downloads" (click)="choosePath()" required>
+		</md-input-container>
+		<button md-raised-button color="primary" class="full-width" (click)="save()" [disabled]="!isValidForm()">Save</button>
+
+    </md-card-content>
+</md-card>

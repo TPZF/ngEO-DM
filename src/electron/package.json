@@ -6,6 +6,7 @@
   "main": "main.js",
   "dependencies": {
     "electron-log": "^2.2.6",
+    "electron-settings": "^3.0.14",
     "electron-simple-updater": "^1.2.0"
   }
 }

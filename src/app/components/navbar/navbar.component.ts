@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { AuthenticationService } from './../../services/authentication.service';
+import { SettingsService } from './../../services/settings.service';
 
 /*
  * NavBar Component
@@ -13,15 +13,20 @@ import { AuthenticationService } from './../../services/authentication.service';
 })
 export class NavbarComponent implements OnInit {
 
+	private _username: string = null;
+
     constructor(
-        private router: Router,
-        private authenticationService: AuthenticationService) {
+        private _router: Router,
+        private _settingsService: SettingsService) {
     }
 
     ngOnInit() {
-        if (this.authenticationService.getCurrentUser() === null) {
-            this.router.navigate(['/login']);
-        }
+		this._username = this._settingsService.get('username');
+        if (this._username !== '') {
+            this._router.navigate(['/downloadManagers']);
+        } else {
+			this._router.navigate(['/']);
+		}
     }
 
 }
