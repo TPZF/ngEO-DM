@@ -23,7 +23,6 @@ export class SettingsComponent implements OnInit {
 	}
 
 	ngOnInit() {
-		console.log(this._settingsService.get('downloadPath'));
 		this._usernameF = this._settingsService.get('username');
 		this._passwordF = '*********';
 		this._downloadPathF = this._settingsService.get('downloadPath');
@@ -37,13 +36,10 @@ export class SettingsComponent implements OnInit {
 	}
 
 	private save() {
-		console.log('save username', this._usernameF);
 		this._settingsService.set('username', this._usernameF);
 		if (this._passwordF !== '*********') {
-			console.log('save password', this._passwordF);
 			this._settingsService.set('password', this._passwordF);
 		}
-		console.log('save downloadPath', this._downloadPathF);
 		this._settingsService.set('downloadPath', this._downloadPathF);
 		this._router.navigate(['downloadManagers']);
 	}
