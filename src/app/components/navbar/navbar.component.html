@@ -1,9 +1,9 @@
 <md-toolbar color="primary">
 	<span></span>
 
-	<span class="example-fill-remaining-space">ngEO DownloadManager</span>
+	<span class="example-fill-remaining-space">ngEO Download Manager</span>
 
-	<span *ngIf="_username !== null">
+	<span *ngIf="(_username !== null) && (_router.url.indexOf('settings') === -1)">
 		<button md-icon-button [mdMenuTriggerFor]="menu">
 			<md-icon>more_vert</md-icon>
 		</button>
