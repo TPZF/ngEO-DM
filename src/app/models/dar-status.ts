@@ -4,6 +4,8 @@ export class ProductStatus {
   productStatus: string;
   productURL: string;
   localPath: string;
+  errorMsg: string;
+  loadedSize: string;
 };
 
 export class DarStatus {

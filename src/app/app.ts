@@ -26,9 +26,12 @@ import { AuthenticationService } from './services/authentication.service';
 import { ConfigurationService } from './services/configuration.service';
 import { DarStatusService } from './services/dar-status.service';
 import { DownloadManagerService } from './services/download-manager.service';
+import { ECPService } from './services/ecp.service';
+import { EoSsoService } from './services/eo-sso.service';
 import { ErrorService } from './services/error.service';
 import { ProductService } from './services/product.service';
 import { SettingsService } from './services/settings.service';
+import { SsoService } from './services/sso.service';
 
 /**
  * Components
@@ -36,6 +39,7 @@ import { SettingsService } from './services/settings.service';
 import { AppComponent } from './components/app.component';
 import { DarStatusListComponent } from './components/darStatus/dar-status-list.component';
 import { DarStatusItemComponent } from './components/darStatus/dar-status-item.component';
+import { ProductStatusItemComponent } from './components/darStatus/product-status-item.component';
 import { DownloadManagerDetailsComponent } from './components/downloadManager/download-manager-details.component';
 import { DownloadManagerListComponent } from './components/downloadManager/download-manager-list.component';
 import { SettingsComponent } from './components/settings/settings.component';
@@ -71,9 +75,12 @@ import { routes } from './app.routes';
 	ConfigurationService,
     DarStatusService,
     DownloadManagerService,
+	ECPService,
+    EoSsoService,
     ErrorService,
     ProductService,
-	SettingsService
+	SettingsService,
+	SsoService
   ],
   declarations: [
     AppComponent,
@@ -85,6 +92,7 @@ import { routes } from './app.routes';
 	SettingsComponent,
     LoginComponent,
     NavbarComponent,
+	ProductStatusItemComponent,
     SearchComponent
   ],
   bootstrap: [AppComponent]

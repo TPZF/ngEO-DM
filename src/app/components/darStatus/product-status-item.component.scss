@@ -1,0 +1,9 @@
+md-card.productstatus {
+    box-shadow:none;
+    background-color: #EFEFEF;
+    h4 {
+        word-break: break-all;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+    }
+}

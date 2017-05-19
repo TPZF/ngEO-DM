@@ -1,7 +1,5 @@
 const { app, BrowserWindow, dialog, globalShortcut, ipcMain, Menu, shell, Tray } = require('electron');
 
-const nativeImage = require('electron').nativeImage;
-
 const isDev = process.env.TODO_DEV ? process.env.TODO_DEV.trim() == "true" : false;
 
 let settings = require('electron-settings');
@@ -28,6 +26,10 @@ let mainTray = null;
 
 let currentPath = '/tmp/';
 
+// downloadItems
+let downloadItems = [];
+let downloadUrls = [];
+
 // Don't show the app in the doc
 if (app.dock) {
 	app.dock.hide();
@@ -40,7 +42,7 @@ if (app.dock) {
  */
 ipcMain.on('setCurrentPath', (event, arg) => {
 	if (arg !== '') {
-		currentPath = arg;
+		currentPath = arg + '/';
 		event.returnValue = 'set current path';
 	}
 });
@@ -49,6 +51,41 @@ ipcMain.on('OpenPath', (event, arg) => {
 	if (arg !== '') {
 		shell.showItemInFolder(arg);
 	}
+});
+
+// start download DAR
+ipcMain.on('startDownloadDar', (event, myDar) => {
+	var wc = topWindow.webContents;
+	myDar.productStatuses.forEach((product) => {
+		let item = _getDownloadItemByUrl(product.productURL);
+		if (item !== null && item.isPaused()) {
+			item.resume();
+		} else {
+			wc.downloadURL(product.productURL);
+		}
+	});
+});
+
+// pause download DAR
+ipcMain.on('pauseDownloadDar', (event, myDar) => {
+	var wc = topWindow.webContents;
+	myDar.productStatuses.forEach((product) => {
+		let item = _getDownloadItemByUrl(product.productURL);
+		if (item !== null) {
+			item.pause();
+		}
+	});
+});
+
+// cancel download DAR
+ipcMain.on('cancelDownloadDar', (event, myDar) => {
+	var wc = topWindow.webContents;
+	myDar.productStatuses.forEach((product) => {
+		let item = _getDownloadItemByUrl(product.productURL);
+		if (item !== null) {
+			item.cancel();
+		}
+	});
 });
 
 ipcMain.on('settings-choosepath', (event) => {
@@ -154,6 +191,46 @@ const createTopWindow = () => {
 	topWindow.on('closed', () => {
 		topWindow = null;
 	});
+
+	topWindow.webContents.session.on('will-download', (event, item, webContents) => {
+
+		downloadItems.push(item);
+
+		// Set the save path, making Electron not to prompt a save dialog.
+		item.setSavePath(currentPath + item.getFilename())
+
+		item.on('updated', (event, state) => {
+			if (state === 'interrupted') {
+				console.log('Download is interrupted but can be resumed')
+			} else if (state === 'progressing') {
+				if (item.isPaused()) {
+					console.log('Download is paused')
+				} else {
+					console.log(`Received bytes: ${item.getReceivedBytes()}`)
+					if (mainWindow) {
+						mainWindow.webContents.send('downloadUpdated', {
+							url: item.getURL(),
+							progress: item.getReceivedBytes() / item.getTotalBytes(),
+							received: item.getReceivedBytes()
+						});
+					}
+				}
+			}
+		})
+		item.once('done', (event, state) => {
+			if (state === 'completed') {
+				_delDownloadItemByUrl(item.getURL());
+				if (mainWindow) {
+					mainWindow.webContents.send('downloadCompleted', {
+						url: item.getURL(),
+						path: currentPath + item.getFilename()
+					});
+				}
+			} else {
+				console.log(`Download failed: ${state}`)
+			}
+		})
+	})
 };
 
 /**
@@ -162,6 +239,10 @@ const createTopWindow = () => {
  *
  */
 const createWindow = () => {
+	if (mainWindow !== null) {
+		mainWindow.show();
+		return;
+	}
 	const pathIcon = __dirname + "/vendor/assets/icons/64x64.png";
 	// Initialize the window to our specified dimensions
 	mainWindow = new BrowserWindow({
@@ -193,32 +274,6 @@ const createWindow = () => {
 		mainWindow = null;
 	});
 
-	mainWindow.webContents.session.on('will-download', (event, item, webContents) => {
-		// Set the save path, making Electron not to prompt a save dialog.
-
-		item.setSavePath(currentPath + item.getFilename())
-
-		console.log(item.getSavePath());
-
-		item.on('updated', (event, state) => {
-			if (state === 'interrupted') {
-				console.log('Download is interrupted but can be resumed')
-			} else if (state === 'progressing') {
-				if (item.isPaused()) {
-					console.log('Download is paused')
-				} else {
-					console.log(`Received bytes: ${item.getReceivedBytes()}`)
-				}
-			}
-		})
-		item.once('done', (event, state) => {
-			if (state === 'completed') {
-				console.log('Download successfully')
-			} else {
-				console.log(`Download failed: ${state}`)
-			}
-		})
-	})
 };
 
 /**
@@ -230,7 +285,6 @@ const createTray = () => {
 	mainTray = new Tray(__dirname + '/vendor/assets/icon.png');
 	const contextMenu = Menu.buildFromTemplate([
 		{ label: 'Show window', type: 'normal', click() { createWindow(); } },
-		{ label: 'Preferences', type: 'normal' },
 		{ label: 'Check for update', type: 'normal', click() { updater.checkForUpdates(); } },
 		{ label: 'About...', type: 'normal', click() { showAbout(); } },
 		{ label: 'Quit', accelerator: 'CommandOrControl+Q', role: 'quit' }
@@ -241,4 +295,35 @@ const createTray = () => {
 
 const showAbout = () => {
 	dialog.showMessageBox(mainWindow, { type: 'info', title: 'About', message: 'Thanks to Irchad, to my Mum, to my cat Mimi, to Snow White and the Seven Dwarfs.' });
+}
+
+/**
+ * @function _getDownloadItemByUrl
+ */
+const _getDownloadItemByUrl = (myUrl) => {
+	let _result = null;
+	console.log('_getDownloadItemByUrl(' + myUrl + ')');
+	console.log('downloadItems:' + downloadItems.length);
+	downloadItems.forEach( (_item) => {
+		if (_item.getURL() === myUrl) {
+			_result = _item;
+		}
+	});
+	return _result;
+}
+
+/**
+ * @function _delDownloadItemByUrl
+ */
+const _delDownloadItemByUrl = (myUrl) => {
+	let _newDownloadItems = [];
+	console.log('_delDownloadItemByUrl(' + myUrl + ')');
+	console.log('downloadItems:' + downloadItems.length);
+	downloadItems.forEach( (_item) => {
+		console.log(_item);
+		if (_item.getURL() !== myUrl) {
+			_newDownloadItems.push(_item);
+		}
+	});
+	downloadItems = _newDownloadItems;
 }
