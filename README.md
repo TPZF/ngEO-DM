@@ -22,7 +22,9 @@ On each code modification, just refresh the application as it was a browser tab.
 ### Linux
 
 * `sudo npm -g install electron-packager`: Install electron-packager globally
-* `npm run packager`: Package (currently only for host OS only)
+* `npm run packager-linux`: Package for Linux OS
+* `npm run packager-windows`: Package for Windows OS
+* `npm run packager-macos`: Package for Mac OS
 
 ## License
 
