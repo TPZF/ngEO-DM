@@ -10,7 +10,7 @@
     "build:dev": "webpack --progress --profile",
     "packager-linux": "electron-packager ./src/electron/ --overwrite --platform=linux --arch=x64 --icon=src/electron/vendor/assets/icon.png --out ./releases",
     "packager-windows": "electron-packager ./src/electron/ --overwrite --platform=win32 --arch=x64 --icon=src/electron/vendor/assets/icon.ico --out ./releases",
-    "packager-macos": "electron-packager ./src/electron/ --overwrite --platform=darwin --icon=src/electron/vendor/assets/icon.icns --out ./releases",
+    "packager-macos": "electron-packager ./src/electron/ --overwrite --platform=darwin --arch=x64 --app-bundle-id=fr.telespazio.ngeo --app-version=0.1.0 --icon=src/electron/vendor/assets/icon.icns --osx-sign --out ./releases",
     "package": "node package.js",
     "package-all": "npm run package -- --all",
     "electron": "TODO_DEV=true electron --enable-logging src/electron",
