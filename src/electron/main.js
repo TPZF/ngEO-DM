@@ -15,7 +15,7 @@ log.transports.file.file = __dirname + '/vendor/electron.log';
 const configuration = isDev ? require('./vendor/conf/configuration-dev.json') : require('./vendor/conf/configuration.json');
 const appVersion = require('./package.json').version;
 const os = require('os').platform();
-const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/releases/${os}/latest/v=${appVersion}`;
+const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/releases/latest`;
 const updater = require('electron-simple-updater');
 let firstLoading = true;
 
