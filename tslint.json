@@ -27,7 +27,7 @@
     "eofline": true,
     "indent": [
       true,
-      "spaces"
+      "tab"
     ],
     "max-line-length": [
       true,
