@@ -294,7 +294,14 @@ const createTray = () => {
 };
 
 const showAbout = () => {
-	dialog.showMessageBox(mainWindow, { type: 'info', title: 'About', message: 'Thanks to Irchad, to my Mum, to my cat Mimi, to Snow White and the Seven Dwarfs.' });
+	dialog.showMessageBox(
+		mainWindow,
+		{
+			type: 'info',
+			title: 'About',
+			message: 'Thanks to Irchad, to my Mum, to my cat Mimi, to Snow White and the Seven Dwarfs. Version ' + appVersion
+		}
+	);
 }
 
 /**
