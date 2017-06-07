@@ -6,18 +6,62 @@ let settings = require('electron-settings');
 
 // log
 const log = require('electron-log');
-log.transports.file.level = 'warn';
+log.transports.file.level = 'all';
 log.transports.file.format = '{h}:{i}:{s}:{ms} {text}';
 log.transports.file.maxSize = 5 * 1024 * 1024;
 log.transports.file.file = __dirname + '/vendor/electron.log';
 
-// auto uploader
+log.debug('isDev=' + isDev);
+
+// auto uploader v1
 const configuration = isDev ? require('./vendor/conf/configuration-dev.json') : require('./vendor/conf/configuration.json');
 const appVersion = require('./package.json').version;
+log.debug('appVersion=' + appVersion);
 const os = require('os').platform();
-const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/releases/latest`;
+log.debug('os=' + os);
+//const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/releases/latest`;
+const urlLatestDownloadManager = `http://localhost:3000/ngeo/downloadManagers/releases/latest`;
 const updater = require('electron-simple-updater');
 let firstLoading = true;
+
+// auto uploader v2
+/* const { autoUpdater } = require('electron');
+
+var updateFeed = `http://localhost:3000/ngeo/downloadManagers/releases/download/darwin-x64-prod/0.2.0/release.json`;
+if (!isDev) {
+	if (os === 'darwin') {
+		//updateFeed = `${configuration.qsHost}/downloadManagers/releases/download/darwin-x64-prod/0.2.0/release.json`;
+		updateFeed = `http://localhost:3000/ngeo/downloadManagers/releases/download/darwin-x64-prod/0.2.0/release.json`;
+	} else if (os === 'win32') {
+		updateFeed = `${configuration.qsHost}/downloadManagers/releases/download/win32-x64-prod/0.2.0/ngeo.exe`;
+	}
+	autoUpdater.addListener('update-available', function(event) {
+		log.info('A new update is available');
+	});
+
+	autoUpdater.addListener('update-downloaded', function(event) {
+		log.info('A new update is ready to install');
+	});
+
+	autoUpdater.addListener('error', function(error) {
+		log.info('Error on update ' + error);
+	});
+
+	autoUpdater.addListener('checking-for-update', function(event) {
+		console.log('Checking for update');
+		log.info('Checking for update');
+	});
+
+	autoUpdater.addListener('update-not-available', function() {
+		log.info('Update not available');
+	});
+
+	log.info('updateFeed=' + updateFeed);
+
+	autoUpdater.setFeedURL(updateFeed);
+
+}
+*/
 
 // browser-window creates a native window
 let topWindow = null;
@@ -129,6 +173,7 @@ updater.on('error', (error) => {
 	log.error(error);
 });
 updater.on('update-available', () => {
+	log.info('A new update is available');
 	dialog.showMessageBox(mainWindow, { type: 'warning', title: 'A new update is available...', message: 'A new update is available...' });
 });
 updater.on('update-not-available', () => {
@@ -139,6 +184,7 @@ updater.on('update-not-available', () => {
 	firstLoading = false;
 });
 updater.on('update-downloaded', () => {
+	log.info('Update downloaded > quit and install !');
 	updater.quitAndInstall();
 });
 
@@ -148,7 +194,7 @@ updater.on('update-downloaded', () => {
  * -------------------------------------------
  */
 app.on('ready', () => {
-	// auto update
+	// auto update v1
 	updater.init(urlLatestDownloadManager);
 
 	// create tray
