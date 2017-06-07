@@ -37,16 +37,14 @@ export class DarStatusItemComponent implements OnInit, DoCheck {
 	ngOnInit() {
 		let _that = this;
 		this._newStatus = '' + this.darStatus.status;
+		// set currentPath to save files on hard disk
+		this._electronService.ipcRenderer.sendSync('setCurrentPath', this._settingsService.get('downloadPath'));
 	}
 
 	ngDoCheck() {
 		// no management if no product to download
 		if (this.darStatus.productStatuses.length === 0) {
 			return;
-		}
-		// set currentPath to save files on hard disk
-		if (this.darStatus.downloadDirectory !== '') {
-			this._electronService.ipcRenderer.sendSync('setCurrentPath', this._settingsService.get('downloadPath'));
 		}
 		// management of different action buttons
 		if (+this._newStatus === 0 && +this.darStatus.status === 10) {
