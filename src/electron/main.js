@@ -42,7 +42,7 @@ let downloadUrls = [];
 
 // Don't show the app in the doc
 if (app.dock) {
-	app.dock.hide();
+	//app.dock.hide();
 }
 
 /**
@@ -65,15 +65,16 @@ ipcMain.on('OpenPath', (event, arg) => {
 
 // start download DAR
 ipcMain.on('startDownloadDar', (event, myDar) => {
-	console.log('ipcMain.startDownloadDar');
+	log.debug('ipcMain.startDownloadDar');
 	var wc = topWindow.webContents;
 	myDar.productStatuses.forEach((product) => {
 		let item = _getDownloadItemByUrl(product.productURL);
 		if (item !== null && item.isPaused()) {
-			console.log('ipcMain.cancelDownloadDar item not null > resume it !');
+			log.debug('ipcMain.startDownloadDar item not null > resume it !');
 			item.resume();
 		} else {
-			console.log('ipcMain.cancelDownloadDar item null > download it !');
+			log.debug('ipcMain.startDownloadDar item null > download it !');
+			log.debug('url: ' + product.productURL);
 			wc.downloadURL(product.productURL);
 		}
 	});
@@ -81,12 +82,12 @@ ipcMain.on('startDownloadDar', (event, myDar) => {
 
 // pause download DAR
 ipcMain.on('pauseDownloadDar', (event, myDar) => {
-	console.log('ipcMain.pauseDownloadDar');
+	log.debug('ipcMain.pauseDownloadDar');
 	var wc = topWindow.webContents;
 	myDar.productStatuses.forEach((product) => {
 		let item = _getDownloadItemByUrl(product.productURL);
 		if (item !== null) {
-			console.log('ipcMain.cancelDownloadDar item not null > pause it !');
+			log.debug('ipcMain.cancelDownloadDar item not null > pause it !');
 			item.pause();
 		}
 	});
@@ -94,12 +95,12 @@ ipcMain.on('pauseDownloadDar', (event, myDar) => {
 
 // cancel download DAR
 ipcMain.on('cancelDownloadDar', (event, myDar) => {
-	console.log('ipcMain.cancelDownloadDar');
+	log.debug('ipcMain.cancelDownloadDar');
 	var wc = topWindow.webContents;
 	myDar.productStatuses.forEach((product) => {
 		let item = _getDownloadItemByUrl(product.productURL);
 		if (item !== null) {
-			console.log('ipcMain.cancelDownloadDar item not null > cancel it !');
+			log.debug('ipcMain.cancelDownloadDar item not null > cancel it !');
 			item.cancel();
 		}
 	});
@@ -213,41 +214,46 @@ const createTopWindow = () => {
 
 	topWindow.webContents.session.on('will-download', (event, item, webContents) => {
 
+		log.debug('topWindow.willDownload');
+
 		downloadItems.push(item);
 
 		// Set the save path, making Electron not to prompt a save dialog.
-		item.setSavePath(currentPath + item.getFilename())
+		item.setSavePath(currentPath + item.getFilename());
+		log.debug('savePath:' + currentPath + item.getFilename());
 
 		item.on('updated', (event, state) => {
 			if (state === 'interrupted') {
-				console.log(`Download is interrupted but can be resumed for ${item.getURLChain()[0]}`)
+				log.info(`Download is interrupted but can be resumed for ${item.getURLChain()[0]}`)
 			} else if (state === 'progressing') {
 				if (item.isPaused()) {
-					console.log(`Download is paused for ${item.getURLChain()[0]}`)
+					log.info(`Download is paused for ${item.getURLChain()[0]}`)
 				} else {
-					console.log(`Received bytes for ${item.getURLChain()[0]} : ${item.getReceivedBytes()}`)
-					/*if (mainWindow) {
+					log.info(`Received bytes for ${item.getURLChain()[0]} : ${item.getReceivedBytes()}`)
+					if (mainWindow) {
+						log.debug('send downloadUpdated to mainWindow...');
 						mainWindow.webContents.send('downloadUpdated', {
 							url: item.getURLChain()[0],
 							progress: item.getReceivedBytes() / item.getTotalBytes(),
 							received: item.getReceivedBytes()
 						});
-					}*/
+					}
 				}
 			}
 		})
 		item.once('done', (event, state) => {
 			if (state === 'completed') {
-				console.log('Completed for ' + item.getURLChain()[0]);
+				log.info('Completed for ' + item.getURLChain()[0]);
 				_delDownloadItemByUrl(item.getURLChain()[0]);
 				if (mainWindow) {
+					log.debug('send downloadCompleted to mainWindow...');
 					mainWindow.webContents.send('downloadCompleted', {
 						url: item.getURLChain()[0],
 						path: currentPath + item.getFilename()
 					});
 				}
 			} else {
-				console.log(`Download failed for ${item.getURLChain()[0]}: ${state}`)
+				log.error(`Download failed for ${item.getURLChain()[0]}: ${state}`)
 			}
 		})
 	})
@@ -280,9 +286,9 @@ const createWindow = () => {
 	mainWindow.loadURL('file://' + __dirname + '/index.html');
 
 	// Open the DevTools.
-	if (isDev) {
+	//if (isDev) {
 		mainWindow.webContents.openDevTools();
-	}
+	//}
 
 	// Show window when ready to show
 	mainWindow.once('ready-to-show', () => {
@@ -330,14 +336,14 @@ const showAbout = () => {
 const _getDownloadItemByUrl = (myUrl) => {
 	let _result = null;
 	if (downloadItems) {
-		console.log('_getDownloadItemByUrl items.length ' + downloadItems.length);
+		log.debug('_getDownloadItemByUrl items.length ' + downloadItems.length);
 		downloadItems.forEach( (_item) => {
 			if (_item.getURLChain()[0] === myUrl) {
 				_result = _item;
 			}
 		});
 	}
-	console.log('_getDownloadItemByUrl ' + _result);
+	log.debug('_getDownloadItemByUrl ' + _result);
 	return _result;
 }
 
@@ -347,7 +353,7 @@ const _getDownloadItemByUrl = (myUrl) => {
 const _delDownloadItemByUrl = (myUrl) => {
 	let _newDownloadItems = [];
 	if (downloadItems) {
-		console.log('_delDownloadItemByUrl old array ' + downloadItems.length);
+		log.debug('_delDownloadItemByUrl old array ' + downloadItems.length);
 		downloadItems.forEach( (_item) => {
 			// getURLChain()[0] is the first url called
 			if (_item.getURLChain()[0] !== myUrl) {
@@ -356,5 +362,5 @@ const _delDownloadItemByUrl = (myUrl) => {
 		});
 	}
 	downloadItems = _newDownloadItems;
-	console.log('_delDownloadItemByUrl new array ' + downloadItems.length);
+	log.debug('_delDownloadItemByUrl new array ' + downloadItems.length);
 }
