@@ -1,6 +1,6 @@
 {
-  "name": "ngeo-dm",
-  "version": "0.1.0",
+  "name": "ngeo-downloadmanager",
+  "version": "0.2.0",
   "author": "Telespazio France - 2017",
   "description": "Download manager using Electron/Angular",
   "scripts": {
@@ -10,7 +10,7 @@
     "build:dev": "webpack --progress --profile",
     "packager-linux": "electron-packager ./src/electron/ --overwrite --platform=linux --arch=x64 --icon=src/electron/vendor/assets/icon.png --out ./releases",
     "packager-windows": "electron-packager ./src/electron/ --overwrite --platform=win32 --arch=x64 --icon=src/electron/vendor/assets/icon.ico --out ./releases",
-    "packager-macos": "electron-packager ./src/electron/ --overwrite --platform=darwin --arch=x64 --icon=src/electron/vendor/assets/icon.icns --app-bundle-id=fr.telespazio.ngeo --app-version=0.1.0 --osx-sign --out ./releases",
+    "packager-macos": "electron-packager ./src/electron/ --overwrite --platform=darwin --arch=x64 --icon=src/electron/vendor/assets/icon.icns --app-bundle-id=com.telespazio.ngeo --app-version=0.2.0 --out ./releases",
     "package": "node package.js",
     "package-all": "npm run package -- --all",
     "electron": "TODO_DEV=true electron --enable-logging src/electron",
