@@ -1,11 +1,11 @@
 export class ProductStatus {
   expectedSize: string;
   percentageCompleted: string;
-  productStatus: string;
+  productStatus?: string;
   productURL: string;
-  localPath: string;
-  errorMsg: string;
-  loadedSize: string;
+  localPath?: string;
+  errorMsg?: string;
+  loadedSize?: string;
 };
 
 export class DarStatus {
