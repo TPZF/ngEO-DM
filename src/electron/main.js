@@ -15,53 +15,19 @@ log.debug('isDev=' + isDev);
 
 // auto uploader v1
 const configuration = isDev ? require('./vendor/conf/configuration-dev.json') : require('./vendor/conf/configuration.json');
+
+// app version
 const appVersion = require('./package.json').version;
 log.debug('appVersion=' + appVersion);
+
+// operating system
 const os = require('os').platform();
 log.debug('os=' + os);
+
 //const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/releases/latest`;
 const urlLatestDownloadManager = `http://localhost:3000/ngeo/downloadManagers/releases/latest`;
 const updater = require('electron-simple-updater');
 let firstLoading = true;
-
-// auto uploader v2
-/* const { autoUpdater } = require('electron');
-
-var updateFeed = `http://localhost:3000/ngeo/downloadManagers/releases/download/darwin-x64-prod/0.2.0/release.json`;
-if (!isDev) {
-	if (os === 'darwin') {
-		//updateFeed = `${configuration.qsHost}/downloadManagers/releases/download/darwin-x64-prod/0.2.0/release.json`;
-		updateFeed = `http://localhost:3000/ngeo/downloadManagers/releases/download/darwin-x64-prod/0.2.0/release.json`;
-	} else if (os === 'win32') {
-		updateFeed = `${configuration.qsHost}/downloadManagers/releases/download/win32-x64-prod/0.2.0/ngeo.exe`;
-	}
-	autoUpdater.addListener('update-available', function(event) {
-		log.info('A new update is available');
-	});
-
-	autoUpdater.addListener('update-downloaded', function(event) {
-		log.info('A new update is ready to install');
-	});
-
-	autoUpdater.addListener('error', function(error) {
-		log.info('Error on update ' + error);
-	});
-
-	autoUpdater.addListener('checking-for-update', function(event) {
-		console.log('Checking for update');
-		log.info('Checking for update');
-	});
-
-	autoUpdater.addListener('update-not-available', function() {
-		log.info('Update not available');
-	});
-
-	log.info('updateFeed=' + updateFeed);
-
-	autoUpdater.setFeedURL(updateFeed);
-
-}
-*/
 
 // browser-window creates a native window
 let topWindow = null;
@@ -99,12 +65,15 @@ ipcMain.on('OpenPath', (event, arg) => {
 
 // start download DAR
 ipcMain.on('startDownloadDar', (event, myDar) => {
+	console.log('ipcMain.startDownloadDar');
 	var wc = topWindow.webContents;
 	myDar.productStatuses.forEach((product) => {
 		let item = _getDownloadItemByUrl(product.productURL);
 		if (item !== null && item.isPaused()) {
+			console.log('ipcMain.cancelDownloadDar item not null > resume it !');
 			item.resume();
 		} else {
+			console.log('ipcMain.cancelDownloadDar item null > download it !');
 			wc.downloadURL(product.productURL);
 		}
 	});
@@ -112,10 +81,12 @@ ipcMain.on('startDownloadDar', (event, myDar) => {
 
 // pause download DAR
 ipcMain.on('pauseDownloadDar', (event, myDar) => {
+	console.log('ipcMain.pauseDownloadDar');
 	var wc = topWindow.webContents;
 	myDar.productStatuses.forEach((product) => {
 		let item = _getDownloadItemByUrl(product.productURL);
 		if (item !== null) {
+			console.log('ipcMain.cancelDownloadDar item not null > pause it !');
 			item.pause();
 		}
 	});
@@ -123,10 +94,12 @@ ipcMain.on('pauseDownloadDar', (event, myDar) => {
 
 // cancel download DAR
 ipcMain.on('cancelDownloadDar', (event, myDar) => {
+	console.log('ipcMain.cancelDownloadDar');
 	var wc = topWindow.webContents;
 	myDar.productStatuses.forEach((product) => {
 		let item = _getDownloadItemByUrl(product.productURL);
 		if (item !== null) {
+			console.log('ipcMain.cancelDownloadDar item not null > cancel it !');
 			item.cancel();
 		}
 	});
@@ -247,33 +220,34 @@ const createTopWindow = () => {
 
 		item.on('updated', (event, state) => {
 			if (state === 'interrupted') {
-				console.log('Download is interrupted but can be resumed')
+				console.log(`Download is interrupted but can be resumed for ${item.getURLChain()[0]}`)
 			} else if (state === 'progressing') {
 				if (item.isPaused()) {
-					console.log('Download is paused')
+					console.log(`Download is paused for ${item.getURLChain()[0]}`)
 				} else {
-					console.log(`Received bytes: ${item.getReceivedBytes()}`)
-					if (mainWindow) {
+					console.log(`Received bytes for ${item.getURLChain()[0]} : ${item.getReceivedBytes()}`)
+					/*if (mainWindow) {
 						mainWindow.webContents.send('downloadUpdated', {
-							url: item.getURL(),
+							url: item.getURLChain()[0],
 							progress: item.getReceivedBytes() / item.getTotalBytes(),
 							received: item.getReceivedBytes()
 						});
-					}
+					}*/
 				}
 			}
 		})
 		item.once('done', (event, state) => {
 			if (state === 'completed') {
-				_delDownloadItemByUrl(item.getURL());
+				console.log('Completed for ' + item.getURLChain()[0]);
+				_delDownloadItemByUrl(item.getURLChain()[0]);
 				if (mainWindow) {
 					mainWindow.webContents.send('downloadCompleted', {
-						url: item.getURL(),
+						url: item.getURLChain()[0],
 						path: currentPath + item.getFilename()
 					});
 				}
 			} else {
-				console.log(`Download failed: ${state}`)
+				console.log(`Download failed for ${item.getURLChain()[0]}: ${state}`)
 			}
 		})
 	})
@@ -355,13 +329,15 @@ const showAbout = () => {
  */
 const _getDownloadItemByUrl = (myUrl) => {
 	let _result = null;
-	console.log('_getDownloadItemByUrl(' + myUrl + ')');
-	console.log('downloadItems:' + downloadItems.length);
-	downloadItems.forEach( (_item) => {
-		if (_item.getURL() === myUrl) {
-			_result = _item;
-		}
-	});
+	if (downloadItems) {
+		console.log('_getDownloadItemByUrl items.length ' + downloadItems.length);
+		downloadItems.forEach( (_item) => {
+			if (_item.getURLChain()[0] === myUrl) {
+				_result = _item;
+			}
+		});
+	}
+	console.log('_getDownloadItemByUrl ' + _result);
 	return _result;
 }
 
@@ -370,13 +346,15 @@ const _getDownloadItemByUrl = (myUrl) => {
  */
 const _delDownloadItemByUrl = (myUrl) => {
 	let _newDownloadItems = [];
-	console.log('_delDownloadItemByUrl(' + myUrl + ')');
-	console.log('downloadItems:' + downloadItems.length);
-	downloadItems.forEach( (_item) => {
-		console.log(_item);
-		if (_item.getURL() !== myUrl) {
-			_newDownloadItems.push(_item);
-		}
-	});
+	if (downloadItems) {
+		console.log('_delDownloadItemByUrl old array ' + downloadItems.length);
+		downloadItems.forEach( (_item) => {
+			// getURLChain()[0] is the first url called
+			if (_item.getURLChain()[0] !== myUrl) {
+				_newDownloadItems.push(_item);
+			}
+		});
+	}
 	downloadItems = _newDownloadItems;
+	console.log('_delDownloadItemByUrl new array ' + downloadItems.length);
 }
