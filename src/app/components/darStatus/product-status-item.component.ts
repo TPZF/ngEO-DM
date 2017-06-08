@@ -1,5 +1,5 @@
 // Imports
-import { Component, OnInit, Input, DoCheck } from '@angular/core';
+import { Component, OnInit, Input, DoCheck, NgZone } from '@angular/core';
 import { ResponseContentType } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
@@ -30,23 +30,30 @@ export class ProductStatusItemComponent implements OnInit, DoCheck {
 		private _electronService: ElectronService,
 		private darStatusService: DarStatusService,
 		private _productService: ProductService,
-		private _settingsService: SettingsService
+		private _settingsService: SettingsService,
+		private _ngZone: NgZone
 	) { }
 
 	// Load data ones componet is ready
 	ngOnInit() {
 		let _that = this;
 		this._electronService.ipcRenderer.on('downloadCompleted', (event, downloadItem) => {
-			if (this.productStatus.productURL === downloadItem.url) {
-				this.productStatus.percentageCompleted = '100';
-				this.productStatus.localPath = downloadItem.path;
-			}
+			console.log('downloadCompleted');
+			_that._ngZone.run(() => {
+				if (_that.productStatus.productURL === downloadItem.url) {
+					_that.productStatus.percentageCompleted = '100';
+					_that.productStatus.localPath = downloadItem.path;
+				}
+			})
 		});
 		this._electronService.ipcRenderer.on('downloadUpdated', (event, downloadItem) => {
-			if (this.productStatus.productURL === downloadItem.url) {
-				this.productStatus.percentageCompleted = '' + Math.floor(parseInt(downloadItem.progress) * 100);
-				this.productStatus.loadedSize = downloadItem.received;
-			}
+			console.log('downloadUploaded');
+			_that._ngZone.run(() => {
+				if (_that.productStatus.productURL === downloadItem.url) {
+					_that.productStatus.percentageCompleted = '' + Math.floor(parseInt(downloadItem.progress) * 100);
+					_that.productStatus.loadedSize = downloadItem.received;
+				}
+			});
 		});
 	}
 
