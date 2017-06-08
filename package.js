@@ -21,7 +21,7 @@ const DEFAULT_OPTS = {
 	ignore: [].concat(devDeps.map(name => `/node_modules/${name}($|/)`))
 };
 
-const icon = './src/electron/assets/icon';
+const icon = './src/electron/vendor/assets/icon';
 
 if (icon) {
 	DEFAULT_OPTS.icon = icon;
