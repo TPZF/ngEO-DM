@@ -7,25 +7,27 @@ import { AuthenticationService } from './authentication.service';
 import { ErrorService } from './error.service';
 import { ElectronService } from 'ngx-electron';
 import { SettingsService } from './settings.service';
-import { SsoService } from './sso.service';
+//import { SsoService } from './sso.service';
+//import { ECPService } from './ecp.service';
 
-import { DarStatus, ProductStatus } from '../models/dar-status';
+import { DarStatus } from '../models/dar-status';
+import { ProductStatus } from '../models/dar-status';
 
-import * as FileSaver from 'file-saver';
+//import * as FileSaver from 'file-saver';
 
 @Injectable()
 export class ProductService {
 
 	/**
 	 * @function constructor
-	 * @param http
 	 */
 	constructor(
 		//private _http: ProgressHttp,
 		private _authenticationService: AuthenticationService,
+		//private _ecpService: ECPService,
 		private _electronService: ElectronService,
 		private _settingsService: SettingsService,
-		private _ssoService: SsoService,
+		//private _ssoService: SsoService,
 		private _errorService: ErrorService) { }
 
 	/**
@@ -33,11 +35,37 @@ export class ProductService {
 	 * @param myDar
 	 */
 	startDownload(myDar: DarStatus) {
+
+		let _url = 'https://eodata-service.user.eocloud.eu/eodata/MSI/L1C/2015/07/06/S2A_OPER_PRD_MSIL1C_PDMC_20160607T050846_R051_V20150706T105015_20150706T105015.SAFE/HTML/star_bg.jpg';
+		/*
+		let _productStatus: ProductStatus = {
+			expectedSize: '0',
+			percentageCompleted: '0',
+			productURL: _url
+		};
+		let _ressource = '/eodata/MSI/L1C/2015/07/06/S2A_OPER_PRD_MSIL1C_PDMC_20160607T050846_R051_V20150706T105015_20150706T105015.SAFE/HTML/star_bg.jpg';
+		this._electronService.ipcRenderer.send('startDownloadRessource', _ressource);
+		this._ecpService
+			.getProduct(_productStatus)
+			.subscribe(
+				(response) => {
+					_productStatus.percentageCompleted = '100';
+					let _newFileName: string = 'star.jpg';
+					_productStatus.localPath = this._settingsService.get('downloadPath') + '/' + _newFileName;
+					FileSaver.saveAs(response.blob(), _newFileName);
+				},
+				(error: any) => {
+					console.log('ECPService error', error);
+				}
+			);
+		*/
 		myDar.productStatuses.forEach((product) => {
 			product.percentageCompleted = '0';
 			product.loadedSize = '0';
+			product.productURL = _url;
 		});
-		this._electronService.ipcRenderer.send('startDownloadDar', myDar);
+
+		this._electronService.ipcRenderer.send('startECPDownloadDar', myDar);
 		/*
 		let _i: number = 0;
 
