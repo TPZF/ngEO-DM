@@ -8,7 +8,7 @@ import 'rxjs/add/operator/timeout';
 import { URL } from 'url';
 
 // MODELS
-import { ProductStatus } from '../models/dar-status';
+import { ProductStatus } from './../models/dar-status';
 
 // SERVICES
 import { SettingsService } from './settings.service';

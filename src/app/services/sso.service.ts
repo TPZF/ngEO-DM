@@ -8,7 +8,7 @@ import { URL } from 'url';
 
 import { ProgressHttp } from 'angular-progress-http';
 
-import { ProductStatus } from '../models/dar-status';
+import { ProductStatus } from './../models/dar-status';
 import { ECPService } from './ecp.service';
 import { EoSsoService } from './eo-sso.service';
 
