@@ -4,5 +4,5 @@
 	<p *ngIf="productStatus.loadedSize && (productStatus.loadedSize > 0) && (productStatus.percentageCompleted!=100)">Loaded size : {{productStatus.loadedSize | fileSize}}</p>
 </md-card-content>
 <md-card-footer>
-	<md-progress-bar color="primary" mode="determinate" [value]="productStatus.percentageCompleted" bufferValue="75"></md-progress-bar>
+	<md-progress-bar color="primary" [mode]="productStatus.mode" [value]="productStatus.percentageCompleted" bufferValue="75"></md-progress-bar>
 </md-card-footer>

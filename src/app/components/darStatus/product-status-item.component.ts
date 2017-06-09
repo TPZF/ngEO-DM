@@ -9,7 +9,8 @@ import { DarStatusService } from './../../services/dar-status.service';
 import { ProductService } from './../../services/product.service';
 import { SettingsService } from './../../services/settings.service';
 
-import { DarStatus, ProductStatus } from './../../models/dar-status';
+import { DarStatus } from './../../models/dar-status';
+import { ProductStatus } from './../../models/dar-status';
 
 import * as FileSaver from 'file-saver';
 
@@ -34,9 +35,10 @@ export class ProductStatusItemComponent implements OnInit, DoCheck {
 		private _ngZone: NgZone
 	) { }
 
-	// Load data ones componet is ready
+	// Load data ones component is ready
 	ngOnInit() {
 		let _that = this;
+		this.productStatus.mode = 'determinate';
 		this._electronService.ipcRenderer.on('downloadCompleted', (event, downloadItem) => {
 			console.log('downloadCompleted');
 			_that._ngZone.run(() => {
@@ -44,10 +46,10 @@ export class ProductStatusItemComponent implements OnInit, DoCheck {
 					_that.productStatus.percentageCompleted = '100';
 					_that.productStatus.localPath = downloadItem.path;
 				}
-			})
+			});
 		});
 		this._electronService.ipcRenderer.on('downloadUpdated', (event, downloadItem) => {
-			console.log('downloadUploaded');
+			console.log('downloadUploaded', downloadItem.progress);
 			_that._ngZone.run(() => {
 				if (_that.productStatus.productURL === downloadItem.url) {
 					_that.productStatus.percentageCompleted = '' + Math.floor(parseInt(downloadItem.progress) * 100);
