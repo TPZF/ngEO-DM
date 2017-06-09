@@ -4,12 +4,14 @@ const isDev = process.env.TODO_DEV ? process.env.TODO_DEV.trim() == "true" : fal
 
 let settings = require('electron-settings');
 
+let ecp = require('./lib/ecp');
+
 // log
 const log = require('electron-log');
 log.transports.file.level = 'all';
 log.transports.file.format = '{h}:{i}:{s}:{ms} {text}';
 log.transports.file.maxSize = 5 * 1024 * 1024;
-log.transports.file.file = __dirname + '/vendor/electron.log';
+log.transports.file.file = __dirname + '/electron.log';
 
 log.debug('isDev=' + isDev);
 
@@ -63,6 +65,23 @@ ipcMain.on('OpenPath', (event, arg) => {
 	}
 });
 
+// start download
+ipcMain.on('startDownloadRessource', (event, myRessource) => {
+	log.debug('ipcMain.startDownloadRessource');
+	let wc = mainWindow.webContents;
+	ecp.download(myRessource, wc, currentPath);
+});
+
+// start download DAR
+ipcMain.on('startECPDownloadDar', (event, myDar) => {
+	log.debug('ipcMain.startECPDownloadDar');
+	let wc = mainWindow.webContents;
+	myDar.productStatuses.forEach((product) => {
+		ecp.downloadProduct(product.productURL, wc, currentPath);
+	});
+});
+
+
 // start download DAR
 ipcMain.on('startDownloadDar', (event, myDar) => {
 	log.debug('ipcMain.startDownloadDar');
@@ -75,6 +94,7 @@ ipcMain.on('startDownloadDar', (event, myDar) => {
 		} else {
 			log.debug('ipcMain.startDownloadDar item null > download it !');
 			log.debug('url: ' + product.productURL);
+
 			wc.downloadURL(product.productURL);
 		}
 	});
@@ -223,6 +243,7 @@ const createTopWindow = () => {
 		log.debug('savePath:' + currentPath + item.getFilename());
 
 		item.on('updated', (event, state) => {
+			log.info(item.getURLChain().length);
 			if (state === 'interrupted') {
 				log.info(`Download is interrupted but can be resumed for ${item.getURLChain()[0]}`)
 			} else if (state === 'progressing') {
