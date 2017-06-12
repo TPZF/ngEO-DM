@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "author": "Telespazio France - 2017",
   "description": "Download manager using Electron/Angular",
+  "main": "src/electron/main.js",
   "scripts": {
     "watch": "npm run watch:dev",
     "watch:dev": "webpack --watch --progress --profile",
@@ -15,7 +16,11 @@
     "package-all": "npm run package -- --all",
     "electron": "TODO_DEV=true electron --enable-logging src/electron",
     "webpack-test": "webpack --config webpack.test.js --progress --profile",
-    "test": "karma start"
+    "test": "karma start",
+    "postinstall": "install-app-deps",
+    "start": "electron src/electron --enable-logging",
+    "dev": "NODE_ENV='development' npm run start",
+    "dist-windows": "build -w --x64 --ia32"
   },
   "dependencies": {
     "@angular/common": "^2.4.7",
@@ -55,7 +60,10 @@
     "codelyzer": "^2.0.0-beta.2",
     "css-loader": "^0.26.2",
     "electron": "^1.6.1",
+    "electron-builder": "^18.6.2",
     "electron-packager": "^8.5.2",
+    "electron-prebuilt": "^1.4.13",
+    "electron-windows-installer": "^1.4.4",
     "es6-promise-loader": "^1.0.1",
     "extract-text-webpack-plugin": "^2.1.0",
     "file-loader": "^0.10.0",
@@ -94,6 +102,11 @@
     "webpack": "2.2.1",
     "webpack-dev-middleware": "^1.6.1",
     "webpack-dev-server": "^2.2.1"
+  },
+  "build": {
+    "appId": "int.esa.ngeo.download.manager",
+    "dmg": {},
+    "win": {}
   },
   "engines": {
     "node": ">= 4.2.1 <= 6",
