@@ -19,8 +19,6 @@ On each code modification, just refresh the application as it was a browser tab.
 
 ## Packaging
 
-**Install electron-packager globally**
-`sudo npm -g install electron-packager`
 
 ### For Linux
 
@@ -32,13 +30,23 @@ On each code modification, just refresh the application as it was a browser tab.
 
 **Build app** `npm run build`
 
-**Package** `npm run packager-windows`
+**Package** `npm run dist-windows`
+It generates the exe in dist folder
 
 ### For MacOS
 
 **Build app** `npm run build`
 
-**Package** `npm run packager-macos` : It generates a ngeo-downloadmanager-darwin-x64 folder with app in it
+**Package** 
+Before doing the dmg, you have to export the key chain from which you will sign the appication because in mac, the auto updater works if and only if application is signed
+for that in the console you have to do
+`export CSC_NAME="5ZQQA3K7N5"`
+You remark hete that the csc name is ours and will not work on your side
+to see the keychain in your machine please do
+`certtool y | grep Eric`
+This will show all the keychain you have (ours is Eric or something like that)
+
+`npm run dist-mac` : It generates a ngeo-downloadmanager-darwin-x64 folder with app you will find in dist folder
 
 **Get a certificate for codesigning** : Go to apple web site - Create a certificate with Developer ID option - Use CSR of your device
 
