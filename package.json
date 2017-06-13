@@ -20,7 +20,8 @@
     "postinstall": "install-app-deps",
     "start": "electron src/electron --enable-logging",
     "dev": "NODE_ENV='development' npm run start",
-    "dist-windows": "build -w --x64 --ia32"
+    "dist-windows": "build -w --x64 --ia32",
+	"dist-mac": "build -m --x64"
   },
   "dependencies": {
     "@angular/common": "^2.4.7",
