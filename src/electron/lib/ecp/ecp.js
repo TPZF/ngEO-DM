@@ -6,6 +6,11 @@ const url = require('url');
 const fs = require('fs');
 const btoa = require('btoa');
 
+const log = require('electron-log');
+log.transports.file.level = 'all';
+log.transports.file.format = '{h}:{i}:{s}:{ms} {text}';
+log.transports.file.maxSize = 5 * 1024 * 1024;
+
 const SP_HOST = 'eodata-service.user.eocloud.eu';
 const SP_ECP_ENDPOINT = '/Shibboleth.sso/SAML2/ECP';
 const IDP_HOST = 'eodata-idp.user.eocloud.eu';
@@ -45,6 +50,7 @@ class ECP extends EventEmitter {
 		console.log('----------------------------------------------------------------------');
 		console.log('_getSoapForUrl');
 		console.log('----------------------------------------------------------------------');
+		log.debug('_getSoapForUrl');
 
 		let _url = url.parse(myProductUrl);
 
@@ -72,6 +78,7 @@ class ECP extends EventEmitter {
 		});
 		_req.on('error', (e) => {
 			console.log('ECP _getSoapForUrl error ' + e);
+			log.error('ECP _getSoapForUrl error ' + e);
 		});
 		_req.end();
 	}
@@ -93,6 +100,7 @@ class ECP extends EventEmitter {
 		console.log('_postBasicAuthenticationWithSoapOnIdP');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
+		log.debug('_postBasicAuthenticationWithSoapOnIdP');
 
 		let _that = this;
 
@@ -165,6 +173,7 @@ class ECP extends EventEmitter {
 		console.log('_postAuthenticationOnServiceProvider');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
+		log.debug('_postAuthenticationOnServiceProvider');
 
 		let _that = this;
 
@@ -231,6 +240,7 @@ class ECP extends EventEmitter {
 		console.log('_getRedirectAttrChecker');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
+		log.debug('_getRedirectAttrChecker');
 
 		let _that = this;
 
@@ -288,6 +298,7 @@ class ECP extends EventEmitter {
 		console.log('_getRedirectECPHook');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
+		log.debug('_getRedirectECPHook');
 
 		let _that = this;
 
@@ -341,6 +352,7 @@ class ECP extends EventEmitter {
 		console.log('_getRedirectToRessource');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
+		log.debug('_getRedirectToRessource');
 
 		let _that = this;
 
@@ -390,6 +402,7 @@ class ECP extends EventEmitter {
 		console.log('_saveRessource');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
+		log.debug('_saveRessource');
 
 		let _that = this;
 
