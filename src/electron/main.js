@@ -29,7 +29,6 @@ log.debug('isDev=' + isDev);
 // auto uploader v1
 const configuration = isDev ? require('./vendor/conf/configuration-dev.json') : require('./vendor/conf/configuration.json');
 
-
 log.debug('appVersion=' + appVersion);
 
 // operating system
@@ -206,7 +205,6 @@ autoUpdater.on('update-downloaded', () => {
 
 autoUpdater.on('update-downloaded', (e) => {
 	log.info(e);
-	alert("Install?")
 	autoUpdater.quitAndInstall();
 });
 
