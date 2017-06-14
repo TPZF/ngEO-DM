@@ -10,7 +10,7 @@ let ecp = require('./lib/ecp');
 
 // log
 const log = require('electron-log');
-log.transports.file.level = 'all';
+log.transports.file.level = isDev ? 'all' : 'all';
 log.transports.file.format = '{h}:{i}:{s}:{ms} {text}';
 log.transports.file.maxSize = 5 * 1024 * 1024;
 /*by default it puts:
@@ -82,8 +82,12 @@ ipcMain.on('startDownloadRessource', (event, myRessource) => {
 ipcMain.on('startECPDownloadDar', (event, myDar) => {
     log.debug('ipcMain.startECPDownloadDar');
     let wc = mainWindow.webContents;
+	let _credentials = {
+		username: settings.get('username'),
+		password: settings.get('password')
+	};
     myDar.productStatuses.forEach((product) => {
-        ecp.downloadProduct(product.productURL, wc, currentPath);
+        ecp.downloadProduct(product.productURL, wc, currentPath, _credentials);
     });
 });
 

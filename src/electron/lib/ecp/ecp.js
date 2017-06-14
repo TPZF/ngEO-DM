@@ -40,17 +40,18 @@ class ECP extends EventEmitter {
 	 * @param {string} myProductUrl
 	 * @param {object} myWc
 	 * @param {string} myCurrentPath
+	 * @param {string} myCredentials
 	 * @returns
 	 * @private
 	 */
-	_getSoapForUrl(myProductUrl, myWc, myCurrentPath) {
+	_getSoapForUrl(myProductUrl, myWc, myCurrentPath, myCredentials) {
 
 		let _that = this;
 
 		console.log('----------------------------------------------------------------------');
 		console.log('_getSoapForUrl');
 		console.log('----------------------------------------------------------------------');
-		log.debug('_getSoapForUrl');
+		log.debug('ECP _getSoapForUrl');
 
 		let _url = url.parse(myProductUrl);
 
@@ -73,7 +74,7 @@ class ECP extends EventEmitter {
 				_body += _chunk;
 			});
 			_resp.on('end', () => {
-				_that._postBasicAuthenticationWithSoapOnIdP(_resp, _body, myProductUrl, myWc, myCurrentPath);
+				_that._postBasicAuthenticationWithSoapOnIdP(_resp, _body, myProductUrl, myWc, myCurrentPath, myCredentials);
 			});
 		});
 		_req.on('error', (e) => {
@@ -92,15 +93,17 @@ class ECP extends EventEmitter {
 	 * @param {string} myProductUrl
 	 * @param {object} myWc
 	 * @param {string} myCurrentPath
+	 * @param {string} myCredentials
 	 * @private
 	 */
-	_postBasicAuthenticationWithSoapOnIdP(myResponse, myBody, myProductUrl, myWc, myCurrentPath) {
+	_postBasicAuthenticationWithSoapOnIdP(myResponse, myBody, myProductUrl, myWc, myCurrentPath, myCredentials) {
 
 		console.log('----------------------------------------------------------------------');
 		console.log('_postBasicAuthenticationWithSoapOnIdP');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
-		log.debug('_postBasicAuthenticationWithSoapOnIdP');
+		log.debug('ECP _postBasicAuthenticationWithSoapOnIdP');
+		log.debug('ECP headers:\n' + JSON.stringify(myResponse.headers));
 
 		let _that = this;
 
@@ -119,7 +122,8 @@ class ECP extends EventEmitter {
 
 		// base64 encode the user:pass combination for BASIC AUTH
 		//var _base64UserPwd = btoa(name + ':' + password);
-		let _base64UserPwd = btoa('obarois:eodata7');
+		let _base64UserPwd = btoa(myCredentials.username + ':' + myCredentials.password);
+		log.debug('ECP _base64UserPwd: ' + _base64UserPwd);
 
 		// options
 		let _options = {
@@ -150,6 +154,7 @@ class ECP extends EventEmitter {
 		_req.write(_idpRequest);
 		_req.on('error', (e) => {
 			console.log('ECP _postBasicAuthenticationWithSoapOnIdP error ' + e);
+			log.error('ECP _postBasicAuthenticationWithSoapOnIdP error ' + e);
 		});
 		_req.end();
 
@@ -173,7 +178,8 @@ class ECP extends EventEmitter {
 		console.log('_postAuthenticationOnServiceProvider');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
-		log.debug('_postAuthenticationOnServiceProvider');
+		log.debug('ECP _postAuthenticationOnServiceProvider');
+		log.debug('ECP headers:\n' + JSON.stringify(myResponse.headers));
 
 		let _that = this;
 
@@ -218,6 +224,7 @@ class ECP extends EventEmitter {
 		_req.write(_soap);
 		_req.on('error', (e) => {
 			console.log('ECP _postAuthenticationOnServiceProvider error ' + e);
+			log.error('ECP _postAuthenticationOnServiceProvider error ' + e);
 		});
 		_req.end();
 
@@ -240,14 +247,15 @@ class ECP extends EventEmitter {
 		console.log('_getRedirectAttrChecker');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
-		log.debug('_getRedirectAttrChecker');
+		log.debug('ECP _getRedirectAttrChecker');
+		log.debug('ECP headers:\n' + JSON.stringify(myResponse.headers));
 
 		let _that = this;
-
 
 		// Get the shibb session cookie
 		let _shibbSessionHeaderCookie = myResponse.headers['set-cookie'];
 		console.log('shibbSessionHeaderCookie: \n' + _shibbSessionHeaderCookie + '\n');
+		log.debug('ECP shibbSessionHeaderCookie error \n' + _shibbSessionHeaderCookie + '\n');
 
 		// Retrieve the rediction location
 		let _redirectionURL = myResponse.headers['location'];
@@ -276,6 +284,7 @@ class ECP extends EventEmitter {
 		});
 		_req.on('error', (e) => {
 			console.log('ECP _getRedirectAttrChecker error ' + e);
+			log.error('ECP _getRedirectAttrChecker error ' + e);
 		});
 		_req.end();
 
@@ -298,7 +307,8 @@ class ECP extends EventEmitter {
 		console.log('_getRedirectECPHook');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
-		log.debug('_getRedirectECPHook');
+		log.debug('ECP _getRedirectECPHook');
+		log.debug('ECP headers:\n' + JSON.stringify(myResponse.headers));
 
 		let _that = this;
 
@@ -330,6 +340,7 @@ class ECP extends EventEmitter {
 		});
 		_req.on('error', (e) => {
 			console.log('ECP _getRedirectECPHook error ' + e);
+			log.error('ECP _getRedirectECPHook error ' + e);
 		});
 		_req.end();
 
@@ -352,7 +363,8 @@ class ECP extends EventEmitter {
 		console.log('_getRedirectToRessource');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
-		log.debug('_getRedirectToRessource');
+		log.debug('ECP _getRedirectToRessource');
+		log.debug('ECP headers:\n' + JSON.stringify(myResponse.headers));
 
 		let _that = this;
 
@@ -361,8 +373,10 @@ class ECP extends EventEmitter {
 		_redirectionPath = _redirectionPath.slice(HTTPS_STRING.length + SP_HOST.length);
 
 		console.log("redirectionPath " + _redirectionPath);
+		log.debug('ECP redirectionPath ' + _redirectionPath);
 		let _fileName = _redirectionPath.slice(_redirectionPath.lastIndexOf('/') + 1);
-		console.log("fileName " + _fileName)
+		console.log("fileName " + _fileName);
+		log.debug('ECP fileName ' + _fileName);
 
 		// options
 		let _options = {
@@ -382,6 +396,7 @@ class ECP extends EventEmitter {
 		});
 		_req.on('error', (e) => {
 			console.log('ECP _getRedirectToRessource error ' + e);
+			log.debug('ECP _getRedirectToRessource error ' + e);
 		});
 		_req.end();
 
@@ -402,11 +417,13 @@ class ECP extends EventEmitter {
 		console.log('_saveRessource');
 		console.log('----------------------------------------------------------------------');
 		console.log('headers:\n' + JSON.stringify(myResponse.headers));
-		log.debug('_saveRessource');
+		log.debug('ECP _saveRessource');
+		log.debug('ECP headers:\n' + JSON.stringify(myResponse.headers));
 
 		let _that = this;
 
 		console.log('Download started for file ' + myFileName);
+		log.debug('ECP Download started for file ' + myFileName);
 
 		// Write the resource to a file
 		if (myFileName == '') {
@@ -417,10 +434,12 @@ class ECP extends EventEmitter {
 		let _bytesDone = 0;
 		let _bytesTotal = parseInt(myResponse.headers['content-length']);
 		console.log('bytes total:' + _bytesTotal);
+		log.debug('ECP bytes total:' + _bytesTotal);
 
 		myResponse.on('data', function (_chunk) {
 			_bytesDone += _chunk.byteLength;
 			console.log(_bytesDone);
+			log.debug('ECP ' + _bytesDone);
 			_wstream.write(_chunk);
 			myWc.send('downloadUpdated', {
 				url: myProductUrl,
@@ -437,6 +456,7 @@ class ECP extends EventEmitter {
 		})
 
 		console.log('Download finished');
+		log.debug('ECP Download finished');
 
 	}
 	/**
@@ -445,11 +465,12 @@ class ECP extends EventEmitter {
 	 * @param {string} myProductUrl
 	 * @param {object} myWc - WebContent used for displaying progress bar
 	 * @param {string} myCurrentPath - path to save the file on device
+	 * @param {string} myCredentials - credentials
 	 * @returns
 	 * @public
 	 */
-	downloadProduct(myProductUrl, myWc, myCurrentPath) {
-		this._getSoapForUrl(myProductUrl, myWc, myCurrentPath);
+	downloadProduct(myProductUrl, myWc, myCurrentPath, myCredentials) {
+		this._getSoapForUrl(myProductUrl, myWc, myCurrentPath, myCredentials);
 	}
 
 }
