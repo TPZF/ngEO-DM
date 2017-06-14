@@ -108,7 +108,10 @@
 	"build": {
 		"appId": "int.esa.ngeo.download.manager",
 		"dmg": {},
-		"win": {}
+		"win": {},
+		"mac": {
+			"identity": "5ZQQA3K7N5"
+		}
 	},
 	"engines": {
 		"node": ">= 4.2.1 <= 6",
