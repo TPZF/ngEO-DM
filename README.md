@@ -38,16 +38,13 @@ It generates the exe in dist folder
 
 **Build app** `npm run build`
 
-**Package** 
-Before doing the dmg, you have to export the key chain from which you will sign the appication because in mac, the auto updater works if and only if application is signed
-for that in the console you have to do
-`export CSC_NAME="5ZQQA3K7N5"`
-You remark hete that the csc name is ours and will not work on your side
+**Package** `npm run build-mac-dist`
+It generates a ngeo-downloadmanager-darwin-x64 folder with app you will find in dist folder. It will be signed with your chan key. For that you have to change the identity founded in build-->mac-->identity in package.kson which shall be your CSC_NAME
+The command to check your keychain 
+You remark here that the csc name is ours and will not work on your side
 to see the keychain in your machine please do
 `certtool y | grep Eric`
 This will show all the keychain you have (ours is Eric or something like that)
-
-`npm run build-mac-dist` : It generates a ngeo-downloadmanager-darwin-x64 folder with app you will find in dist folder
 
 **Get a certificate for codesigning** : Go to apple web site - Create a certificate with Developer ID option - Use CSR of your device
 
