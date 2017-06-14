@@ -13,7 +13,8 @@ Application used with ngEO-LWS designed to manage download subscriptions.
 Two step command:
 
 * `npm run watch` : Watch the code changes
-* `npm run electron`: Start application
+* `npm run electron`: Start application in Mac or Linux
+* `npm run electron-windows`: Start application in Windows
 
 On each code modification, just refresh the application as it was a browser tab.
 
@@ -30,7 +31,7 @@ On each code modification, just refresh the application as it was a browser tab.
 
 **Build app** `npm run build`
 
-**Package** `npm run dist-windows`
+**Package** `npm run build-windows-dist`
 It generates the exe in dist folder
 
 ### For MacOS
@@ -46,7 +47,7 @@ to see the keychain in your machine please do
 `certtool y | grep Eric`
 This will show all the keychain you have (ours is Eric or something like that)
 
-`npm run dist-mac` : It generates a ngeo-downloadmanager-darwin-x64 folder with app you will find in dist folder
+`npm run build-mac-dist` : It generates a ngeo-downloadmanager-darwin-x64 folder with app you will find in dist folder
 
 **Get a certificate for codesigning** : Go to apple web site - Create a certificate with Developer ID option - Use CSR of your device
 
@@ -67,6 +68,11 @@ ngeo-downloadmanager.app: accepted
 source=Developer ID
 origin=Developer ID Application: ...
 ```
+## Log files
+
+- on Linux: `~/.config/<app name>/log.log`
+- on OS X: `~/Library/Logs/<app name>/log.log`
+- on Windows: `%USERPROFILE%\AppData\Roaming\<app name>\log.log`
 
 ## License
 
