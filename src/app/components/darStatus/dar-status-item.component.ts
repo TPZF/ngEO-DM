@@ -1,5 +1,5 @@
 // Imports
-import { Component, OnInit, Input, DoCheck } from '@angular/core';
+import { Component, OnInit, Input, DoCheck, NgZone } from '@angular/core';
 import { ResponseContentType } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
@@ -30,15 +30,55 @@ export class DarStatusItemComponent implements OnInit, DoCheck {
 		private _electronService: ElectronService,
 		private darStatusService: DarStatusService,
 		private _productService: ProductService,
-		private _settingsService: SettingsService
+		private _settingsService: SettingsService,
+		private _ngZone: NgZone
 	) { }
 
-	// Load data ones componet is ready
+	// Load data ones component is ready
 	ngOnInit() {
 		let _that = this;
 		this._newStatus = '' + this.darStatus.status;
-		// set currentPath to save files on hard disk
-		this._electronService.ipcRenderer.sendSync('setCurrentPath', this._settingsService.get('downloadPath'));
+
+		// listener on downloadCompleted
+		this._electronService.ipcRenderer.on('downloadCompleted', (event, downloadItem) => {
+			//console.log('downloadCompleted', _that.darStatus);
+			_that._ngZone.run(() => {
+				_that.darStatus.productStatuses.forEach(_product => {
+					if (_product.productURL === downloadItem.url) {
+						_product.percentageCompleted = '100';
+						_product.localPath = downloadItem.path;
+					}
+				});
+			});
+		});
+
+		// listener on downloadUploaded
+		this._electronService.ipcRenderer.on('downloadUpdated', (event, downloadItem) => {
+			//console.log('downloadUploaded', _that.darStatus);
+			_that._ngZone.run(() => {
+				_that.darStatus.productStatuses.forEach(_product => {
+					if (_product.productURL === downloadItem.url) {
+						_product.mode = 'determinate';
+						_product.percentageCompleted = '' + Math.floor(parseInt(downloadItem.progress) * 100);
+						_product.loadedSize = downloadItem.received;
+					}
+				});
+			});
+		});
+
+		// listener on downloadError
+		this._electronService.ipcRenderer.on('downloadError', (event, downloadItem) => {
+			//console.log('downloadError', _that.darStatus);
+			_that._ngZone.run(() => {
+				_that.darStatus.productStatuses.forEach(_product => {
+					if (_product.productURL === downloadItem.url) {
+						_product.mode = 'determinate';
+						_product.errorMsg = JSON.stringify(downloadItem.errorMsg);
+					}
+				});
+			});
+		});
+
 	}
 
 	ngDoCheck() {

@@ -39,24 +39,6 @@ export class ProductStatusItemComponent implements OnInit, DoCheck {
 	ngOnInit() {
 		let _that = this;
 		this.productStatus.mode = 'determinate';
-		this._electronService.ipcRenderer.on('downloadCompleted', (event, downloadItem) => {
-			console.log('downloadCompleted');
-			_that._ngZone.run(() => {
-				if (_that.productStatus.productURL === downloadItem.url) {
-					_that.productStatus.percentageCompleted = '100';
-					_that.productStatus.localPath = downloadItem.path;
-				}
-			});
-		});
-		this._electronService.ipcRenderer.on('downloadUpdated', (event, downloadItem) => {
-			console.log('downloadUploaded', downloadItem.progress);
-			_that._ngZone.run(() => {
-				if (_that.productStatus.productURL === downloadItem.url) {
-					_that.productStatus.percentageCompleted = '' + Math.floor(parseInt(downloadItem.progress) * 100);
-					_that.productStatus.loadedSize = downloadItem.received;
-				}
-			});
-		});
 	}
 
 	ngDoCheck() {
