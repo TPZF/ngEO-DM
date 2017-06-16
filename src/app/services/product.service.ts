@@ -80,7 +80,14 @@ export class ProductService {
 	/**
 	 *
 	 */
-	startDownloadProduct(myProduct: ProductStatus) {
+	startDownloadFile(myUrl: String) {
+		this._electronService.ipcRenderer.send('startDownloadFile', myUrl);
+	}
+
+	/**
+	 *
+	 */
+	startECPDownloadProduct(myProduct: ProductStatus) {
 		this._electronService.ipcRenderer.send('startECPDownloadDar', { productStatuses: [myProduct] });
 	}
 

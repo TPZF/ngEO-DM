@@ -64,12 +64,44 @@ export class DirectDownloadComponent implements OnInit {
 				}
 			});
 		});
+
+		this._electronService.ipcRenderer.on('downloadFileUpdated', (event, downloadItem) => {
+			console.log('downloadFileUpdated');
+			_that._ngZone.run(() => {
+				if (_that._fileDownload.productURL === downloadItem.url) {
+					_that._fileDownload.mode = 'determinate';
+					_that._fileDownload.percentageCompleted = '' + Math.floor(parseInt(downloadItem.progress) * 100);
+					_that._fileDownload.loadedSize = downloadItem.received;
+				}
+			});
+		});
+		this._electronService.ipcRenderer.on('downloadFileCompleted', (event, downloadItem) => {
+			console.log('downloadFileCompleted');
+			_that._ngZone.run(() => {
+				if (_that._fileDownload.productURL === downloadItem.url) {
+					_that._fileDownload.mode = 'determinate';
+					_that._fileDownload.percentageCompleted = '100';
+					_that._fileDownload.localPath = downloadItem.path;
+				}
+			});
+		});
+		this._electronService.ipcRenderer.on('downloadFileError', (event, downloadItem) => {
+			console.log('downloadFileError');
+			_that._ngZone.run(() => {
+				if (_that._fileDownload.productURL === downloadItem.url) {
+					_that._fileDownload.mode = 'indeterminate';
+					_that._fileDownload.percentageCompleted = '0';
+					_that._fileDownload.loadedSize = '0';
+					_that._productService.startECPDownloadProduct(_that._fileDownload);
+				}
+			});
+		});
 	}
 
 	download() {
 		this._fileDownload.productURL = this._urlInput;
 		this._fileDownload.mode = 'indeterminate';
-		this._productService.startDownloadProduct(this._fileDownload);
+		this._productService.startDownloadFile(this._fileDownload.productURL);
 	}
 
 	openProductFile() {

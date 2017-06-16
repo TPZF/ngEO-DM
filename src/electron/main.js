@@ -67,14 +67,10 @@ ipcMain.on('OpenPath', (event, arg) => {
 	}
 });
 
-// start download
-ipcMain.on('startDownloadRessource', (event, myRessource) => {
-	log.debug('ipcMain.startDownloadRessource');
-	let wc = mainWindow.webContents;
-	ecp.download(myRessource, wc, currentPath);
-});
-
-// start download DAR
+// -------------------------------------------
+// download DAR with ECP
+// -------------------------------------------
+// start
 ipcMain.on('startECPDownloadDar', (event, myDar) => {
 	log.debug('ipcMain.startECPDownloadDar');
 	let _wc = mainWindow.webContents;
@@ -90,7 +86,47 @@ ipcMain.on('startECPDownloadDar', (event, myDar) => {
 	});
 });
 
+// -------------------------------------------
+// download file
+// -------------------------------------------
+//	start
+ipcMain.on('startDownloadFile', (event, myUrlFile) => {
+	log.debug('ipcMain.startDownloadFile');
+	let _wc = topWindow.webContents;
+	let _item = _getDownloadItemByUrl(myUrlFile);
+	if (_item !== null && _item.isPaused()) {
+		log.debug('ipcMain.startDownloadFile item already exists > resume it !');
+		_item.resume();
+	} else {
+		log.debug('ipcMain.startDownloadFile item null > download it !');
+		log.debug('url: ' + myUrlFile);
+		_wc.downloadURL(myUrlFile);
+	}
+});
+// pause
+ipcMain.on('pauseDownloadFile', (event, myUrlFile) => {
+	log.debug('ipcMain.pauseDownloadFile');
+	let _wc = topWindow.webContents;
+	let _item = _getDownloadItemByUrl(myUrlFile);
+	if (_item !== null) {
+		log.debug('ipcMain.cancelDownloadFile item not null > pause it !');
+		_item.pause();
+	}
+});
+// cancel
+ipcMain.on('cancelDownloadFile', (event, myUrlFile) => {
+	log.debug('ipcMain.cancelDownloadFile');
+	var _wc = topWindow.webContents;
+	let _item = _getDownloadItemByUrl(myUrlFile);
+	if (_item !== null) {
+		log.debug('ipcMain.cancelDownloadFile item not null > cancel it !');
+		_delDownloadItemByUrl(myUrlFile);
+		_item.cancel();
+	}
+});
 
+// -------------------------------------------
+// -------------------------------------------
 // start download DAR
 ipcMain.on('startDownloadDar', (event, myDar) => {
 	log.debug('ipcMain.startDownloadDar');
@@ -108,7 +144,6 @@ ipcMain.on('startDownloadDar', (event, myDar) => {
 		}
 	});
 });
-
 // pause download DAR
 ipcMain.on('pauseDownloadDar', (event, myDar) => {
 	log.debug('ipcMain.pauseDownloadDar');
@@ -121,7 +156,6 @@ ipcMain.on('pauseDownloadDar', (event, myDar) => {
 		}
 	});
 });
-
 // cancel download DAR
 ipcMain.on('cancelDownloadDar', (event, myDar) => {
 	log.debug('ipcMain.cancelDownloadDar');
@@ -135,6 +169,9 @@ ipcMain.on('cancelDownloadDar', (event, myDar) => {
 	});
 });
 
+// -------------------------------------------
+//	settings
+// -------------------------------------------
 ipcMain.on('settings-choosepath', (event) => {
 	let myPaths = dialog.showOpenDialog(mainWindow, {
 		title: 'Choose path directory for downloads',
@@ -144,7 +181,6 @@ ipcMain.on('settings-choosepath', (event) => {
 		event.sender.send('settings-choosepath-reply', myPaths[0]);
 	}
 });
-
 ipcMain.on('settings-get', (event, arg) => {
 	if (arg !== '') {
 		let val = settings.get(arg);
@@ -155,11 +191,9 @@ ipcMain.on('settings-get', (event, arg) => {
 		}
 	}
 });
-
 ipcMain.on('settings-getall', (event, arg) => {
 	event.returnValue = settings.getAll();
 });
-
 ipcMain.on('settings-set', (event, key, value) => {
 	log.debug('ipcMain.settings-set');
 	log.debug('ipcMain.settings-set key=' + key);
@@ -268,26 +302,32 @@ const createTopWindow = () => {
 
 		downloadItems.push(item);
 
+		let _path = settings.get('downloadPath') === '' ? currentPath : settings.get('downloadPath') + '/';
+
 		// Set the save path, making Electron not to prompt a save dialog.
-		item.setSavePath(currentPath + item.getFilename());
-		log.debug('savePath:' + currentPath + item.getFilename());
+		item.setSavePath(_path + item.getFilename());
+		log.debug('savePath:' + _path + item.getFilename());
 
 		item.on('updated', (event, state) => {
-			log.info(item.getURLChain().length);
 			if (state === 'interrupted') {
 				log.info(`Download is interrupted but can be resumed for ${item.getURLChain()[0]}`)
 			} else if (state === 'progressing') {
-				if (item.isPaused()) {
-					log.info(`Download is paused for ${item.getURLChain()[0]}`)
+				if (item.getURLChain().length > 1) {
+					_delDownloadItemByUrl(item.getURLChain()[0]);
+					item.cancel();
 				} else {
-					log.info(`Received bytes for ${item.getURLChain()[0]} : ${item.getReceivedBytes()}`)
-					if (mainWindow) {
-						log.debug('send downloadUpdated to mainWindow...');
-						mainWindow.webContents.send('downloadUpdated', {
-							url: item.getURLChain()[0],
-							progress: item.getReceivedBytes() / item.getTotalBytes(),
-							received: item.getReceivedBytes()
-						});
+					if (item.isPaused()) {
+						log.info(`Download is paused for ${item.getURLChain()[0]}`)
+					} else {
+						log.info(`Received bytes for ${item.getURLChain()[0]} : ${item.getReceivedBytes()}`)
+						if (mainWindow) {
+							log.debug('send downloadFileUpdated to mainWindow...');
+							mainWindow.webContents.send('downloadFileUpdated', {
+								url: item.getURLChain()[0],
+								progress: item.getReceivedBytes() / item.getTotalBytes(),
+								received: item.getReceivedBytes()
+							});
+						}
 					}
 				}
 			}
@@ -297,14 +337,21 @@ const createTopWindow = () => {
 				log.info('Completed for ' + item.getURLChain()[0]);
 				_delDownloadItemByUrl(item.getURLChain()[0]);
 				if (mainWindow) {
-					log.debug('send downloadCompleted to mainWindow...');
-					mainWindow.webContents.send('downloadCompleted', {
+					log.debug('send downloadFileCompleted to mainWindow...');
+					mainWindow.webContents.send('downloadFileCompleted', {
 						url: item.getURLChain()[0],
-						path: currentPath + item.getFilename()
+						urlChain: item.getURLChain(),
+						path: _path + item.getFilename()
 					});
 				}
 			} else {
 				log.error(`Download failed for ${item.getURLChain()[0]}: ${state}`)
+				if (mainWindow) {
+					log.debug('send downloadFileError to mainWindow...');
+					mainWindow.webContents.send('downloadFileError', {
+						url: item.getURLChain()[0]
+					});
+				}
 			}
 		})
 	})
@@ -370,6 +417,11 @@ const createTray = () => {
 	mainTray.setContextMenu(contextMenu);
 };
 
+/**
+ * Display about message box
+ *
+ * @function showAbout
+ */
 const showAbout = () => {
 	dialog.showMessageBox(
 		mainWindow, {
@@ -381,7 +433,13 @@ const showAbout = () => {
 }
 
 /**
+ * Find and return item from downloadItems array
+ * which matches with myUrl input
+ *
  * @function _getDownloadItemByUrl
+ * @param {string} myUrl
+ * @returns {DownloadItem | null}
+ * @private
  */
 const _getDownloadItemByUrl = (myUrl) => {
 	let _result = null;
@@ -398,7 +456,13 @@ const _getDownloadItemByUrl = (myUrl) => {
 }
 
 /**
+ * Del from downloadItems array
+ * if one url in chain is like myUrl
+ *
  * @function _delDownloadItemByUrl
+ * @param {string} myUrl
+ * @returns {void}
+ * @private
  */
 const _delDownloadItemByUrl = (myUrl) => {
 	let _newDownloadItems = [];
