@@ -2,7 +2,7 @@
 	"name": "ngeo-downloadmanager",
 	"version": "0.2.0",
 	"author": "Telespazio France - 2017",
-	"description": "Download manager using Electron/Angular",
+	"description": "ngEO Download mMnager",
 	"main": "src/electron/main.js",
 	"scripts": {
 		"watch": "npm run watch:dev",
