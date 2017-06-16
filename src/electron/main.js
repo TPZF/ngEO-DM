@@ -35,8 +35,11 @@ log.debug('appVersion=' + appVersion);
 let platform = os.platform();
 log.debug('os=' + platform);
 
-//const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/releases/latest`;
-const urlLatestDownloadManager = `http://localhost:3000/ngeo/downloadManagers/releases/latest`;
+const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/releases/latest`;
+//const urlLatestDownloadManager = `http://localhost:3000/ngeo/downloadManagers/releases/latest`;
+if (isDev) {
+	urlLatestDownloadManager = `http://localhost:3000/ngeo/downloadManagers/releases/latest`;
+}
 
 let firstLoading = true;
 
@@ -231,10 +234,6 @@ autoUpdater.on('update-not-available', () => {
 	}
 	firstLoading = false;
 });
-autoUpdater.on('update-downloaded', () => {
-	log.info('Update downloaded > quit and install !');
-	autoUpdater.quitAndInstall();
-});
 
 autoUpdater.on('update-downloaded', (e) => {
 	log.info(e);
@@ -384,9 +383,9 @@ const createWindow = () => {
 	mainWindow.loadURL('file://' + __dirname + '/index.html');
 
 	// Open the DevTools.
-	//if (isDev) {
-	mainWindow.webContents.openDevTools();
-	//}
+	if (isDev) {
+		mainWindow.webContents.openDevTools();
+	}
 
 	// Show window when ready to show
 	mainWindow.once('ready-to-show', () => {
