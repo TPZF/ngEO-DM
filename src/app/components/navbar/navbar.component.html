@@ -10,27 +10,23 @@
 		<md-menu #menu="mdMenu">
 			<button md-menu-item disabled>
 				<span>Welcome {{_username}}</span>
-			</button>
-			<button md-menu-item [routerLink]="['/login']">
-				<md-icon>account_box</md-icon>
-				<span>Login</span>
-			</button>
-			<button md-menu-item [routerLink]="['/settings']">
+	</button>
+	<button md-menu-item [routerLink]="['/settings']">
 				<md-icon>settings</md-icon>
 				<span>Settings</span>
 			</button>
-			<button md-menu-item [routerLink]="['/downloadManagers']">
+	<button md-menu-item [routerLink]="['/downloadManagers']">
 				<md-icon>cloud_download</md-icon>
 				<span>Download managers</span>
 			</button>
-			<button md-menu-item [routerLink]="['/search']">
+	<button md-menu-item [routerLink]="['/search']">
 				<md-icon>search</md-icon>
 				<span>Search</span>
 			</button>
-			<button md-menu-item [routerLink]="['']">
-				<md-icon>exit_to_app</md-icon>
-				<span>Logout</span>
+	<button md-menu-item [routerLink]="['/directDownload']">
+				<md-icon>file_download</md-icon>
+				<span>Direct download</span>
 			</button>
-		</md-menu>
+	</md-menu>
 	</span>
 </md-toolbar>
