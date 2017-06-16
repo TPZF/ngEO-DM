@@ -61,13 +61,6 @@ if (app.dock) {
  * IPC section
  * -------------------------------------------
  */
-ipcMain.on('setCurrentPath', (event, arg) => {
-	if (arg !== '') {
-		currentPath = arg + '/';
-		event.returnValue = 'set current path';
-	}
-});
-
 ipcMain.on('OpenPath', (event, arg) => {
 	if (arg !== '') {
 		shell.showItemInFolder(arg);
@@ -84,13 +77,16 @@ ipcMain.on('startDownloadRessource', (event, myRessource) => {
 // start download DAR
 ipcMain.on('startECPDownloadDar', (event, myDar) => {
 	log.debug('ipcMain.startECPDownloadDar');
-	let wc = mainWindow.webContents;
+	let _wc = mainWindow.webContents;
 	let _credentials = {
 		username: settings.get('username'),
 		password: settings.get('password')
 	};
+	let _path = settings.get('downloadPath') + '/';
+	log.debug('ipcMain.startECPDownloadDar credentials = ' + JSON.stringify(_credentials));
+	log.debug('ipcMain.startECPDownloadDar currentPath = ' + _path);
 	myDar.productStatuses.forEach((product) => {
-		ecp.downloadProduct(product.productURL, wc, currentPath, _credentials);
+		ecp.downloadProduct(product.productURL, _wc, _path, _credentials);
 	});
 });
 
@@ -165,6 +161,9 @@ ipcMain.on('settings-getall', (event, arg) => {
 });
 
 ipcMain.on('settings-set', (event, key, value) => {
+	log.debug('ipcMain.settings-set');
+	log.debug('ipcMain.settings-set key=' + key);
+	log.debug('ipcMain.settings-set value=' + value);
 	if ((key !== '') && (value !== '')) {
 		settings.set(key, value);
 		event.returnValue = 'done';
@@ -251,7 +250,11 @@ app.on('window-all-closed', () => {
  * @function createTopWindow
  */
 const createTopWindow = () => {
+
+	const pathIcon = __dirname + "/vendor/assets/icons/";
+
 	topWindow = new BrowserWindow({
+		icon: pathIcon,
 		show: false
 	});
 	// Clear out the top window when the app is closed
@@ -319,14 +322,12 @@ const createWindow = () => {
 		mainWindow.show();
 		return;
 	}
-	const pathIcon = __dirname + "/vendor/assets/icons/64x64.png";
 	// Initialize the window to our specified dimensions
 	mainWindow = new BrowserWindow({
 		parent: topWindow,
 		x: 100,
 		y: 100,
 		backgroundColor: '#FFFFFF',
-		icon: pathIcon,
 		show: false,
 		minWidth: 800,
 		minHeight: 600
