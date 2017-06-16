@@ -1,3 +1,13 @@
 {
-    "qsHost": "http://localhost:3000/ngeo"
+	"qsHost": "http://localhost:3000/ngeo",
+	"ecp": {
+		"serviceprovider": {
+			"host": "eodata-service.user.eocloud.eu",
+			"endpoint": "/Shibboleth.sso/SAML2/ECP"
+		},
+		"identityprovider": {
+			"host": "eodata-idp.user.eocloud.eu",
+			"endpoint": "/idp/profile/SAML2/SOAP/ECP"
+		}
+	}
 }
