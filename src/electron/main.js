@@ -426,7 +426,7 @@ const showAbout = () => {
 		mainWindow, {
 			type: 'info',
 			title: 'About',
-			message: 'Thanks to Irchad, to my Mum, to my cat Mimi, to Snow White and the Seven Dwarfs. Version ' + appVersion
+			message: `The download manager is software which is retrieved and run in standalone.\nIt is used to the download of ngeo product data.\nVersion: ${appVersion}`
 		}
 	);
 }
