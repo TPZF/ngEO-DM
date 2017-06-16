@@ -1,6 +1,6 @@
 {
 	"name": "ngeo-downloadmanager",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"author": "Telespazio France - 2017",
 	"description": "ngEO Download mMnager",
 	"main": "src/electron/main.js",
@@ -22,7 +22,8 @@
 		"start": "electron src/electron --enable-logging",
 		"dev": "NODE_ENV='development' npm run start",
 		"build-windows-dist": "build -w --x64 --ia32",
-		"build-mac-dist": "build -m --x64"
+		"build-mac-dist": "build -m --x64",
+		"build-linux-dist": "build -l --x64"
 	},
 	"dependencies": {
 		"@angular/common": "^2.4.7",
@@ -107,10 +108,18 @@
 	},
 	"build": {
 		"appId": "int.esa.ngeo.download.manager",
+		"directories": {
+			"output": "dist",
+			"app": "src/electron/"
+		},
 		"dmg": {},
 		"win": {},
 		"mac": {
 			"identity": "5ZQQA3K7N5"
+		},
+		"linux": {
+			"icon": "src/electron/vendor/assets/icons/",
+			"target": "AppImage"
 		}
 	},
 	"engines": {
