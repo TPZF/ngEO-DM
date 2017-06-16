@@ -1,0 +1,17 @@
+<md-card>
+	<md-card-content>
+		<md-input-container class="full-width">
+			<input mdInput [(ngModel)]="_urlInput" placeholder="Url to download with ECP" required>
+		</md-input-container>
+		<button md-raised-button color="primary" (click)="download()" [disabled]="!isValidForm()">Download</button>
+		<button md-raised-button color="accent" (click)="reset()">Reset</button>
+		<button md-raised-button color="primary" (click)="openProductFile()" *ngIf="_fileDownload.percentageCompleted==100">See in folder</button>
+		<p>
+			<md-icon color="warn" *ngIf="_fileDownload.errorMsg" title="{{_fileDownload.errorMsg}}">error</md-icon> Expected size : {{_fileDownload.expectedSize | fileSize}} - Loaded size : {{_fileDownload.loadedSize |
+			fileSize}}
+		</p>
+	</md-card-content>
+	<md-card-footer>
+		<md-progress-bar color="primary" [mode]="_fileDownload.mode" [value]="_fileDownload.percentageCompleted" bufferValue="75"></md-progress-bar>
+	</md-card-footer>
+</md-card>

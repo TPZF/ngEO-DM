@@ -78,12 +78,19 @@ export class ProductService {
 	}
 
 	/**
+	 *
+	 */
+	startDownloadProduct(myProduct: ProductStatus) {
+		this._electronService.ipcRenderer.send('startECPDownloadDar', { productStatuses: [myProduct] });
+	}
+
+	/**
 	 * @function startDownloadProduct
 	 * @param myDar
 	 * @param myProduct
 	 * @param myIndice
 	 */
-	startDownloadProduct(myDar: DarStatus, myProduct: ProductStatus, myIndice: number) {
+	startDownloadProduct2(myDar: DarStatus, myProduct: ProductStatus, myIndice: number) {
 
 		this._electronService.ipcRenderer.send('downloadFile', myProduct.productURL);
 		/*

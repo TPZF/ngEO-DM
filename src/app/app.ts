@@ -46,6 +46,7 @@ import { SettingsComponent } from './components/settings/settings.component';
 import { LoginComponent } from './components/login/login.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SearchComponent } from './components/search/search.component';
+import { DirectDownloadComponent } from './components/directDownload/direct-download.component';
 
 /**
  * Pipes
@@ -58,48 +59,49 @@ import { FileSizePipe } from './pipes/file-size.pipe';
 import { routes } from './app.routes';
 
 @NgModule({
-  imports: [
-    BrowserModule,
-    FormsModule,
-    HttpModule,
-    MaterialModule.forRoot(),
-    Md2Module.forRoot(),
-    NgxElectronModule,
-    ProgressHttpModule,
-    ReactiveFormsModule,
-    RouterModule.forRoot(routes, { useHash: true })
-  ],
-  providers: [
-    NgeoService,
-    AuthenticationService,
-	ConfigurationService,
-    DarStatusService,
-    DownloadManagerService,
-	ECPService,
-    EoSsoService,
-    ErrorService,
-    ProductService,
-	SettingsService,
-	SsoService
-  ],
-  declarations: [
-    AppComponent,
-    DarStatusListComponent,
-    DarStatusItemComponent,
-    DownloadManagerDetailsComponent,
-    DownloadManagerListComponent,
-    FileSizePipe,
-	SettingsComponent,
-    LoginComponent,
-    NavbarComponent,
-	ProductStatusItemComponent,
-    SearchComponent
-  ],
-  bootstrap: [AppComponent]
+	imports: [
+		BrowserModule,
+		FormsModule,
+		HttpModule,
+		MaterialModule.forRoot(),
+		Md2Module.forRoot(),
+		NgxElectronModule,
+		ProgressHttpModule,
+		ReactiveFormsModule,
+		RouterModule.forRoot(routes, { useHash: true })
+	],
+	providers: [
+		NgeoService,
+		AuthenticationService,
+		ConfigurationService,
+		DarStatusService,
+		DownloadManagerService,
+		ECPService,
+		EoSsoService,
+		ErrorService,
+		ProductService,
+		SettingsService,
+		SsoService
+	],
+	declarations: [
+		AppComponent,
+		DarStatusListComponent,
+		DarStatusItemComponent,
+		DirectDownloadComponent,
+		DownloadManagerDetailsComponent,
+		DownloadManagerListComponent,
+		FileSizePipe,
+		SettingsComponent,
+		LoginComponent,
+		NavbarComponent,
+		ProductStatusItemComponent,
+		SearchComponent
+	],
+	bootstrap: [AppComponent]
 })
 export class AppModule { }
 const isDev = process.env.TODO_DEV ? process.env.TODO_DEV.trim() == 'true' : false;
 if (!isDev) {
-  enableProdMode();
+	enableProdMode();
 }
 platformBrowserDynamic().bootstrapModule(AppModule);
