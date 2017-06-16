@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import { ElectronService } from 'ngx-electron';
 
+import { ConfigurationService } from './../../services/configuration.service';
 import { DarStatusService } from './../../services/dar-status.service';
 import { ProductService } from './../../services/product.service';
 import { SettingsService } from './../../services/settings.service';
@@ -22,6 +23,7 @@ export class DirectDownloadComponent implements OnInit {
 
 	constructor(
 		private _electronService: ElectronService,
+		private _configurationService: ConfigurationService,
 		private darStatusService: DarStatusService,
 		private _productService: ProductService,
 		private _settingsService: SettingsService,
@@ -101,7 +103,11 @@ export class DirectDownloadComponent implements OnInit {
 	download() {
 		this._fileDownload.productURL = this._urlInput;
 		this._fileDownload.mode = 'indeterminate';
-		this._productService.startDownloadFile(this._fileDownload.productURL);
+		if (this._urlInput.indexOf(this._configurationService.get().ecp.serviceprovider.host) > -1) {
+			this._productService.startECPDownloadProduct(this._fileDownload);
+		} else {
+			this._productService.startDownloadFile(this._fileDownload.productURL);
+		}
 	}
 
 	openProductFile() {
