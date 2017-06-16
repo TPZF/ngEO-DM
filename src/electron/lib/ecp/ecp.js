@@ -80,6 +80,10 @@ class ECP extends EventEmitter {
 		_req.on('error', (e) => {
 			console.log('ECP _getSoapForUrl error ' + e);
 			log.error('ECP _getSoapForUrl error ' + e);
+			myWc.send('downloadError', {
+				url: myProductUrl,
+				errorMsg: e
+			});
 		});
 		_req.end();
 	}
@@ -155,6 +159,10 @@ class ECP extends EventEmitter {
 		_req.on('error', (e) => {
 			console.log('ECP _postBasicAuthenticationWithSoapOnIdP error ' + e);
 			log.error('ECP _postBasicAuthenticationWithSoapOnIdP error ' + e);
+			myWc.send('downloadError', {
+				url: myProductUrl,
+				errorMsg: e
+			});
 		});
 		_req.end();
 
@@ -225,6 +233,10 @@ class ECP extends EventEmitter {
 		_req.on('error', (e) => {
 			console.log('ECP _postAuthenticationOnServiceProvider error ' + e);
 			log.error('ECP _postAuthenticationOnServiceProvider error ' + e);
+			myWc.send('downloadError', {
+				url: myProductUrl,
+				errorMsg: e
+			});
 		});
 		_req.end();
 
@@ -255,7 +267,7 @@ class ECP extends EventEmitter {
 		// Get the shibb session cookie
 		let _shibbSessionHeaderCookie = myResponse.headers['set-cookie'];
 		console.log('shibbSessionHeaderCookie: \n' + _shibbSessionHeaderCookie + '\n');
-		log.debug('ECP shibbSessionHeaderCookie error \n' + _shibbSessionHeaderCookie + '\n');
+		log.debug('ECP shibbSessionHeaderCookie \n' + _shibbSessionHeaderCookie + '\n');
 
 		// Retrieve the rediction location
 		let _redirectionURL = myResponse.headers['location'];
@@ -285,6 +297,10 @@ class ECP extends EventEmitter {
 		_req.on('error', (e) => {
 			console.log('ECP _getRedirectAttrChecker error ' + e);
 			log.error('ECP _getRedirectAttrChecker error ' + e);
+			myWc.send('downloadError', {
+				url: myProductUrl,
+				errorMsg: e
+			});
 		});
 		_req.end();
 
@@ -341,6 +357,10 @@ class ECP extends EventEmitter {
 		_req.on('error', (e) => {
 			console.log('ECP _getRedirectECPHook error ' + e);
 			log.error('ECP _getRedirectECPHook error ' + e);
+			myWc.send('downloadError', {
+				url: myProductUrl,
+				errorMsg: e
+			});
 		});
 		_req.end();
 
@@ -397,6 +417,10 @@ class ECP extends EventEmitter {
 		_req.on('error', (e) => {
 			console.log('ECP _getRedirectToRessource error ' + e);
 			log.debug('ECP _getRedirectToRessource error ' + e);
+			myWc.send('downloadError', {
+				url: myProductUrl,
+				errorMsg: e
+			});
 		});
 		_req.end();
 
