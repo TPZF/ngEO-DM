@@ -76,16 +76,19 @@ ipcMain.on('OpenPath', (event, arg) => {
 // start
 ipcMain.on('startECPDownloadDar', (event, myDar) => {
 	log.debug('ipcMain.startECPDownloadDar');
-	let _wc = mainWindow.webContents;
-	let _credentials = {
-		username: settings.get('username'),
-		password: settings.get('password')
+	let _options = {
+		wc: mainWindow.webContents,
+		credentials: {
+			username: settings.get('username'),
+			password: settings.get('password')
+		},
+		path: settings.get('downloadPath') + '/',
+		configuration: configuration,
+		logger: log
 	};
-	let _path = settings.get('downloadPath') + '/';
-	log.debug('ipcMain.startECPDownloadDar credentials = ' + JSON.stringify(_credentials));
-	log.debug('ipcMain.startECPDownloadDar currentPath = ' + _path);
 	myDar.productStatuses.forEach((product) => {
-		ecp.downloadProduct(product.productURL, _wc, _path, _credentials);
+		_options.url = product.productURL;
+		ecp.downloadURL(_options);
 	});
 });
 
@@ -308,25 +311,31 @@ const createTopWindow = () => {
 		log.debug('savePath:' + _path + item.getFilename());
 
 		item.on('updated', (event, state) => {
+
+			// check if last url redirect on ECP serviceprovider
+			if (item.getURLChain().length > 1) {
+				let _lastURL = item.getURLChain()[item.getURLChain().length - 1];
+				if (_lastURL.indexOf(configuration.ecp.serviceprovider.host) > -1) {
+					_delDownloadItemByUrl(item.getURLChain()[0]);
+					item.cancel();
+					return;
+				}
+			}
+
 			if (state === 'interrupted') {
 				log.info(`Download is interrupted but can be resumed for ${item.getURLChain()[0]}`)
 			} else if (state === 'progressing') {
-				if (item.getURLChain().length > 1) {
-					_delDownloadItemByUrl(item.getURLChain()[0]);
-					item.cancel();
+				if (item.isPaused()) {
+					log.info(`Download is paused for ${item.getURLChain()[0]}`)
 				} else {
-					if (item.isPaused()) {
-						log.info(`Download is paused for ${item.getURLChain()[0]}`)
-					} else {
-						log.info(`Received bytes for ${item.getURLChain()[0]} : ${item.getReceivedBytes()}`)
-						if (mainWindow) {
-							log.debug('send downloadFileUpdated to mainWindow...');
-							mainWindow.webContents.send('downloadFileUpdated', {
-								url: item.getURLChain()[0],
-								progress: item.getReceivedBytes() / item.getTotalBytes(),
-								received: item.getReceivedBytes()
-							});
-						}
+					log.info(`Received bytes for ${item.getURLChain()[0]} : ${item.getReceivedBytes()}`)
+					if (mainWindow) {
+						log.debug('send downloadFileUpdated to mainWindow...');
+						mainWindow.webContents.send('downloadFileUpdated', {
+							url: item.getURLChain()[0],
+							progress: item.getReceivedBytes() / item.getTotalBytes(),
+							received: item.getReceivedBytes()
+						});
 					}
 				}
 			}
