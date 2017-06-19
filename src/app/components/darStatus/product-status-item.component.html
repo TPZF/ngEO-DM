@@ -1,7 +1,10 @@
 <md-card-content>
-	<h4><md-icon color="warn" *ngIf="productStatus.errorMsg" title="{{productStatus.errorMsg}}">error</md-icon> {{productStatus.productURL}}</h4>
-	<p>Expected size : {{productStatus.expectedSize | fileSize}} <button (click)="openProductFile()" *ngIf="productStatus.percentageCompleted==100">See in folder</button></p>
-	<p *ngIf="productStatus.loadedSize && (productStatus.loadedSize > 0) && (productStatus.percentageCompleted!=100)">Loaded size : {{productStatus.loadedSize | fileSize}}</p>
+	<h4>{{productStatus.productURL}}</h4>
+	<button md-raised-button color="primary" (click)="openProductFile()" *ngIf="productStatus.percentageCompleted==100">See in folder</button>
+	<p>
+		<md-icon color="warn" *ngIf="productStatus.errorMsg" title="{{productStatus.errorMsg}}">error</md-icon>
+		Expected size : {{productStatus.expectedSize | fileSize}} - Loaded size : {{productStatus.loadedSize |fileSize}}
+	</p>
 </md-card-content>
 <md-card-footer>
 	<md-progress-bar color="primary" [mode]="productStatus.mode" [value]="productStatus.percentageCompleted" bufferValue="75"></md-progress-bar>
