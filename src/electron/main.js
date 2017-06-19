@@ -36,10 +36,6 @@ let platform = os.platform();
 log.debug('os=' + platform);
 
 const urlLatestDownloadManager = `${configuration.qsHost}/downloadManagers/releases/latest`;
-//const urlLatestDownloadManager = `http://localhost:3000/ngeo/downloadManagers/releases/latest`;
-if (isDev) {
-	urlLatestDownloadManager = `http://localhost:3000/ngeo/downloadManagers/releases/latest`;
-}
 
 let firstLoading = true;
 
