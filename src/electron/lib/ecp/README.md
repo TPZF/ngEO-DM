@@ -2,7 +2,7 @@
 
 Request url with ECP
 
-## Why ?
+## Why
 
 Because make a request with ECP lunches minimum 4 requests
 

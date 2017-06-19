@@ -33,7 +33,7 @@ function _getSoapForUrl(myOptions) {
 	let _url;
 	try {
 		_url = url.parse(myOptions.url);
-	} catch(e) {
+	} catch (e) {
 		myOptions.logger.error('ECP _getSoapForUrl error', e);
 		myOptions.wc.send('downloadError', {
 			url: myOptions.url,
@@ -49,7 +49,7 @@ function _getSoapForUrl(myOptions) {
 		method: 'GET',
 		headers: {
 			Accept: 'text/html; application/vnd.paos+xml',
-			PAOS:'ver=\"urn:liberty:paos:2003-08\";\"urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp\"'
+			PAOS: 'ver=\"urn:liberty:paos:2003-08\";\"urn:oasis:names:tc:SAML:2.0:profiles:SSO:ecp\"'
 		}
 	}
 
@@ -118,8 +118,8 @@ function _postBasicAuthenticationWithSoapOnIdP(myResponse, myBody, myOptions) {
 		path: myOptions.configuration.ecp.identityprovider.endpoint,
 		method: 'POST',
 		headers: {
-			'Accept' : 'text/html',
-			'Authorization' : 'Basic ' + _base64UserPwd,
+			'Accept': 'text/html',
+			'Authorization': 'Basic ' + _base64UserPwd,
 			'Content-Type': 'text/xml'
 		},
 		dataType: 'text',
@@ -169,7 +169,7 @@ function _postAuthenticationOnServiceProvider(myResponse, myBody, myRelayState, 
 	let _stringRelayState = myRelayState + '';
 
 	// Adjust the xml namespace slightly on the relay state
-	let _relayStateNSAdjusted = _stringRelayState.replace(/S:/g,"soap11:");
+	let _relayStateNSAdjusted = _stringRelayState.replace(/S:/g, "soap11:");
 	// Extract the first part of the response
 	let _soapStart = myBody.indexOf(SOAP_ENVELOPE_START_STRING);
 	let _acsStart = myBody.indexOf(ACS_START_STRING);
@@ -191,7 +191,7 @@ function _postAuthenticationOnServiceProvider(myResponse, myBody, myRelayState, 
 		path: myOptions.configuration.ecp.serviceprovider.endpoint,
 		method: 'POST',
 		followAllRedirects: true,
-		headers: { 'Content-Type': 'application/vnd.paos+xml'},
+		headers: { 'Content-Type': 'application/vnd.paos+xml' },
 		dataType: 'text'
 	};
 	// request
@@ -251,12 +251,12 @@ function _getRedirectAttrChecker(myResponse, myBody, myOptions) {
 
 	let _options = {
 		host: myOptions.configuration.ecp.serviceprovider.host,
-		port: myOptions.configuration.ecp.serviceprovider.endpoint,
+		port: HTTPS_PORT,
 		path: _redirectionURL,
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/vnd.paos+xml',
-			'Cookie' : _shibbSessionHeaderCookie
+			'Cookie': _shibbSessionHeaderCookie
 		}
 	};
 
@@ -309,7 +309,7 @@ function _getRedirectECPHook(myResponse, myBody, myShibbSessionHeaderCookie, myO
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/vnd.paos+xml',
-			'Cookie' : myShibbSessionHeaderCookie
+			'Cookie': myShibbSessionHeaderCookie
 		}
 	};
 	// request
@@ -365,7 +365,7 @@ function _getRedirectToRessource(myResponse, myBody, myShibbSessionHeaderCookie,
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/vnd.paos+xml',
-			'Cookie' : myShibbSessionHeaderCookie
+			'Cookie': myShibbSessionHeaderCookie
 		}
 	};
 
