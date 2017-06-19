@@ -1,5 +1,5 @@
 // Imports
-import { Component, OnInit, Input, DoCheck, NgZone } from '@angular/core';
+import { Component, OnDestroy, OnInit, Input, DoCheck, NgZone } from '@angular/core';
 import { ResponseContentType } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
@@ -19,7 +19,7 @@ import * as FileSaver from 'file-saver';
 	styleUrls: ['./dar-status-item.component.scss']
 })
 // Component class implementing OnInit
-export class DarStatusItemComponent implements OnInit, DoCheck {
+export class DarStatusItemComponent implements OnDestroy, OnInit, DoCheck {
 
 	@Input() darStatus: DarStatus;
 
@@ -28,7 +28,7 @@ export class DarStatusItemComponent implements OnInit, DoCheck {
 
 	constructor(
 		private _electronService: ElectronService,
-		private darStatusService: DarStatusService,
+		private _darStatusService: DarStatusService,
 		private _productService: ProductService,
 		private _settingsService: SettingsService,
 		private _ngZone: NgZone
@@ -115,6 +115,17 @@ export class DarStatusItemComponent implements OnInit, DoCheck {
 
 	openProductFile(product: ProductStatus) {
 		this._electronService.ipcRenderer.send('OpenPath', product.localPath);
+	}
+
+	ngOnDestroy() {
+		// remove listeners  to avoid memory leak
+		this._electronService.ipcRenderer.removeAllListeners('downloadError');
+		this._electronService.ipcRenderer.removeAllListeners('downloadUpdated');
+		this._electronService.ipcRenderer.removeAllListeners('downloadCompleted');
+	}
+
+	delete() {
+		this._darStatusService.deleteOne(this.darStatus.ID);
 	}
 
 }

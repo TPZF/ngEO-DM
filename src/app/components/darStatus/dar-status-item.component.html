@@ -1,22 +1,24 @@
 <md-card-content>
-  <h3>{{(darStatus.name ? darStatus.name : darStatus.ID)}}</h3>
-  <div class="menu-actions">
-    <md-button-toggle-group [(ngModel)]="_newStatus">
-      <md-button-toggle value="0">
-        <md-icon>stop</md-icon>
-      </md-button-toggle>
-      <md-button-toggle value="5" *ngIf="darStatus.status!=0">
-        <md-icon>pause</md-icon>
-      </md-button-toggle>
-      <md-button-toggle value="10">
-        <md-icon>play_arrow</md-icon>
-      </md-button-toggle>
-    </md-button-toggle-group>
-  </div>
-  <p>
-    <strong>{{darStatus.type}}</strong> with <strong>{{darStatus.productStatuses.length}} product<span *ngIf="darStatus.productStatuses.length>1">s</span></strong>
-  </p>
-  <md-card class="productstatus" *ngFor="let productStatus of darStatus.productStatuses">
-	  <ngeo-product-status-item [productStatus]="productStatus"></ngeo-product-status-item>
-  </md-card>
+	<h3>{{(darStatus.name ? darStatus.name : darStatus.ID)}}
+		<button md-icon-button color="primary" (click)="delete();" title="Delete this DAR"><md-icon>delete_forever</md-icon></button>
+	</h3>
+	<div class="menu-actions">
+		<md-button-toggle-group [(ngModel)]="_newStatus">
+			<md-button-toggle value="0">
+				<md-icon>stop</md-icon>
+			</md-button-toggle>
+			<md-button-toggle value="5" *ngIf="darStatus.status!=0">
+				<md-icon>pause</md-icon>
+			</md-button-toggle>
+			<md-button-toggle value="10">
+				<md-icon>play_arrow</md-icon>
+			</md-button-toggle>
+		</md-button-toggle-group>
+	</div>
+	<p>
+		<strong>{{darStatus.type}}</strong> with <strong>{{darStatus.productStatuses.length}} product<span *ngIf="darStatus.productStatuses.length>1">s</span></strong>
+	</p>
+	<md-card class="productstatus" *ngFor="let productStatus of darStatus.productStatuses">
+		<ngeo-product-status-item [productStatus]="productStatus"></ngeo-product-status-item>
+	</md-card>
 </md-card-content>
