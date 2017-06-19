@@ -43,7 +43,7 @@ export class DownloadManagerDetailsComponent implements OnDestroy, OnInit {
 
 	private delete() {
 		this._downloadManagerService
-			.deleteDownloadManager(this.downloadManager.downloadManagerId)
+			.deleteOne(this.downloadManager.downloadManagerId)
 			.subscribe(_resp => {
 				if (_resp) {
 					this._router.navigate(['/downloadManagers']);

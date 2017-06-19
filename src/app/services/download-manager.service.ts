@@ -75,7 +75,7 @@ export class DownloadManagerService {
 			.map((res) => res.json());
 	}
 
-	deleteDownloadManager(myId: string): Observable<Boolean> {
+	deleteOne(myId: string): Observable<Boolean> {
 		return this._http
 			.delete(`${this.downloadManagersUrl}/${myId}`)
 			.map(response => {
