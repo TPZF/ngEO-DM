@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, NgZone } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, NgZone } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -16,7 +16,7 @@ import { ProductStatus } from './../../models/dar-status';
 	templateUrl: './direct-download.component.html',
 	styleUrls: ['./direct-download.component.scss']
 })
-export class DirectDownloadComponent implements OnInit {
+export class DirectDownloadComponent implements OnDestroy, OnInit {
 
 	private _fileDownload: ProductStatus;
 	private _urlInput: string = 'https://eodata-service.user.eocloud.eu/eodata/MSI/L1C/2015/07/06/S2A_OPER_PRD_MSIL1C_PDMC_20160607T050846_R051_V20150706T105015_20150706T105015.SAFE/HTML/star_bg.jpg';
@@ -119,6 +119,16 @@ export class DirectDownloadComponent implements OnInit {
 		this._fileDownload.loadedSize = '0';
 		this._fileDownload.errorMsg = '';
 		this._fileDownload.percentageCompleted = '0';
+	}
+
+	ngOnDestroy() {
+		// remove listeners to avoid memory leak
+		this._electronService.ipcRenderer.removeAllListeners('downloadError');
+		this._electronService.ipcRenderer.removeAllListeners('downloadUpdated');
+		this._electronService.ipcRenderer.removeAllListeners('downloadCompleted');
+		this._electronService.ipcRenderer.removeAllListeners('downloadFileError');
+		this._electronService.ipcRenderer.removeAllListeners('downloadFileUpdated');
+		this._electronService.ipcRenderer.removeAllListeners('downloadFileCompleted');
 	}
 
 	private isValidForm() {
