@@ -39,6 +39,7 @@ import { SsoService } from './services/sso.service';
 import { AppComponent } from './components/app.component';
 import { DarStatusListComponent } from './components/darStatus/dar-status-list.component';
 import { DarStatusItemComponent } from './components/darStatus/dar-status-item.component';
+import { DarStatusAddComponent } from './components/darStatus/dar-status-add.component';
 import { ProductStatusItemComponent } from './components/darStatus/product-status-item.component';
 import { DownloadManagerDetailsComponent } from './components/downloadManager/download-manager-details.component';
 import { DownloadManagerListComponent } from './components/downloadManager/download-manager-list.component';
@@ -87,6 +88,7 @@ import { routes } from './app.routes';
 		AppComponent,
 		DarStatusListComponent,
 		DarStatusItemComponent,
+		DarStatusAddComponent,
 		DirectDownloadComponent,
 		DownloadManagerDetailsComponent,
 		DownloadManagerListComponent,

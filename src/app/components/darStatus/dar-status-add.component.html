@@ -1,0 +1,15 @@
+<md-card>
+	<md-card-content>
+		<md-input-container class="full-width">
+			<input mdInput [(ngModel)]="_nameInput" placeholder="Name" title="Enter name of DAR" required>
+		</md-input-container>
+		<md-input-container class="full-width">
+			<input mdInput [(ngModel)]="_urlInput" placeholder="Url to download" title="Entre url to download" required>
+		</md-input-container>
+		<md-input-container class="full-width">
+			<input mdInput [(ngModel)]="_expectedSizeInput" placeholder="Expected size" title="Enter expected size in bytes" required>
+		</md-input-container>
+		<button md-raised-button color="primary" (click)="add()" [disabled]="!isValidForm()">Add</button>
+		<button md-raised-button color="accent" (click)="_cancel()">Cancel</button>
+	</md-card-content>
+</md-card>
