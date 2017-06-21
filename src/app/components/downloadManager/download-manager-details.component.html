@@ -1,8 +1,9 @@
 <div class="downloadmanager" *ngIf="downloadManager">
 	<h2>{{downloadManager.downloadManagerFriendlyName}}
 		<button md-icon-button color="primary" (click)="delete();" title="Delete this download manager"><md-icon>delete_forever</md-icon></button>
-		<button md-icon-button color="primary" (click)="addDARs();" title="Add DAR"><md-icon>add_circle</md-icon></button>
+		<button md-icon-button color="primary" (click)="_displayAdd=true" title="Add DAR"><md-icon>add_circle</md-icon></button>
 	</h2>
+	<ngeo-dar-status-add [ngClass]="{'hide': !_displayAdd}" (changeDisplay)="_displayAdd=false" [downloadManagerId]="downloadManager.downloadManagerId"></ngeo-dar-status-add>
 	<ngeo-dar-status-list [downloadManagerId]="downloadManager.downloadManagerId"></ngeo-dar-status-list>
 </div>
 <button class="nav-btn" color="accent" md-icon-button [routerLink]="['/downloadManagers']" title="Return to list"><md-icon>close</md-icon></button>
