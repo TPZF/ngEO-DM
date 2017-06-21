@@ -241,7 +241,6 @@ function _getRedirectAttrChecker(myResponse, myBody, myOptions) {
 			url: myOptions.url,
 			errorMsg: 'Not authorized (bad credentials)'
 		});
-		return;
 	}
 
 	// Retrieve the rediction location
@@ -357,6 +356,7 @@ function _getRedirectToRessource(myResponse, myBody, myShibbSessionHeaderCookie,
 	let _fileName = _redirectionPath.slice(_redirectionPath.lastIndexOf('/') + 1);
 	myOptions.logger.debug('ECP fileName ' + _fileName);
 
+
 	// options
 	let _options = {
 		host: myOptions.configuration.ecp.serviceprovider.host,
@@ -374,14 +374,15 @@ function _getRedirectToRessource(myResponse, myBody, myShibbSessionHeaderCookie,
 		_saveRessource(_resp, _fileName, myOptions);
 	});
 	_req.on('error', (e) => {
-		myOptions.logger.error('ECP _getRedirectToRessource error ' + e);
-		myOptions.wc.send('downloadError', {
-			url: myOptions.url,
-			errorMsg: e
-		});
+		if (e.code !== 'HPE_INVALID_CONSTANT') {
+			myOptions.logger.error('ECP _getRedirectToRessource error ' + JSON.stringify(e));
+			myOptions.wc.send('downloadError', {
+				url: myOptions.url,
+				errorMsg: e
+			});
+		}
 	});
 	_req.end();
-
 }
 
 /**
@@ -411,18 +412,18 @@ function _saveRessource(myResponse, myFileName, myOptions) {
 	myOptions.logger.debug('ECP bytes total:' + _bytesTotal);
 
 	myResponse.on('data', function (_chunk) {
-		_bytesDone += _chunk.byteLength;
-		myOptions.logger.debug('ECP ' + _bytesDone + ' bytes done');
 		_wstream.write(_chunk);
+		_bytesDone += _chunk.byteLength;
+		//myOptions.logger.debug('ECP ' + _bytesDone + ' bytes done');
 		myOptions.wc.send('downloadUpdated', {
 			url: myOptions.url,
-			progress: _bytesDone / _bytesTotal,
+			total: _bytesTotal,
 			received: _bytesDone
 		});
 	})
 	myResponse.on('end', function () {
-		myOptions.logger.debug('ECP end');
 		_wstream.end();
+		myOptions.logger.debug('ECP end');
 		myOptions.wc.send('downloadCompleted', {
 			url: myOptions.url,
 			path: myOptions.path + myFileName
