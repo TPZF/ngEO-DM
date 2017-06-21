@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
 import { AuthenticationService } from './authentication.service';
+import { ConfigurationService } from './configuration.service';
 import { ErrorService } from './error.service';
 import { ElectronService } from 'ngx-electron';
 import { SettingsService } from './settings.service';
@@ -24,6 +25,7 @@ export class ProductService {
 	constructor(
 		//private _http: ProgressHttp,
 		private _authenticationService: AuthenticationService,
+		private _configurationService: ConfigurationService,
 		//private _ecpService: ECPService,
 		private _electronService: ElectronService,
 		private _settingsService: SettingsService,
@@ -36,44 +38,16 @@ export class ProductService {
 	 */
 	startDownload(myDar: DarStatus) {
 
-		let _url = 'https://eodata-service.user.eocloud.eu/eodata/MSI/L1C/2015/07/06/S2A_OPER_PRD_MSIL1C_PDMC_20160607T050846_R051_V20150706T105015_20150706T105015.SAFE/HTML/star_bg.jpg';
-		/*
-		let _productStatus: ProductStatus = {
-			expectedSize: '0',
-			percentageCompleted: '0',
-			productURL: _url
-		};
-		let _ressource = '/eodata/MSI/L1C/2015/07/06/S2A_OPER_PRD_MSIL1C_PDMC_20160607T050846_R051_V20150706T105015_20150706T105015.SAFE/HTML/star_bg.jpg';
-		this._electronService.ipcRenderer.send('startDownloadRessource', _ressource);
-		this._ecpService
-			.getProduct(_productStatus)
-			.subscribe(
-				(response) => {
-					_productStatus.percentageCompleted = '100';
-					let _newFileName: string = 'star.jpg';
-					_productStatus.localPath = this._settingsService.get('downloadPath') + '/' + _newFileName;
-					FileSaver.saveAs(response.blob(), _newFileName);
-				},
-				(error: any) => {
-					console.log('ECPService error', error);
-				}
-			);
-		*/
-		myDar.productStatuses.forEach((product) => {
-			product.percentageCompleted = '0';
-			product.loadedSize = '0';
-			product.productURL = _url;
+		myDar.productStatuses.forEach((_product) => {
+			_product.percentageCompleted = '0';
+			_product.loadedSize = '0';
+			_product.mode = 'indeterminate';
+			if (_product.productURL.indexOf(this._configurationService.get().ecp.serviceprovider.host) > -1) {
+				this.startECPDownloadProduct(_product);
+			} else {
+				this.startDownloadFile(_product.productURL);
+			}
 		});
-
-		this._electronService.ipcRenderer.send('startECPDownloadDar', myDar);
-		/*
-		let _i: number = 0;
-
-		myDar.productStatuses.forEach((product) => {
-			_i++;
-			this.startDownloadProduct(myDar, product, _i);
-		});
-		*/
 
 	}
 
