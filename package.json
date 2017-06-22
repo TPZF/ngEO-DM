@@ -64,7 +64,6 @@
 		"css-loader": "^0.26.2",
 		"electron": "^1.6.1",
 		"electron-builder": "^18.6.2",
-		"electron-packager": "^8.5.2",
 		"electron-prebuilt": "^1.4.13",
 		"electron-windows-installer": "^1.4.4",
 		"es6-promise-loader": "^1.0.1",
