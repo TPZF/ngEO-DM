@@ -1,12 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
-
-const rootPath = path.join(__dirname, '../..');
-const assetsPath = path.join(rootPath, 'vendor/assets');
-
-let currentPath = '/tmp/';
+const { BrowserWindow } = require('electron');
 
 class TopWindow {
 
@@ -18,9 +12,7 @@ class TopWindow {
 	createWindow() {
 		// Initialize the window to our specified dimensions
 		this.topWindow = new BrowserWindow({
-			icon: path.join(assetsPath, 'ngeo.png'),
-			frame: false,
-			show: false,
+			show: false
 		});
 
 	}

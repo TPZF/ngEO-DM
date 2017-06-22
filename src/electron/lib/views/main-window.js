@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { BrowserWindow, ipcMain, shell } = require('electron');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -31,7 +31,7 @@ class MainWindow {
 		this.logger.debug('MainWindow.createWindow');
 		// Initialize the window to our specified dimensions
 		this.mainWindow = new BrowserWindow({
-			icon: path.join(assetsPath, 'ngeo.png'),
+			icon: path.join(assetsPath, 'ngeo-window.png'),
 			parent: this.topWindow.topWindow,
 			backgroundColor: '#FFFFFF',
 			show: false,

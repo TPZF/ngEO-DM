@@ -19,7 +19,7 @@ class AppTray {
 
 	createTray() {
 
-		let _image = nativeImage.createFromPath(path.join(assetsPath, 'ngeo.png'));
+		let _image = nativeImage.createFromPath(path.join(assetsPath, 'ngeo-tray.png'));
 		_image.setTemplateImage(true);
 
 		this._tray = new Tray(_image);
@@ -65,7 +65,7 @@ class AppTray {
 	 * @function showAbout
 	 */
 	showAbout() {
-		const _iconImage = nativeImage.createFromPath(path.join(assetsPath, 'ngeo.png'));
+		const _iconImage = nativeImage.createFromPath(path.join(assetsPath, 'ngeo-dialog.png'));
 		dialog.showMessageBox(
 			this._topWindow.getBrowserWindow(), {
 				type: 'info',
