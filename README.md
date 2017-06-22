@@ -25,7 +25,8 @@ On each code modification, just refresh the application as it was a browser tab.
 
 **Build app** `npm run build`
 
-**Package** `npm run packager-linux`
+**Package** `npm run build-linux-dist`
+It generates the AppImage in dist folder
 
 ### For Windows
 
