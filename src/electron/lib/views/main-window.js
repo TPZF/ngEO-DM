@@ -4,7 +4,7 @@ const { BrowserWindow, ipcMain, shell } = require('electron');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
+const URL = require('url');
 
 const settings = require('electron-settings');
 const configuration = require('./../handlers/configuration');
@@ -390,7 +390,13 @@ class MainWindow {
 
 		let _that = this;
 
-		let _fileName = myDownloadUrl.url.slice(myDownloadUrl.url.lastIndexOf('/') + 1);
+		let _fileName = myResponse.headers['Content-Disposition'];
+		if (_fileName) {
+			// inline; filename="file.txt"
+			_fileName = _fileName.split(';', _fileName).length > 0 ? _fileName.split(';', _fileName)[1].trim() : '';
+			_fileName = _fileName.split('=', _fileName).length > 0 ? _fileName.split('=', _fileName)[1] : '';
+			_fileName = _fileName.replace('"', '');
+		}
 		// Write the resource to a file
 		if (_fileName == '') {
 			_fileName = settings.get('downloadPath') + '/resource.txt';
