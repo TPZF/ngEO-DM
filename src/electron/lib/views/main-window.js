@@ -284,11 +284,10 @@ class MainWindow {
 			this.logger.debug('ipcMain.startDownloadFile item null > download it !');
 			this.logger.debug(myRequest);
 			if (typeof myRequest === 'undefined') {
-				let url = new URL(myUrl);
-				let myRequest = {
+				let url = URL.parse(myUrl);
+				myRequest = {
 					host: url.host,
-					protocol: url.protocol,
-					port: url.port,
+					port: url.port == null ? 443 : url.port,
 					path: url.pathname,
 					method: 'GET'
 				};
