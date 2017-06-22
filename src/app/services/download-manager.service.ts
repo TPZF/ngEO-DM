@@ -3,9 +3,9 @@ import { Http, Headers, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
-import { AuthenticationService } from './authentication.service';
 import { ConfigurationService } from './configuration.service';
 import { ErrorService } from './error.service';
+import { SettingsService } from './settings.service';
 
 import { DownloadManager } from './../models/download-manager';
 
@@ -25,9 +25,10 @@ export class DownloadManagerService {
 	 */
 	constructor(
 		private _http: Http,
-		private _authenticationService: AuthenticationService,
 		private _configurationService: ConfigurationService,
-		private _errorService: ErrorService) {
+		private _settingsService: SettingsService,
+		private _errorService: ErrorService
+	) {
 		this.baseUrl = _configurationService.get().qsHost;
 		this.downloadManagersUrl = this.baseUrl + '/downloadManagers';
 	}
@@ -60,7 +61,7 @@ export class DownloadManagerService {
 	 */
 	public registerDownloadManager(downloadManagerInsert: any) {
 
-		let userId = this._authenticationService.getCurrentUser().username;
+		let userId = this._settingsService.get('username');
 
 		let itemToAdd: DownloadManager = {
 			downloadManagerFriendlyName: downloadManagerInsert.downloadManagerFriendlyName,
