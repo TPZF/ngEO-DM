@@ -49,9 +49,9 @@ export class DownloadManagerService {
 	 * @function getDownloadManager
 	 * @param id
 	 */
-	getDownloadManager(id: string): Observable<DownloadManager> {
+	getDownloadManager(myId: string): Observable<DownloadManager> {
 		return this._http
-			.get(`${this.downloadManagersUrl}/${id}`)
+			.get(`${this.downloadManagersUrl}/${myId}`)
 			.map(response => response.json().downloadmanager)
 			.catch(this._errorService.handleError);
 	}
@@ -59,12 +59,12 @@ export class DownloadManagerService {
 	/**
 	 * Register a new download manager
 	 */
-	public registerDownloadManager(downloadManagerInsert: any) {
+	public registerDownloadManager(myDownloadManagerFriendlyNameInsert: string) {
 
 		let userId = this._settingsService.get('username');
 
 		let itemToAdd: DownloadManager = {
-			downloadManagerFriendlyName: downloadManagerInsert.downloadManagerFriendlyName,
+			downloadManagerFriendlyName: myDownloadManagerFriendlyNameInsert,
 			userId: userId,
 			status: 'ACTIVE',
 			ipAddress: 'localhost',
