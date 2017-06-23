@@ -1,12 +1,11 @@
 # Node
 node_modules
-npm-debug.log
+*.log
 
 # Build directories
 build
 dist
 releases
-.log
 src/electron/node_modules/**/*.*
 src/electron/vendor/**/*.*
 
