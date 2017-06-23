@@ -19,7 +19,12 @@ class AppTray {
 
 	createTray() {
 
-		let _image = nativeImage.createFromPath(path.join(assetsPath, 'ngeo-tray.png'));
+		let _image;
+		if (process.platform === 'linux' || process.platform === 'win32') {
+			_image = nativeImage.createFromPath(path.join(assetsPath, 'ngeo-tray.png'));
+		} else {
+			image = nativeImage.createFromPath(path.join(assetsPath, 'ngeo-tray-macos.png'));
+		}
 		_image.setTemplateImage(true);
 
 		this._tray = new Tray(_image);
