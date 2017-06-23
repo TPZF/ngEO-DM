@@ -1,8 +1,8 @@
 {
 	"name": "ngeo-downloadmanager",
-	"version": "0.3.0",
+	"version": "0.2.1",
 	"author": "Telespazio France - 2017",
-	"description": "ngEO Download mMnager",
+	"description": "ngEO Download Manager",
 	"main": "src/electron/main.js",
 	"scripts": {
 		"watch": "npm run watch:dev",
@@ -63,7 +63,7 @@
 		"codelyzer": "^2.0.0-beta.2",
 		"css-loader": "^0.26.2",
 		"electron": "^1.6.1",
-		"electron-builder": "^18.6.2",
+		"electron-builder": "18.6.2",
 		"electron-prebuilt": "^1.4.13",
 		"electron-windows-installer": "^1.4.4",
 		"es6-promise-loader": "^1.0.1",
@@ -114,7 +114,8 @@
 		"dmg": {},
 		"win": {},
 		"mac": {
-			"identity": "5ZQQA3K7N5"
+			"identity": "5ZQQA3K7N5",
+			"icon": "src/electron/vendor/assets/icon.icns"
 		},
 		"linux": {
 			"icon": "src/electron/vendor/assets/icons/",

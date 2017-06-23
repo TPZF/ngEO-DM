@@ -1,7 +1,7 @@
 {
 	"name": "ngeo-downloadmanager",
 	"description": "Simple download manager application buit with Electron and Angular",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"author": "Telespazio France",
 	"main": "main.js",
 	"dependencies": {
