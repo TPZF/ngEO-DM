@@ -1,20 +1,20 @@
 const { app, globalShortcut } = require('electron');
 
-const AppTray = require('./lib/views/app-tray');
-const MainWindow = require('./lib/views/main-window');
-const TopWindow = require('./lib/views/top-window');
-const AutoUpdaterHandler = require('./lib/handlers/auto-updater');
+const AppTray = require('./js/views/app-tray');
+const MainWindow = require('./js/views/main-window');
+const TopWindow = require('./js/views/top-window');
+const AutoUpdaterHandler = require('./js/handlers/auto-updater');
 
 // app version
 const appVersion = require('./package.json').version;
 const isDev = process.env.TODO_DEV ? process.env.TODO_DEV.trim() == "true" : false;
-const configuration = require('./lib/handlers/configuration');
+const configuration = require('./js/handlers/configuration');
 
 // log
 const log = require('electron-log');
-log.transports.file.level = isDev ? 'all' : 'warn';
-log.transports.file.format = '{h}:{i}:{s}:{ms} {text}';
-log.transports.file.maxSize = 5 * 1024 * 1024;
+log.transports.file.level = configuration.getConf(isDev).log.level;
+log.transports.file.format = configuration.getConf(isDev).log.format;
+log.transports.file.maxSize = configuration.getConf(isDev).log.maxSize;
 /*by default it puts:
 on Linux: ~/.config/<app name>/log.log
 on OS X: ~/Library/Logs/<app name>/log.log

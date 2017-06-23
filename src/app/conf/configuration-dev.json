@@ -9,5 +9,10 @@
 			"host": "eodata-idp.user.eocloud.eu",
 			"endpoint": "/idp/profile/SAML2/SOAP/ECP"
 		}
+	},
+	"log": {
+		"level": "all",
+		"format": "{h}:{i}:{s}:{ms} {text}",
+		"maxSize": 5242880
 	}
 }
