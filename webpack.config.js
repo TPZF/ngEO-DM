@@ -26,7 +26,7 @@ var config = {
 
   // Config for our build files
   output: {
-    path: helpers.root('src/electron/vendor'),
+    path: helpers.root('src/electron/webapp'),
     filename: '[name].js',
     sourceMapFilename: '[name].map',
     chunkFilename: '[id].chunk.js'
@@ -45,7 +45,7 @@ var config = {
     extensions: ['.ts', '.js', '.json', '.css', '.scss', '.html'],
 
     // An array of directory names to be resolved to the current directory
-    modules: [helpers.root('src'), 'node_modules', 'vendor'],
+    modules: [helpers.root('src'), 'node_modules', 'webapp'],
 
   },
   /*

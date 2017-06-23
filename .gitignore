@@ -7,7 +7,7 @@ build
 dist
 releases
 src/electron/node_modules/**/*.*
-src/electron/vendor/**/*.*
+src/electron/webapp/**/*.*
 
 # IDE/dev
 .vscode
