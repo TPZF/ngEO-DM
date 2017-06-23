@@ -23,7 +23,7 @@ class AppTray {
 		if (process.platform === 'linux' || process.platform === 'win32') {
 			_image = nativeImage.createFromPath(path.join(assetsPath, 'ngeo-tray.png'));
 		} else {
-			image = nativeImage.createFromPath(path.join(assetsPath, 'ngeo-tray-macos.png'));
+			_image = nativeImage.createFromPath(path.join(assetsPath, 'ngeo-tray-macos.png'));
 		}
 		_image.setTemplateImage(true);
 
@@ -71,15 +71,24 @@ class AppTray {
 	 */
 	showAbout() {
 		const _iconImage = nativeImage.createFromPath(path.join(assetsPath, 'ngeo-dialog.png'));
-		dialog.showMessageBox(
-			this._topWindow.getBrowserWindow(), {
-				type: 'info',
-				buttons: ['Close'],
-				title: 'About',
-				icon: _iconImage,
-				message: `The download manager is software which is retrieved and run in standalone.\nIt is used to the download of ngeo product data.\nVersion: ${this._appVersion}`
-			}
-		);
+		const _options = {
+			type: 'info',
+			buttons: ['Close'],
+			title: 'About',
+			icon: _iconImage,
+			message: `The download manager is software which is retrieved and run in standalone.\nIt is used to the download of ngeo product data.\nVersion: ${this._appVersion}`
+		};
+		if (this._mainWindow.getBrowserWindow()) {
+			// attach dialog box to mainWindow, making it modal
+			dialog.showMessageBox(
+				this._mainWindow.getBrowserWindow(),
+				_options
+			);
+		} else {
+			dialog.showMessageBox(
+				_options
+			);
+		}
 	}
 
 	refreshIcon() {
