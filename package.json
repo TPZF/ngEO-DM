@@ -115,10 +115,10 @@
 		"win": {},
 		"mac": {
 			"identity": "5ZQQA3K7N5",
-			"icon": "src/electron/vendor/assets/icon.icns"
+			"icon": "src/electron/webapp/assets/icon.icns"
 		},
 		"linux": {
-			"icon": "src/electron/vendor/assets/icons/",
+			"icon": "src/electron/webapp/assets/icons/",
 			"target": "AppImage"
 		}
 	},
