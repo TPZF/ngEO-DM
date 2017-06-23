@@ -1,11 +1,11 @@
 # Node
 node_modules
+npm-debug.log
 
 # Build directories
 build
 dist
 releases
-ngeo-DM*
 .log
 src/electron/node_modules/**/*.*
 src/electron/vendor/**/*.*
