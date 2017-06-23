@@ -7,7 +7,7 @@
 		<button md-raised-button color="primary" (click)="download()" [disabled]="!isValidForm()">Download</button>
 		<button md-raised-button color="accent" (click)="reset()">Reset</button>
 		<button md-raised-button color="primary" (click)="openProductFile()" *ngIf="_fileDownload.percentageCompleted==100">See in folder</button>
-		<p *ngIf="_fileDownload.percentageCompleted !== '0' && _fileDownload.percentageCompleted !== '100'">{{_fileDownload.loadedSize | fileSize}} on {{_fileDownload.loadedSize | fileSize}}
+		<p *ngIf="_fileDownload.percentageCompleted !== '0' && _fileDownload.percentageCompleted !== '100'">{{_fileDownload.loadedSize | fileSize}} on {{_fileDownload.expectedSize | fileSize}}
 		</p>
 	</md-card-content>
 	<md-card-footer>
