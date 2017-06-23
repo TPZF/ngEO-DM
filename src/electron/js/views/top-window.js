@@ -7,7 +7,7 @@ const notifier = require('electron-notifications');
 
 const path = require('path');
 const rootPath = path.join(__dirname, './../..');
-const assetsPath = path.join(rootPath, 'vendor/assets');
+const assetsPath = path.join(rootPath, 'webapp/assets');
 
 class TopWindow {
 

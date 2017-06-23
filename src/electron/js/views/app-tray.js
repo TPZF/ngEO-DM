@@ -5,7 +5,7 @@ const path = require('path');
 
 const MainWindow = require('./main-window');
 
-const assetsPath = path.join(__dirname, '../../vendor/assets');
+const assetsPath = path.join(__dirname, '../../webapp/assets');
 
 class AppTray {
 

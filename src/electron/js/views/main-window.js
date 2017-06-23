@@ -12,7 +12,7 @@ const configuration = require('./../handlers/configuration');
 const ecp = require('./../ecp');
 
 const rootPath = path.join(__dirname, './../..');
-const assetsPath = path.join(rootPath, 'vendor/assets');
+const assetsPath = path.join(rootPath, 'webapp/assets');
 
 class MainWindow {
 

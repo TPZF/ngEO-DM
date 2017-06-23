@@ -1,7 +1,7 @@
 'use strict';
 
 function getConf(myIsDev) {
-	let _conf = myIsDev ? require('./../../vendor/conf/configuration-dev.json') : require('./../../vendor/conf/configuration.json');
+	let _conf = myIsDev ? require('./../../webapp/conf/configuration-dev.json') : require('./../../webapp/conf/configuration.json');
 	return _conf;
 }
 
