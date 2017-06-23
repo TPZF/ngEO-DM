@@ -56,7 +56,7 @@ class DownloadManager {
 			log.debug('app.ready !');
 
 			// create top window
-			this.topWindow = new TopWindow();
+			this.topWindow = new TopWindow(log);
 
 			// create main window (web app)
 			// param topWindow = parent window
@@ -93,8 +93,8 @@ class DownloadManager {
 			// On macOS it's common to re-create a window in the app when the
 			// dock icon is clicked and there are no other windows open.
 			if (this.topWindow.getBrowserWindow() === null) {
-				this.topWindow = new TopWindow();
-				this.mainWindow = new MainWindow(this.topWindow, isDev);
+				this.topWindow = new TopWindow(log);
+				this.mainWindow = new MainWindow(this.topWindow, log, isDev);
 			}
 		});
 
