@@ -1,6 +1,7 @@
 'use strict';
 
 const { BrowserWindow, ipcMain, shell } = require('electron');
+const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -287,7 +288,9 @@ class MainWindow {
 				let url = URL.parse(myUrl);
 				myRequest = {
 					host: url.host,
-					port: url.port == null ? 443 : url.port,
+					hostname: url.hostname,
+					protocol: url.protocol,
+					port: url.port,
 					path: url.pathname,
 					method: 'GET'
 				};
@@ -307,10 +310,19 @@ class MainWindow {
 		let _that = this;
 
 		this.logger.debug('_startDownloadUrl ' + myDownloadUrl.url);
+		this.logger.debug('_startDownloadUrl ' + JSON.stringify(myDownloadUrl.request));
 		// request
-		let _req = https.request(myDownloadUrl.request, (_resp) => {
-			_that._saveRessource(_resp, myDownloadUrl);
-		});
+		let _req;
+		if (myDownloadUrl.url.indexOf('https') === 0) {
+			_req = https.request(myDownloadUrl.request, (_resp) => {
+				_that._saveRessource(_resp, myDownloadUrl);
+			});
+		} else {
+			_req = http.request(myDownloadUrl.request, (_resp) => {
+				_that._saveRessource(_resp, myDownloadUrl);
+			});
+		}
+
 		_req.on('error', (e) => {
 			if (e.code !== 'HPE_INVALID_CONSTANT') {
 				_that.logger.error('_startDownloadUrl error ' + JSON.stringify(e));
@@ -389,27 +401,14 @@ class MainWindow {
 
 		let _that = this;
 
-		let _fileName = 'resource.txt';
-
-		let _disposition = myResponse.headers['Content-Disposition'];
-		if (typeof _disposition === 'undefined') {
-			_disposition = myResponse.headers['content-disposition'];
-		}
-		if (typeof _disposition !== 'undefined') {
-			// inline; filename="file.txt"
-			const _filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-			var _matches = _filenameRegex.exec(_disposition);
-			if (_matches != null && _matches[1]) {
-				_fileName = _matches[1].replace(/['"]/g, '');
-			}
-		}
+		let _fileName = this._getFileNameFromHeaders(myResponse, myDownloadUrl);
 		let _filePath = settings.get('downloadPath') + '/' + _fileName;
 		this.logger.debug('_filePath:' + _filePath);
 
 		let _wstream = fs.createWriteStream(_filePath);
 
 		let _bytesDone = 0;
-		let _bytesTotal = parseInt(myResponse.headers['content-length']);
+		let _bytesTotal = this._getSizeFromHeaders(myResponse);
 		this.logger.debug('ECP bytes total:' + _bytesTotal);
 
 		myResponse.on('data', function (_chunk) {
@@ -431,6 +430,45 @@ class MainWindow {
 			});
 		})
 
+	}
+
+	_getFileNameFromHeaders(myResponse, myDownloadUrl) {
+		let _fileName = '';
+
+		let _disposition = myResponse.headers['Content-Disposition'];
+		if (typeof _disposition === 'undefined') {
+			_disposition = myResponse.headers['content-disposition'];
+		}
+		if (typeof _disposition !== 'undefined') {
+			// inline; filename="file.txt"
+			const _filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+			let _matches = _filenameRegex.exec(_disposition);
+			if (_matches != null && _matches[1]) {
+				_fileName = _matches[1].replace(/['"]/g, '');
+			}
+		}
+		if (_fileName === '') {
+			// extract filename from request pathname
+			let _pathName = myDownloadUrl.request.path;
+			_fileName = _pathName.substring(_pathName.lastIndexOf('/') + 1);
+		}
+		if (_fileName === '') {
+			_fileName = 'resource.txt';
+		}
+		return _fileName;
+	}
+
+	_getSizeFromHeaders(myResponse) {
+		let _size = 0;
+
+		let _contentLength = myResponse.headers['Content-Length'];
+		if (typeof _contentLength === 'undefined') {
+			_contentLength = myResponse.headers['content-length'];
+		}
+		if (typeof _contentLength !== 'undefined') {
+			_size = parseInt(_contentLength);
+		}
+		return _size;
 	}
 
 }
