@@ -389,16 +389,19 @@ class MainWindow {
 
 		let _that = this;
 
-		let _fileName = myResponse.headers['Content-Disposition'];
-		if (_fileName) {
-			// inline; filename="file.txt"
-			_fileName = _fileName.split(';', _fileName).length > 0 ? _fileName.split(';', _fileName)[1].trim() : '';
-			_fileName = _fileName.split('=', _fileName).length > 0 ? _fileName.split('=', _fileName)[1] : '';
-			_fileName = _fileName.replace('"', '');
+		let _fileName = 'resource.txt';
+
+		let _disposition = myResponse.headers['Content-Disposition'];
+		if (typeof _disposition === 'undefined') {
+			_disposition = myResponse.headers['content-disposition'];
 		}
-		// Write the resource to a file
-		if (_fileName == '') {
-			_fileName = settings.get('downloadPath') + '/resource.txt';
+		if (typeof _disposition !== 'undefined') {
+			// inline; filename="file.txt"
+			const _filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+			var _matches = _filenameRegex.exec(_disposition);
+			if (_matches != null && _matches[1]) {
+				_fileName = _matches[1].replace(/['"]/g, '');
+			}
 		}
 		let _filePath = settings.get('downloadPath') + '/' + _fileName;
 		this.logger.debug('_filePath:' + _filePath);
