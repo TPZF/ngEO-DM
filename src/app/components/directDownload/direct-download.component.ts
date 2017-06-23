@@ -61,7 +61,10 @@ export class DirectDownloadComponent implements OnDestroy, OnInit {
 			_that._ngZone.run(() => {
 				if (_that._fileDownload.productURL === downloadItem.url) {
 					_that._fileDownload.mode = 'determinate';
-					_that._fileDownload.percentageCompleted = '' + Math.floor(parseInt(downloadItem.progress) * 100);
+					_that._fileDownload.expectedSize = downloadItem.total;
+					if (parseInt(_that._fileDownload.expectedSize, 10) > 0) {
+						_that._fileDownload.percentageCompleted = '' + Math.floor(parseInt(downloadItem.received, 10) / parseInt(downloadItem.total, 10) * 100);
+					}
 					_that._fileDownload.loadedSize = downloadItem.received;
 				}
 			});
@@ -72,7 +75,10 @@ export class DirectDownloadComponent implements OnDestroy, OnInit {
 			_that._ngZone.run(() => {
 				if (_that._fileDownload.productURL === downloadItem.url) {
 					_that._fileDownload.mode = 'determinate';
-					_that._fileDownload.percentageCompleted = '' + Math.floor(parseInt(downloadItem.progress) * 100);
+					_that._fileDownload.expectedSize = downloadItem.total;
+					if (parseInt(_that._fileDownload.expectedSize, 10) > 0) {
+						_that._fileDownload.percentageCompleted = '' + Math.floor(parseInt(downloadItem.received, 10) / parseInt(downloadItem.total, 10) * 100);
+					}
 					_that._fileDownload.loadedSize = downloadItem.received;
 				}
 			});
@@ -119,6 +125,7 @@ export class DirectDownloadComponent implements OnDestroy, OnInit {
 		this._fileDownload.loadedSize = '0';
 		this._fileDownload.errorMsg = '';
 		this._fileDownload.percentageCompleted = '0';
+		this._fileDownload.mode = 'determinate';
 	}
 
 	ngOnDestroy() {
@@ -133,6 +140,10 @@ export class DirectDownloadComponent implements OnDestroy, OnInit {
 
 	private isValidForm() {
 		return (this._urlInput);
+	}
+
+	private _setDownloadUpdate() {
+
 	}
 
 }
