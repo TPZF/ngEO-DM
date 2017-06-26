@@ -4,6 +4,7 @@ const AppTray = require('./js/views/app-tray');
 const MainWindow = require('./js/views/main-window');
 const TopWindow = require('./js/views/top-window');
 const AutoUpdaterHandler = require('./js/handlers/auto-updater');
+const DownloadHandler = require('./js/handlers/download');
 
 // app version
 const appVersion = require('./package.json').version;
@@ -56,7 +57,7 @@ class DownloadManager {
 			log.debug('app.ready !');
 
 			// create top window
-			this.topWindow = new TopWindow(log);
+			this.topWindow = new TopWindow(log, isDev);
 
 			// create main window (web app)
 			// param topWindow = parent window
@@ -76,13 +77,16 @@ class DownloadManager {
 				this.topWindow.getBrowserWindow().close();
 			})
 
-			// auto updater
+			// auto updater - map to mainWindow to modal dialog box if new update
 			const urlLatestDownloadManager = `${configuration.getConf(isDev).qsHost}/downloadManagers/releases/latest`;
 			if (!AutoUpdaterHandler.CHECKED) {
 				log.debug('urlLatestDownloadManager=' + urlLatestDownloadManager);
 				this.mainWindow._autoUpdater = new AutoUpdaterHandler(this.mainWindow, log);
 				this.mainWindow._autoUpdater.init(urlLatestDownloadManager);
 			}
+
+			// download - map to topWindow
+			this.topWindow._downloadHandler = new DownloadHandler(this.topWindow, this.mainWindow, log);
 
 		});
 

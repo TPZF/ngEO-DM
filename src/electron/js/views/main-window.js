@@ -1,6 +1,6 @@
 'use strict';
 
-const { BrowserWindow, ipcMain, shell } = require('electron');
+const { BrowserWindow, dialog, ipcMain, shell } = require('electron');
 const http = require('http');
 const https = require('https');
 const path = require('path');
@@ -18,11 +18,12 @@ class MainWindow {
 
 	constructor(myTopWindow, myLogger, myIsDev) {
 		this.topWindow = myTopWindow;
-		this.mainWindow = null;
+		this._bw = null;
 		this.logger = myLogger;
 		this.isDev = myIsDev;
 		this.downloadItems = [];
 		this.downloadUrls = [];
+		this.downloadRequests = [];
 		this.createWindow();
 	}
 
@@ -30,9 +31,9 @@ class MainWindow {
 
 		this.logger.debug('MainWindow.createWindow');
 		// Initialize the window to our specified dimensions
-		this.mainWindow = new BrowserWindow({
+		this._bw = new BrowserWindow({
 			icon: path.join(assetsPath, 'ngeo-window.png'),
-			parent: this.topWindow.topWindow,
+			parent: this.topWindow._bw,
 			backgroundColor: '#FFFFFF',
 			show: false,
 			x: 100,
@@ -48,20 +49,21 @@ class MainWindow {
 	}
 
 	getBrowserWindow() {
-		return this.mainWindow;
+		return this._bw;
 	}
 
 	initWindowEvents() {
 		// Show window when ready to show
-		this.mainWindow.once('ready-to-show', () => {
+		this._bw.once('ready-to-show', () => {
 			this.logger.debug('MainWindow event ready-to-show');
-			this.mainWindow.show();
+			this._bw.show();
+			this._bw.focus();
 		});
 
 		// Clear out the main window when the app is closed
-		this.mainWindow.on('closed', () => {
+		this._bw.on('closed', () => {
 			this.logger.debug('MainWindow event closed');
-			this.mainWindow = null;
+			this._bw = null;
 		});
 
 	}
@@ -71,12 +73,12 @@ class MainWindow {
 		this.logger.debug('MainWindow.load');
 
 		// Tell Electron where to load the entry point from
-		this.mainWindow.loadURL("file://" + rootPath + "/index.html");
+		this._bw.loadURL("file://" + rootPath + "/index.html");
 
 		// Open the DevTools.
 		if (this.isDev) {
 			this.logger.debug('MainWindow in dev mode > openDevTools');
-			this.mainWindow.webContents.openDevTools();
+			this._bw.webContents.openDevTools();
 		}
 	}
 
@@ -92,11 +94,19 @@ class MainWindow {
 		let _that = this;
 
 		// -------------------------------------------
-		// download DAR with ECP
+		// download url
+		// -------------------------------------------
+		//	start
+		ipcMain.on('startDownload', (event, myUrl) => {
+			_that.topWindow._startDownload(myUrl, _that);
+		});
+
+		// -------------------------------------------
+		// download with ECP
 		// -------------------------------------------
 		// start
-		ipcMain.on('startECPDownloadDar', (event, myDar) => {
-			_that.logger.debug('ipcMain.startECPDownloadDar');
+		ipcMain.on('startEcpDownload', (event, myProduct) => {
+			_that.logger.debug('ipcMain.startEcpDownload');
 			let _options = {
 				credentials: {
 					username: settings.get('username'),
@@ -106,26 +116,24 @@ class MainWindow {
 				configuration: configuration.getConf(this.isDev),
 				logger: _that.logger
 			};
-			myDar.productStatuses.forEach((product) => {
-				_options.url = product.productURL;
-				ecp.downloadURL(_options)
-					.then((_resp) => {
-						_that._startDownloadFile(_resp.url, _resp.request);
-					})
-					.catch((_err) => {
-						_that.mainWindow.webContents.send('downloadError', {
-							url: _err.url,
-							errorMsg: _err.errorMsg
-						});
-					})
-			});
+			_options.url = myProduct.productURL;
+			ecp.downloadURL(_options)
+				.then((_resp) => {
+					_that._startDownloadFile(_resp.url, _resp.request);
+				})
+				.catch((_err) => {
+					_that.mainWindow.webContents.send('downloadError', {
+						url: _err.url,
+						errorMsg: _err.errorMsg
+					});
+				})
 		});
 
 		// -------------------------------------------
 		// download file
 		// -------------------------------------------
 		//	start
-		ipcMain.on('startDownloadFile', (event, myUrlFile) => {
+		ipcMain.on('startDirectDownload', (event, myUrlFile) => {
 			_that._startDownloadFile(myUrlFile);
 		});
 		// pause
@@ -194,7 +202,7 @@ class MainWindow {
 		//	settings
 		// -------------------------------------------
 		ipcMain.on('settings-choosepath', (event) => {
-			let myPaths = dialog.showOpenDialog(this.mainWindow, {
+			let myPaths = dialog.showOpenDialog(this._bw, {
 				title: 'Choose path directory for downloads',
 				properties: ['openDirectory']
 			});
@@ -323,6 +331,8 @@ class MainWindow {
 			});
 		}
 
+		this.downloadRequests.push(_req);
+
 		_req.on('error', (e) => {
 			if (e.code !== 'HPE_INVALID_CONSTANT') {
 				_that.logger.error('_startDownloadUrl error ' + JSON.stringify(e));
@@ -385,6 +395,7 @@ class MainWindow {
 		this.downloadUrls = _newDownloadUrls;
 		this.logger.debug('_delDownloadByUrl new array ' + this.downloadUrls.length);
 	}
+
 
 }
 
