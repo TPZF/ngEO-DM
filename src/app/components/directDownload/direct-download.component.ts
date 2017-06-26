@@ -1,13 +1,7 @@
-import { Component, Input, OnDestroy, OnInit, NgZone } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component, OnDestroy, OnInit, NgZone } from '@angular/core';
 
 import { ElectronService } from 'ngx-electron';
-
-import { ConfigurationService } from './../../services/configuration.service';
-import { DarStatusService } from './../../services/dar-status.service';
-import { ProductService } from './../../services/product.service';
-import { SettingsService } from './../../services/settings.service';
+import { IpcRendererService } from './../../services/ipc-renderer.service';
 
 import { ProductStatus } from './../../models/dar-status';
 
@@ -23,10 +17,7 @@ export class DirectDownloadComponent implements OnDestroy, OnInit {
 
 	constructor(
 		private _electronService: ElectronService,
-		private _configurationService: ConfigurationService,
-		private darStatusService: DarStatusService,
-		private _productService: ProductService,
-		private _settingsService: SettingsService,
+		private _ipcRendererService: IpcRendererService,
 		private _ngZone: NgZone
 	) { }
 
@@ -38,82 +29,13 @@ export class DirectDownloadComponent implements OnDestroy, OnInit {
 			mode: 'determinate',
 			productURL: ''
 		};
-		this._electronService.ipcRenderer.on('downloadError', (event, downloadItem) => {
-			console.log('downloadError', _that._fileDownload.productURL);
-			_that._ngZone.run(() => {
-				if (_that._fileDownload.productURL === downloadItem.url) {
-					_that._fileDownload.mode = 'determinate';
-					_that._fileDownload.errorMsg = JSON.stringify(downloadItem.errorMsg);
-				}
-			});
-		});
-		this._electronService.ipcRenderer.on('downloadCompleted', (event, downloadItem) => {
-			console.log('downloadCompleted', _that._fileDownload.productURL);
-			_that._ngZone.run(() => {
-				if (_that._fileDownload.productURL === downloadItem.url) {
-					_that._fileDownload.percentageCompleted = '100';
-					_that._fileDownload.localPath = downloadItem.path;
-				}
-			});
-		});
-		this._electronService.ipcRenderer.on('downloadUpdated', (event, downloadItem) => {
-			console.log('downloadUploaded', _that._fileDownload.productURL);
-			_that._ngZone.run(() => {
-				if (_that._fileDownload.productURL === downloadItem.url) {
-					_that._fileDownload.mode = 'determinate';
-					_that._fileDownload.expectedSize = downloadItem.total;
-					if (parseInt(_that._fileDownload.expectedSize, 10) > 0) {
-						_that._fileDownload.percentageCompleted = '' + Math.floor(parseInt(downloadItem.received, 10) / parseInt(downloadItem.total, 10) * 100);
-					}
-					_that._fileDownload.loadedSize = downloadItem.received;
-				}
-			});
-		});
-
-		this._electronService.ipcRenderer.on('downloadFileUpdated', (event, downloadItem) => {
-			console.log('downloadFileUpdated');
-			_that._ngZone.run(() => {
-				if (_that._fileDownload.productURL === downloadItem.url) {
-					_that._fileDownload.mode = 'determinate';
-					_that._fileDownload.expectedSize = downloadItem.total;
-					if (parseInt(_that._fileDownload.expectedSize, 10) > 0) {
-						_that._fileDownload.percentageCompleted = '' + Math.floor(parseInt(downloadItem.received, 10) / parseInt(downloadItem.total, 10) * 100);
-					}
-					_that._fileDownload.loadedSize = downloadItem.received;
-				}
-			});
-		});
-		this._electronService.ipcRenderer.on('downloadFileCompleted', (event, downloadItem) => {
-			console.log('downloadFileCompleted');
-			_that._ngZone.run(() => {
-				if (_that._fileDownload.productURL === downloadItem.url) {
-					_that._fileDownload.mode = 'determinate';
-					_that._fileDownload.percentageCompleted = '100';
-					_that._fileDownload.localPath = downloadItem.path;
-				}
-			});
-		});
-		this._electronService.ipcRenderer.on('downloadFileError', (event, downloadItem) => {
-			console.log('downloadFileError');
-			_that._ngZone.run(() => {
-				if (_that._fileDownload.productURL === downloadItem.url) {
-					_that._fileDownload.mode = 'indeterminate';
-					_that._fileDownload.percentageCompleted = '0';
-					_that._fileDownload.loadedSize = '0';
-					_that._productService.startECPDownloadProduct(_that._fileDownload);
-				}
-			});
-		});
+		this._ipcRendererService.initDownload(this._ngZone, this._fileDownload);
 	}
 
 	download() {
 		this._fileDownload.productURL = this._urlInput;
 		this._fileDownload.mode = 'indeterminate';
-		if (this._urlInput.indexOf(this._configurationService.get().ecp.serviceprovider.host) > -1) {
-			this._productService.startECPDownloadProduct(this._fileDownload);
-		} else {
-			this._productService.startDownloadFile(this._fileDownload.productURL);
-		}
+		this._electronService.ipcRenderer.send('startDownload', this._fileDownload.productURL);
 	}
 
 	openProductFile() {
@@ -129,13 +51,7 @@ export class DirectDownloadComponent implements OnDestroy, OnInit {
 	}
 
 	ngOnDestroy() {
-		// remove listeners to avoid memory leak
-		this._electronService.ipcRenderer.removeAllListeners('downloadError');
-		this._electronService.ipcRenderer.removeAllListeners('downloadUpdated');
-		this._electronService.ipcRenderer.removeAllListeners('downloadCompleted');
-		this._electronService.ipcRenderer.removeAllListeners('downloadFileError');
-		this._electronService.ipcRenderer.removeAllListeners('downloadFileUpdated');
-		this._electronService.ipcRenderer.removeAllListeners('downloadFileCompleted');
+		this._ipcRendererService.destroyDownload();
 	}
 
 	private isValidForm() {
