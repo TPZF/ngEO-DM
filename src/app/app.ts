@@ -29,6 +29,7 @@ import { DownloadManagerService } from './services/download-manager.service';
 import { ECPService } from './services/ecp.service';
 import { EoSsoService } from './services/eo-sso.service';
 import { ErrorService } from './services/error.service';
+import { IpcRendererService } from './services/ipc-renderer.service';
 import { ProductService } from './services/product.service';
 import { SettingsService } from './services/settings.service';
 import { SsoService } from './services/sso.service';
@@ -80,6 +81,7 @@ import { routes } from './app.routes';
 		ECPService,
 		EoSsoService,
 		ErrorService,
+		IpcRendererService,
 		ProductService,
 		SettingsService,
 		SsoService
