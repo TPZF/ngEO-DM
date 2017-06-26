@@ -6,6 +6,7 @@ import 'rxjs/add/operator/map';
 
 import { ConfigurationService } from './configuration.service';
 import { ErrorService } from './error.service';
+import { ElectronService } from 'ngx-electron';
 import { DarStatus, ProductStatus } from './../models/dar-status';
 
 @Injectable()
@@ -26,7 +27,12 @@ export class DarStatusService {
 	 * @function constructor
 	 * @param http
 	 */
-	constructor(private _http: Http, private errorService: ErrorService, private _configurationService: ConfigurationService) {
+	constructor(
+		private _http: Http,
+		private errorService: ErrorService,
+		private _configurationService: ConfigurationService,
+		private _electronService: ElectronService
+	) {
 		this._baseUrl = _configurationService.get().qsHost;
 		this._darStatusesUrl = this._baseUrl + '/dataAccessRequestStatuses';
 		this._simpleDarUrl = this._baseUrl + '/simpleDataAccessRequests';
@@ -91,6 +97,44 @@ export class DarStatusService {
 			);
 	}
 
+	/**
+	 * @function startDownload
+	 * @param myDar
+	 */
+	startDownload(myDar: DarStatus) {
+
+		myDar.productStatuses.forEach((_product) => {
+			_product.percentageCompleted = '0';
+			_product.loadedSize = '0';
+			_product.mode = 'indeterminate';
+			this._electronService.ipcRenderer.send('startDownload', _product.productURL);
+		});
+
+	}
+
+	cancelDownload(myDar: DarStatus) {
+		this._electronService.ipcRenderer.send('cancelDownloadDar', myDar);
+	}
+
+	pauseDownload(myDar: DarStatus) {
+		this._electronService.ipcRenderer.send('pauseDownloadDar', myDar);
+	}
+
+	checkDownload(myDar: DarStatus, myStatus: string) {
+
+		let complete = 0;
+		myDar.productStatuses.forEach((product) => {
+			if (+product.percentageCompleted === 100) {
+				complete++;
+			}
+		});
+		if (complete === myDar.productStatuses.length) {
+			myDar.status = 0;
+			return '0';
+		} else {
+			return myStatus;
+		}
+	}
 
 	// /**
 	//  * @function getDarStatus
