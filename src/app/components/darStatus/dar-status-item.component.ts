@@ -6,8 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { ElectronService } from 'ngx-electron';
 
 import { DarStatusService } from './../../services/dar-status.service';
-import { ProductService } from './../../services/product.service';
-import { SettingsService } from './../../services/settings.service';
+import { IpcRendererService } from './../../services/ipc-renderer.service';
 
 import { DarStatus, ProductStatus } from './../../models/dar-status';
 
@@ -27,10 +26,9 @@ export class DarStatusItemComponent implements OnDestroy, OnInit, DoCheck {
 	private _started: boolean = false;
 
 	constructor(
-		private _electronService: ElectronService,
 		private _darStatusService: DarStatusService,
-		private _productService: ProductService,
-		private _settingsService: SettingsService,
+		private _electronService: ElectronService,
+		private _ipcRendererService: IpcRendererService,
 		private _ngZone: NgZone
 	) { }
 
@@ -39,87 +37,8 @@ export class DarStatusItemComponent implements OnDestroy, OnInit, DoCheck {
 		let _that = this;
 		this._newStatus = '' + this.darStatus.status;
 
-		// listener on downloadCompleted
-		this._electronService.ipcRenderer.on('downloadCompleted', (event, downloadItem) => {
-			_that._ngZone.run(() => {
-				_that.darStatus.productStatuses.forEach(_product => {
-					if (_product.productURL === downloadItem.url) {
-						console.log('downloadCompleted', downloadItem);
-						_product.percentageCompleted = '100';
-						_product.localPath = downloadItem.path;
-					}
-				});
-			});
-		});
+		this._ipcRendererService.initDownloadForDarStatus(this._ngZone, this.darStatus);
 
-		// listener on downloadUploaded
-		this._electronService.ipcRenderer.on('downloadUpdated', (event, downloadItem) => {
-			_that._ngZone.run(() => {
-				_that.darStatus.productStatuses.forEach(_product => {
-					if (_product.productURL === downloadItem.url) {
-						_product.mode = 'determinate';
-						_product.expectedSize = downloadItem.total;
-						if (parseInt(_product.expectedSize, 10) > 0) {
-							_product.percentageCompleted = '' + Math.floor(parseInt(downloadItem.received, 10) / parseInt(downloadItem.total, 10) * 100);
-						}
-						_product.loadedSize = downloadItem.received;
-					}
-				});
-			});
-		});
-
-		// listener on downloadError
-		this._electronService.ipcRenderer.on('downloadError', (event, downloadItem) => {
-			_that._ngZone.run(() => {
-				_that.darStatus.productStatuses.forEach(_product => {
-					if (_product.productURL === downloadItem.url) {
-						console.log('downloadError', downloadItem);
-						_product.mode = 'determinate';
-						_product.errorMsg = JSON.stringify(downloadItem.errorMsg);
-					}
-				});
-			});
-		});
-
-		this._electronService.ipcRenderer.on('downloadFileUpdated', (event, downloadItem) => {
-			_that._ngZone.run(() => {
-				_that.darStatus.productStatuses.forEach(_product => {
-					if (_product.productURL === downloadItem.url) {
-						_product.mode = 'determinate';
-						_product.expectedSize = downloadItem.total;
-						if (parseInt(_product.expectedSize, 10) > 0) {
-							_product.percentageCompleted = '' + Math.floor(parseInt(downloadItem.received, 10) / parseInt(downloadItem.total, 10) * 100);
-						}
-						_product.loadedSize = downloadItem.received;
-					}
-				});
-			});
-		});
-		this._electronService.ipcRenderer.on('downloadFileCompleted', (event, downloadItem) => {
-			_that._ngZone.run(() => {
-				_that.darStatus.productStatuses.forEach(_product => {
-					if (_product.productURL === downloadItem.url) {
-						console.log('downloadFileCompleted', downloadItem);
-						_product.mode = 'determinate';
-						_product.percentageCompleted = '100';
-						_product.localPath = downloadItem.path;
-					}
-				});
-			});
-		});
-		this._electronService.ipcRenderer.on('downloadFileError', (event, downloadItem) => {
-			_that._ngZone.run(() => {
-				_that.darStatus.productStatuses.forEach(_product => {
-					if (_product.productURL === downloadItem.url) {
-						console.log('downloadFileError', downloadItem);
-						_product.mode = 'indeterminate';
-						_product.percentageCompleted = '0';
-						_product.loadedSize = '0';
-						_that._productService.startECPDownloadProduct(_product);
-					}
-				});
-			});
-		});
 	}
 
 	ngDoCheck() {
@@ -131,25 +50,25 @@ export class DarStatusItemComponent implements OnDestroy, OnInit, DoCheck {
 		if (+this._newStatus === 0 && +this.darStatus.status === 10) {
 			// click on stop after start
 			this.darStatus.status = 0;
-			this._productService.cancelDownload(this.darStatus);
+			this._darStatusService.cancelDownload(this.darStatus);
 		} else if (+this._newStatus === 5 && +this.darStatus.status === 10) {
 			// click on pause after start
 			this.darStatus.status = 5;
-			this._productService.pauseDownload(this.darStatus);
+			this._darStatusService.pauseDownload(this.darStatus);
 		} else if (+this._newStatus === 0 && +this.darStatus.status === 5) {
 			// click on stop after pause
 			this.darStatus.status = 0;
-			this._productService.cancelDownload(this.darStatus);
+			this._darStatusService.cancelDownload(this.darStatus);
 		} else if (+this._newStatus === 10 && +this.darStatus.status === 0) {
 			// click on start after stop
 			this.darStatus.status = 10;
-			this._productService.startDownload(this.darStatus);
+			this._darStatusService.startDownload(this.darStatus);
 		} else if (+this._newStatus === 10 && +this.darStatus.status === 5) {
 			// click on start after pause
 			this.darStatus.status = 10;
-			this._productService.startDownload(this.darStatus);
+			this._darStatusService.startDownload(this.darStatus);
 		} else {
-			this._newStatus = this._productService.checkDownload(this.darStatus, this._newStatus);
+			this._newStatus = this._darStatusService.checkDownload(this.darStatus, this._newStatus);
 		}
 
 	}
@@ -159,13 +78,7 @@ export class DarStatusItemComponent implements OnDestroy, OnInit, DoCheck {
 	}
 
 	ngOnDestroy() {
-		// remove listeners  to avoid memory leak
-		this._electronService.ipcRenderer.removeAllListeners('downloadError');
-		this._electronService.ipcRenderer.removeAllListeners('downloadUpdated');
-		this._electronService.ipcRenderer.removeAllListeners('downloadCompleted');
-		this._electronService.ipcRenderer.removeAllListeners('downloadFileError');
-		this._electronService.ipcRenderer.removeAllListeners('downloadFileUpdated');
-		this._electronService.ipcRenderer.removeAllListeners('downloadFileCompleted');
+		this._ipcRendererService.destroyDownload();
 	}
 
 	delete() {
