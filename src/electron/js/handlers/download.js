@@ -18,15 +18,27 @@ const logger = require('../utils/logger');
 class DownloadHandler {
 
 	constructor(myTopWindow, myMainWindow) {
-		this._topWindow = myTopWindow;
-		this._mainWindow = myMainWindow;
+		this.topWindow = myTopWindow;
+		this.mainWindow = myMainWindow;
+
+		this._downloads = [];
 		this._downloadItems = [];
 		this._downloadUrls = [];
 		this._downloadRequests = [];
 		this.shibb = null;
 	}
 
+	/**
+	 * Try do download with DownloadItem provided by electron
+	 *
+	 * @function startDownload
+	 * @param {string} myUrl
+	 */
 	startDownload(myUrl) {
+		if (this._downloads.indexOf(myUrl) === -1) {
+			this._downloads.push({ url: myUrl });
+		}
+		logger.debug('downloadHandler.startDownload _downloads.length=' + this._downloads.length);
 		let _item = this._getDownloadItemByUrl(myUrl);
 		if (_item !== null && _item.isPaused()) {
 			logger.debug('downloadHandler.startDownload item not null > resume it !');
@@ -34,10 +46,77 @@ class DownloadHandler {
 		} else {
 			logger.debug('downloadHandler.startDownload item null > download it !');
 			logger.debug('url: ' + myUrl);
-			this._topWindow._bw.webContents.downloadURL(myUrl);
+			// @see top-window.js - will-download
+			this.topWindow.getBrowserWindow().webContents.downloadURL(myUrl);
 		}
 	}
 
+	pauseDownload(myUrl) {
+		// find in _downloads
+		let _ind = -1;
+		this._downloads.forEach((_it, _idx) => {
+			if (_it.url === myUrl) { _ind = _idx; }
+		});
+		// if not found else end !
+		if (_ind === -1) return;
+		// if already paused
+		let setPaused = false;
+		if (!this._downloads[_ind].isPaused) {
+			this._downloads[_ind].isPaused = true;
+			setPause = true;
+		}
+		if (!setPause) return;
+		/*
+		this.logger.debug('downloadHandler.pauseDownload setPause=' + setPause);
+		let _item = null;
+		let _start = new Date();
+		let _end = new Date();
+		while (_item === null && (_end.getTime() - _start.getTime() < 1000)) {
+			_item = this._getDownloadItemByUrl(myUrl);
+			_item = this._getDownloadByUrl(myUrl);
+			_end = new Date();
+		}
+		if (_item === null) {
+			return;
+		}
+		if (!_item.isPaused()) {
+			item.pause();
+		} else {
+			if (!_item.isOnPaused) {
+				this._downloadRequests.forEach((dR) => {
+					if (dR.downloadUrl.url === myUrl) {
+						_item.isOnPaused = true;
+						dR.request.abort();
+					}
+				});
+			}
+		}
+		*/
+	}
+
+	cancelDownload(myUrl) {
+		// find in _downloads
+		let _ind = -1;
+		this._downloads.forEach((_it, _idx) => {
+			if (_it.url === myUrl) { _ind = _idx; }
+		});
+		// if not found else end !
+		if (_ind === -1) return;
+		// find if already cancelled
+		let setCancel = false;
+		if (!this._downloads[_ind].isCancelled) {
+			this._downloads[_ind].isCancelled = true;
+			setCancel = true;
+		}
+		// if already cancelled else end !
+		if (!setCancel) return;
+	}
+
+	/**
+	 * start a download via ECP
+	 * @function startEcpDownload
+	 * @param {string} myUrl
+	 */
 	startEcpDownload(myUrl) {
 
 		let _that = this;
@@ -46,6 +125,7 @@ class DownloadHandler {
 		// logger.debug('downloadHandler.startEcpDownload settings.get(username):' + settings.get('username') + '');
 		// logger.debug('downloadHandler.startEcpDownload settings.get(username):' + settings.get('password') + '');
 		let _options;
+		// if shibb then download file with cookie in header
 		if (this.shibb) {
 			let _url = URL.parse(myUrl);
 			_options = {
@@ -61,6 +141,7 @@ class DownloadHandler {
 			logger.debug('downloadHandler.startEcpDownload shibb _options:' + _options);
 			this._startDownloadFile(myUrl, _options);
 		} else {
+			// put credentials, path, configuration, logger and url in options
 			_options = {
 				credentials: {
 					username: settings.get('username'),
@@ -70,6 +151,7 @@ class DownloadHandler {
 				configuration: configuration.getConf(),
 				url: myUrl
 			};
+			// downloadURL via ECP
 			ecp.downloadURL(_options)
 				.then((_resp) => {
 					logger.debug('downloadHandler _resp' + _resp);
@@ -78,7 +160,7 @@ class DownloadHandler {
 				})
 				.catch((_err) => {
 					logger.debug('downloadHandler downloadError _err' + _err);
-					_that._mainWindow._bw.webContents.send('downloadError', {
+					_that.mainWindow.getBrowserWindow().webContents.send('downloadError', {
 						url: _err.url,
 						errorMsg: _err.errorMsg
 					});
@@ -134,7 +216,7 @@ class DownloadHandler {
 	}
 
 	/**
-	 * Find and return item from downloadItems array
+	 * Find and return item from downloadUrls array
 	 * which matches with myUrl input
 	 *
 	 * @function _getDownloadFileByUrl
@@ -157,7 +239,7 @@ class DownloadHandler {
 	}
 
 	/**
-	 * Del from downloadItems array
+	 * Del from downloadUrls array
 	 * if one url in chain is like myUrl
 	 *
 	 * @function _delDownloadByUrl
@@ -181,9 +263,11 @@ class DownloadHandler {
 	}
 
 	/**
+	 * Start download file with myUrl
 	 *
-	 * @param {*} myUrl
-	 * @param {*} myRequest
+	 * @function _startDownloadFile
+	 * @param {string} myUrl
+	 * @param {object} myRequest
 	 */
 	_startDownloadFile(myUrl, myRequest) {
 		logger.debug('downloadHandler.startDownloadFile');
@@ -216,6 +300,12 @@ class DownloadHandler {
 		}
 	}
 
+	/**
+	 * Start download for myDownloadUrl object
+	 *
+	 * @function _startDownloadUrl
+	 * @param {object} myDownloadUrl
+	 */
 	_startDownloadUrl(myDownloadUrl) {
 
 		let _that = this;
@@ -233,14 +323,17 @@ class DownloadHandler {
 				_that._saveRessource(_resp, myDownloadUrl);
 			});
 		}
-
-		this._downloadRequests.push(_req);
+		let _downloadReq = {
+			downloadUrl: myDownloadUrl,
+			request: _req
+		};
+		this._downloadRequests.push(_downloadReq);
 
 		_req.on('error', (e) => {
 			if (e.code !== 'HPE_INVALID_CONSTANT') {
 				logger.error('downloadHandler._startDownloadUrl error ' + JSON.stringify(e));
-				if (_that._mainWindow && _that._mainWindow.getBrowserWindow()) {
-					_that._mainWindow.getBrowserWindow().webContents.send('downloadError', {
+				if (_that.mainWindow && _that.mainWindow.getBrowserWindow()) {
+					_that.mainWindow.getBrowserWindow().webContents.send('downloadError', {
 						url: myDownloadUrl.url,
 						errorMsg: e
 					});
@@ -251,6 +344,7 @@ class DownloadHandler {
 	}
 
 	/**
+	 * Save to filePath
 	 * @function _saveRessource
 	 * @param {object} myResponse
 	 * @param {object} myDownloadUrl
@@ -276,8 +370,8 @@ class DownloadHandler {
 			_wstream.write(_chunk);
 			_bytesDone += _chunk.byteLength;
 			//myOptions.logger.debug('ECP ' + _bytesDone + ' bytes done');
-			if (_that._mainWindow && _that._mainWindow.getBrowserWindow()) {
-				_that._mainWindow.getBrowserWindow().webContents.send('downloadUpdated', {
+			if (_that.mainWindow && _that.mainWindow.getBrowserWindow()) {
+				_that.mainWindow.getBrowserWindow().webContents.send('downloadUpdated', {
 					url: myDownloadUrl.url,
 					total: _bytesTotal,
 					received: _bytesDone
@@ -287,8 +381,8 @@ class DownloadHandler {
 		myResponse.on('end', function () {
 			_wstream.end();
 			logger.debug('downloadHandler._saveRessource end');
-			if (_that._mainWindow && _that._mainWindow.getBrowserWindow()) {
-				_that._mainWindow.getBrowserWindow().webContents.send('downloadCompleted', {
+			if (_that.mainWindow && _that.mainWindow.getBrowserWindow()) {
+				_that.mainWindow.getBrowserWindow().webContents.send('downloadCompleted', {
 					url: myDownloadUrl.url,
 					path: _filePath
 				});
