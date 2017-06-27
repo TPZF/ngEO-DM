@@ -1,19 +1,18 @@
 'use strict';
 
 const { app, dialog, Menu, nativeImage, Tray, ipcMain } = require('electron');
+
 const path = require('path');
-
 const MainWindow = require('./main-window');
-
 const assetsPath = path.join(__dirname, '../../webapp/assets');
+const logger = require('../utils/logger');
 
 class AppTray {
 
-	constructor(myTopWindow, myMainWindow, myAppVersion, myLogger) {
+	constructor(myTopWindow, myMainWindow, myAppVersion) {
 		this._topWindow = myTopWindow;
 		this._mainWindow = myMainWindow;
 		this._appVersion = myAppVersion;
-		this._logger = myLogger;
 		this.createTray();
 	}
 
@@ -51,7 +50,7 @@ class AppTray {
 	}
 
 	showMainWindow() {
-		this._logger.debug('AppTray.showMainWindow()');
+		logger.debug('AppTray.showMainWindow()');
 		// if mainWindow is null -> recreate it
 		if (this._mainWindow.getBrowserWindow() == null) {
 			this._mainWindow.createWindow();

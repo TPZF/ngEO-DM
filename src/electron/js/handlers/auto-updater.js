@@ -2,13 +2,13 @@
 
 const { dialog } = require('electron');
 const autoUpdater = require('electron-simple-updater');
+const logger = require('../utils/logger');
 
 class AutoUpdaterHandler {
 
-	constructor(myMainWindow, myLogger) {
+	constructor(myMainWindow) {
 		this._autoUpdater = autoUpdater;
 		this._mainWindow = myMainWindow;
-		this._logger = myLogger;
 		this.initListeners();
 	}
 
@@ -17,11 +17,11 @@ class AutoUpdaterHandler {
 		let _that = this;
 
 		this._autoUpdater.on('error', (error) => {
-			this._logger.error(error);
+			logger.error(error);
 		});
 
 		this._autoUpdater.on('update-available', () => {
-			this._logger.info('AutoUpdaterHandler.event#update-available');
+			logger.info('AutoUpdaterHandler.event#update-available');
 			dialog.showMessageBox(this._mainWindow.getBrowserWindow(), {
 				type: 'warning',
 				buttons: ['Update now', 'Cancel'],
@@ -35,7 +35,7 @@ class AutoUpdaterHandler {
 		});
 
 		this._autoUpdater.on('update-not-available', () => {
-			this._logger.info('AutoUpdaterHandler.event#update-not-available...');
+			logger.info('AutoUpdaterHandler.event#update-not-available...');
 			if (AutoUpdaterHandler.CHECKED) {
 				dialog.showMessageBox(this._mainWindow.getBrowserWindow(), {
 					type: 'info',
@@ -49,7 +49,7 @@ class AutoUpdaterHandler {
 		});
 
 		this._autoUpdater.on('update-downloaded', (e) => {
-			this._logger.info(e);
+			logger.info(e);
 			this._autoUpdater.quitAndInstall();
 		});
 	}

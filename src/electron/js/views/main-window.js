@@ -5,22 +5,19 @@ const http = require('http');
 const https = require('https');
 const path = require('path');
 const URL = require('url');
-
 const settings = require('electron-settings');
-const configuration = require('./../handlers/configuration');
 
-const ecp = require('./../ecp');
-
+const configuration = require('../handlers/configuration');
+const ecp = require('../ecp');
 const rootPath = path.join(__dirname, './../..');
 const assetsPath = path.join(rootPath, 'webapp/assets');
+const logger = require('../utils/logger');
 
 class MainWindow {
 
-	constructor(myTopWindow, myLogger, myIsDev) {
+	constructor(myTopWindow) {
 		this.topWindow = myTopWindow;
 		this._bw = null;
-		this.logger = myLogger;
-		this.isDev = myIsDev;
 		this.downloadItems = [];
 		this.downloadUrls = [];
 		this.downloadRequests = [];
@@ -29,7 +26,7 @@ class MainWindow {
 
 	createWindow() {
 
-		this.logger.debug('MainWindow.createWindow');
+		logger.debug('MainWindow.createWindow');
 		// Initialize the window to our specified dimensions
 		this._bw = new BrowserWindow({
 			icon: path.join(assetsPath, 'ngeo-window.png'),
@@ -55,14 +52,14 @@ class MainWindow {
 	initWindowEvents() {
 		// Show window when ready to show
 		this._bw.once('ready-to-show', () => {
-			this.logger.debug('MainWindow event ready-to-show');
+			logger.debug('MainWindow event ready-to-show');
 			this._bw.show();
 			this._bw.focus();
 		});
 
 		// Clear out the main window when the app is closed
 		this._bw.on('closed', () => {
-			this.logger.debug('MainWindow event closed');
+			logger.debug('MainWindow event closed');
 			this._bw = null;
 		});
 
@@ -70,14 +67,14 @@ class MainWindow {
 
 	load() {
 
-		this.logger.debug('MainWindow.load');
+		logger.debug('MainWindow.load');
 
 		// Tell Electron where to load the entry point from
 		this._bw.loadURL("file://" + rootPath + "/index.html");
 
 		// Open the DevTools.
-		if (this.isDev) {
-			this.logger.debug('MainWindow in dev mode > openDevTools');
+		if (configuration.isDevMode) {
+			logger.debug('MainWindow in dev mode > openDevTools');
 			this._bw.webContents.openDevTools();
 		}
 	}
@@ -106,15 +103,14 @@ class MainWindow {
 		// -------------------------------------------
 		// start
 		ipcMain.on('startEcpDownload', (event, myProduct) => {
-			_that.logger.debug('ipcMain.startEcpDownload');
+			logger.debug('ipcMain.startEcpDownload');
 			let _options = {
 				credentials: {
 					username: settings.get('username'),
 					password: settings.get('password')
 				},
 				path: settings.get('downloadPath') + '/',
-				configuration: configuration.getConf(this.isDev),
-				logger: _that.logger
+				configuration: configuration.getConf()
 			};
 			_options.url = myProduct.productURL;
 			ecp.downloadURL(_options)
@@ -138,19 +134,19 @@ class MainWindow {
 		});
 		// pause
 		ipcMain.on('pauseDownloadFile', (event, myUrlFile) => {
-			_that.logger.debug('ipcMain.pauseDownloadFile');
+			logger.debug('ipcMain.pauseDownloadFile');
 			let _item = _that._getDownloadItemByUrl(myUrlFile);
 			if (_item !== null) {
-				_that.logger.debug('ipcMain.cancelDownloadFile item not null > pause it !');
+				logger.debug('ipcMain.cancelDownloadFile item not null > pause it !');
 				_item.pause();
 			}
 		});
 		// cancel
 		ipcMain.on('cancelDownloadFile', (event, myUrlFile) => {
-			_that.logger.debug('ipcMain.cancelDownloadFile');
+			logger.debug('ipcMain.cancelDownloadFile');
 			let _item = _that._getDownloadItemByUrl(myUrlFile);
 			if (_item !== null) {
-				_that.logger.debug('ipcMain.cancelDownloadFile item not null > cancel it !');
+				logger.debug('ipcMain.cancelDownloadFile item not null > cancel it !');
 				_that._delDownloadItemByUrl(myUrlFile);
 				_item.cancel();
 			}
@@ -161,16 +157,16 @@ class MainWindow {
 		// -------------------------------------------
 		// start
 		ipcMain.on('startDownloadDar', (event, myDar) => {
-			_that.logger.debug('ipcMain.startDownloadDar');
+			logger.debug('ipcMain.startDownloadDar');
 			var wc = _that.topWindow.webContents;
 			myDar.productStatuses.forEach((product) => {
 				let item = _that._getDownloadItemByUrl(product.productURL);
 				if (item !== null && item.isPaused()) {
-					_that.logger.debug('ipcMain.startDownloadDar item not null > resume it !');
+					logger.debug('ipcMain.startDownloadDar item not null > resume it !');
 					item.resume();
 				} else {
-					_that.logger.debug('ipcMain.startDownloadDar item null > download it !');
-					_that.logger.debug('url: ' + product.productURL);
+					logger.debug('ipcMain.startDownloadDar item null > download it !');
+					logger.debug('url: ' + product.productURL);
 
 					wc.downloadURL(product.productURL);
 				}
@@ -178,22 +174,22 @@ class MainWindow {
 		});
 		// pause
 		ipcMain.on('pauseDownloadDar', (event, myDar) => {
-			_that.logger.debug('ipcMain.pauseDownloadDar');
+			logger.debug('ipcMain.pauseDownloadDar');
 			myDar.productStatuses.forEach((product) => {
 				let item = _that._getDownloadItemByUrl(product.productURL);
 				if (item !== null) {
-					_that.logger.debug('ipcMain.cancelDownloadDar item not null > pause it !');
+					logger.debug('ipcMain.cancelDownloadDar item not null > pause it !');
 					item.pause();
 				}
 			});
 		});
 		// cancel
 		ipcMain.on('cancelDownloadDar', (event, myDar) => {
-			_that.logger.debug('ipcMain.cancelDownloadDar');
+			logger.debug('ipcMain.cancelDownloadDar');
 			myDar.productStatuses.forEach((product) => {
 				let item = _that._getDownloadItemByUrl(product.productURL);
 				if (item !== null) {
-					_that.logger.debug('ipcMain.cancelDownloadDar item not null > cancel it !');
+					logger.debug('ipcMain.cancelDownloadDar item not null > cancel it !');
 					item.cancel();
 				}
 			});
@@ -224,9 +220,9 @@ class MainWindow {
 			event.returnValue = settings.getAll();
 		});
 		ipcMain.on('settings-set', (event, key, value) => {
-			_that.logger.debug('ipcMain.settings-set');
-			_that.logger.debug('ipcMain.settings-set key=' + key);
-			_that.logger.debug('ipcMain.settings-set value=' + value);
+			logger.debug('ipcMain.settings-set');
+			logger.debug('ipcMain.settings-set key=' + key);
+			logger.debug('ipcMain.settings-set value=' + value);
 			if ((key !== '') && (value !== '')) {
 				settings.set(key, value);
 				event.returnValue = 'done';
@@ -247,14 +243,14 @@ class MainWindow {
 	_getDownloadItemByUrl(myUrl) {
 		let _result = null;
 		if (this.downloadItems) {
-			this.logger.debug('_getDownloadItemByUrl items.length ' + this.downloadItems.length);
+			logger.debug('_getDownloadItemByUrl items.length ' + this.downloadItems.length);
 			this.downloadItems.forEach((_item) => {
 				if (_item.getURLChain()[0] === myUrl) {
 					_result = _item;
 				}
 			});
 		}
-		this.logger.debug('_getDownloadItemByUrl ' + _result);
+		logger.debug('_getDownloadItemByUrl ' + _result);
 		return _result;
 	}
 
@@ -270,8 +266,8 @@ class MainWindow {
 	_delDownloadItemByUrl(myUrl) {
 		let _newDownloadItems = [];
 		if (this.downloadItems) {
-			this.logger.debug('_delDownloadItemByUrl old array ' + this.downloadItems.length);
-			this.downloadItems.forEach((_item) => {
+			logger.debug('_delDownloadItemByUrl old array ' + this.downloadItems.length);
+			downloadItems.forEach((_item) => {
 				// getURLChain()[0] is the first url called
 				if (_item.getURLChain()[0] !== myUrl) {
 					_newDownloadItems.push(_item);
@@ -279,18 +275,18 @@ class MainWindow {
 			});
 		}
 		this.downloadItems = _newDownloadItems;
-		this.logger.debug('_delDownloadItemByUrl new array ' + this.downloadItems.length);
+		logger.debug('_delDownloadItemByUrl new array ' + this.downloadItems.length);
 	}
 
 	_startDownloadFile(myUrl, myRequest) {
-		this.logger.debug('ipcMain.startDownloadFile');
+		logger.debug('ipcMain.startDownloadFile');
 		let _item = this._getDownloadByUrl(myUrl);
 		if (_item !== null && _item.isPaused) {
-			this.logger.debug('ipcMain.startDownloadFile item already exists > resume it !');
+			logger.debug('ipcMain.startDownloadFile item already exists > resume it !');
 			this._resumeDownloadUrl(_item);
 		} else {
-			this.logger.debug('ipcMain.startDownloadFile item null > download it !');
-			this.logger.debug(myRequest);
+			logger.debug('ipcMain.startDownloadFile item null > download it !');
+			logger.debug(myRequest);
 			if (typeof myRequest === 'undefined') {
 				let _url = URL.parse(myUrl);
 				let _path = _url.pathname + (_url.search == null ? '' : _url.search);
@@ -308,7 +304,7 @@ class MainWindow {
 				request: myRequest
 			};
 			this.downloadUrls.push(downloadUrl);
-			this.logger.debug(this.downloadUrls.length);
+			logger.debug(this.downloadUrls.length);
 			this._startDownloadUrl(downloadUrl);
 		}
 	}
@@ -317,8 +313,8 @@ class MainWindow {
 
 		let _that = this;
 
-		this.logger.debug('_startDownloadUrl ' + myDownloadUrl.url);
-		this.logger.debug('_startDownloadUrl ' + JSON.stringify(myDownloadUrl.request));
+		logger.debug('_startDownloadUrl ' + myDownloadUrl.url);
+		logger.debug('_startDownloadUrl ' + JSON.stringify(myDownloadUrl.request));
 		// request
 		let _req;
 		if (myDownloadUrl.url.indexOf('https') === 0) {
@@ -335,7 +331,7 @@ class MainWindow {
 
 		_req.on('error', (e) => {
 			if (e.code !== 'HPE_INVALID_CONSTANT') {
-				_that.logger.error('_startDownloadUrl error ' + JSON.stringify(e));
+				logger.error('_startDownloadUrl error ' + JSON.stringify(e));
 				_that.mainWindow.webContents.send('downloadError', {
 					url: myDownloadUrl.url,
 					errorMsg: e
@@ -346,7 +342,7 @@ class MainWindow {
 	}
 
 	_resumeDownloadUrl(myDownloadUrl) {
-		this.logger.debug('_resumeDownloadUrl ' + myDownloadUrl.url);
+		logger.debug('_resumeDownloadUrl ' + myDownloadUrl.url);
 	}
 
 	/**
@@ -361,14 +357,14 @@ class MainWindow {
 	_getDownloadByUrl(myUrl) {
 		let _result = null;
 		if (this.downloadUrls) {
-			this.logger.debug('_getDownloadByUrl items.length ' + this.downloadUrls.length);
+			logger.debug('_getDownloadByUrl items.length ' + this.downloadUrls.length);
 			this.downloadUrls.forEach((_downloadUrl) => {
 				if (_downloadUrl.url === myUrl) {
 					_result = _downloadUrl;
 				}
 			});
 		}
-		this.logger.debug('_getDownloadByUrl ' + _result);
+		logger.debug('_getDownloadByUrl ' + _result);
 		return _result;
 	}
 
@@ -384,7 +380,7 @@ class MainWindow {
 	_delDownloadByUrl(myUrl) {
 		let _newDownloadUrls = [];
 		if (this.downloadUrls) {
-			this.logger.debug('_delDownloadByUrl old array ' + this.downloadUrls.length);
+			logger.debug('_delDownloadByUrl old array ' + this.downloadUrls.length);
 			this.downloadUrls.forEach((_downloadUrl) => {
 				// getURLChain()[0] is the first url called
 				if (_downloadUrl.url !== myUrl) {
@@ -393,7 +389,7 @@ class MainWindow {
 			});
 		}
 		this.downloadUrls = _newDownloadUrls;
-		this.logger.debug('_delDownloadByUrl new array ' + this.downloadUrls.length);
+		logger.debug('_delDownloadByUrl new array ' + this.downloadUrls.length);
 	}
 
 
