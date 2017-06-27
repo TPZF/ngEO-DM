@@ -99,27 +99,47 @@ export class DarStatusService {
 
 	/**
 	 * @function startDownload
-	 * @param myDar
+	 * @param {DarStatus} myDar
+	 * @see component <dar-status-item>
 	 */
 	startDownload(myDar: DarStatus) {
-
 		myDar.productStatuses.forEach((_product) => {
 			_product.percentageCompleted = '0';
 			_product.loadedSize = '0';
 			_product.mode = 'indeterminate';
 			this._electronService.ipcRenderer.send('startDownload', _product.productURL);
 		});
-
 	}
 
+	/**
+	 * @function cancelDownload
+	 * @param {DarStatus} myDar
+	 * @see component <dar-status-item>
+	 */
 	cancelDownload(myDar: DarStatus) {
-		this._electronService.ipcRenderer.send('cancelDownloadDar', myDar);
+		this._electronService.ipcRenderer.send('cancelDownload', myDar);
 	}
 
+	/**
+	 * @function pauseDownload
+	 * @param {DarStatus} myDar
+	 * @see component <dar-status-item>
+	 */
 	pauseDownload(myDar: DarStatus) {
-		this._electronService.ipcRenderer.send('pauseDownloadDar', myDar);
+		myDar.productStatuses.forEach((_product) => {
+			if (+_product.percentageCompleted < 100) {
+				_product.mode = 'indeterminate';
+				this._electronService.ipcRenderer.send('pauseDownload', _product.productURL);
+			}
+		});
 	}
 
+	/**
+	 * @function checkDownload
+	 * @param {DarStatus} myDar
+	 * @param {string} myStatus
+	 * @see component <dar-status-item>
+	 */
 	checkDownload(myDar: DarStatus, myStatus: string) {
 
 		let complete = 0;
