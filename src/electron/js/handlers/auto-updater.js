@@ -2,7 +2,7 @@
 
 const { dialog } = require('electron');
 const autoUpdater = require('electron-simple-updater');
-const logger = require('../utils/logger');
+const logger = require('./../utils/logger');
 
 class AutoUpdaterHandler {
 
@@ -18,6 +18,13 @@ class AutoUpdaterHandler {
 
 		this._autoUpdater.on('error', (error) => {
 			logger.error(error);
+			dialog.showMessageBox(this.mainWindow.getBrowserWindow(), {
+				type: 'error',
+				title: 'Check for update',
+				message: 'Error on checking for update',
+				detail: 'An error has been detected : ' + error + '\nPlease contact administrator.',
+				buttons: ['Close']
+			});
 		});
 
 		this._autoUpdater.on('update-available', () => {
