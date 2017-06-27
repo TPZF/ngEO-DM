@@ -20,11 +20,7 @@ class DownloadHandler {
 	constructor(myTopWindow, myMainWindow) {
 		this.topWindow = myTopWindow;
 		this.mainWindow = myMainWindow;
-
 		this._downloads = [];
-		this._downloadItems = [];
-		this._downloadUrls = [];
-		this._downloadRequests = [];
 		this.shibb = null;
 	}
 
@@ -35,14 +31,12 @@ class DownloadHandler {
 	 * @param {string} myUrl
 	 */
 	startDownload(myUrl) {
-		if (this._downloads.indexOf(myUrl) === -1) {
-			this._downloads.push({ url: myUrl });
-		}
-		logger.debug('downloadHandler.startDownload _downloads.length=' + this._downloads.length);
-		let _item = this._getDownloadItemByUrl(myUrl);
-		if (_item !== null && _item.isPaused()) {
+		logger.debug('downloadHandler.startDownload(' + myUrl + ')');
+		this._addInDownloads({ url: myUrl, type: 'DownloadItem' });
+		let _download = this._getInDownloads(myUrl);
+		if (typeof _download.item !== 'undefined' && _download.item.isPaused()) {
 			logger.debug('downloadHandler.startDownload item not null > resume it !');
-			item.resume();
+			_download.item.resume();
 		} else {
 			logger.debug('downloadHandler.startDownload item null > download it !');
 			logger.debug('url: ' + myUrl);
@@ -53,19 +47,17 @@ class DownloadHandler {
 
 	pauseDownload(myUrl) {
 		// find in _downloads
-		let _ind = -1;
-		this._downloads.forEach((_it, _idx) => {
-			if (_it.url === myUrl) { _ind = _idx; }
-		});
+		let _download = this._getInDownloads(myUrl);
 		// if not found else end !
 		if (_ind === -1) return;
 		// if already paused
 		let setPaused = false;
 		if (!this._downloads[_ind].isPaused) {
 			this._downloads[_ind].isPaused = true;
-			setPause = true;
+			setPaused = true;
 		}
-		if (!setPause) return;
+		if (!setPaused) return;
+		logger.debug('downloadHandler.cancelDownload pause it');
 		/*
 		this.logger.debug('downloadHandler.pauseDownload setPause=' + setPause);
 		let _item = null;
@@ -95,21 +87,40 @@ class DownloadHandler {
 	}
 
 	cancelDownload(myUrl) {
+		logger.debug('######### downloadHandler.cancelDownload(' + myUrl + ')');
 		// find in _downloads
-		let _ind = -1;
-		this._downloads.forEach((_it, _idx) => {
-			if (_it.url === myUrl) { _ind = _idx; }
-		});
+		let _download = this._getInDownloads(myUrl);
 		// if not found else end !
-		if (_ind === -1) return;
+		if (_download === null) return;
 		// find if already cancelled
 		let setCancel = false;
-		if (!this._downloads[_ind].isCancelled) {
-			this._downloads[_ind].isCancelled = true;
+		logger.debug('######### downloadHandler.cancelDownload isCancelled=' + _download.isCancelled);
+		if (typeof _download.isCancelled === 'undefined') {
+			_download.isCancelled = true;
 			setCancel = true;
+		} else {
+			setCancel = _download.isCancelled;
 		}
+		logger.debug('######### downloadHandler.cancelDownload setCancel=' + setCancel);
 		// if already cancelled else end !
 		if (!setCancel) return;
+		logger.debug('######### downloadHandler.cancelDownload cancel it' + _download.type);
+		if (_download.type === 'DownloadItem') {
+			if (typeof _download.item !== 'undefined') {
+				logger.debug('######### downloadHandler.cancelDownload item.cancel');
+				_download.item.cancel();
+			}
+		} else if (_download.type === 'DownloadUrl') {
+			if (typeof _download.request !== 'undefined') {
+				logger.debug('######### downloadHandler.cancelDownload request.abort');
+				_download.request.abort();
+
+			}
+		} else {
+			return;
+		}
+		this._delInDownloads(myUrl);
+
 	}
 
 	/**
@@ -122,6 +133,9 @@ class DownloadHandler {
 		let _that = this;
 
 		logger.debug('downloadHandler.startEcpDownload(' + myUrl + ')');
+
+		let _download = this._getInDownloads(myUrl);
+		_download.type = 'DownloadUrl';
 		// logger.debug('downloadHandler.startEcpDownload settings.get(username):' + settings.get('username') + '');
 		// logger.debug('downloadHandler.startEcpDownload settings.get(username):' + settings.get('password') + '');
 		let _options;
@@ -156,7 +170,9 @@ class DownloadHandler {
 				.then((_resp) => {
 					logger.debug('downloadHandler _resp' + _resp);
 					_that.shibb = _resp.request.headers['Cookie'];
-					_that._startDownloadFile(_resp.url, _resp.request);
+					if (!_download.isCancelled) {
+						_that._startDownloadFile(_resp.url, _resp.request);
+					}
 				})
 				.catch((_err) => {
 					logger.debug('downloadHandler downloadError _err' + _err);
@@ -169,100 +185,6 @@ class DownloadHandler {
 	}
 
 	/**
-	 * Find and return item from downloadItems array
-	 * which matches with myUrl input
-	 *
-	 * @function _getDownloadItemByUrl
-	 * @param {string} myUrl
-	 * @returns {DownloadItem | null}
-	 * @private
-	 */
-	_getDownloadItemByUrl(myUrl) {
-		let _result = null;
-		if (this._downloadItems) {
-			logger.debug('downloadHandler._getDownloadItemByUrl items.length ' + this._downloadItems.length);
-			this._downloadItems.forEach((_item) => {
-				if (_item.getURLChain()[0] === myUrl) {
-					_result = _item;
-				}
-			});
-		}
-		logger.debug('downloadHandler._getDownloadItemByUrl ' + _result);
-		return _result;
-	}
-
-	/**
-	 * Del from downloadItems array
-	 * if one url in chain is like myUrl
-	 *
-	 * @function _delDownloadItemByUrl
-	 * @param {string} myUrl
-	 * @returns {void}
-	 * @private
-	 */
-	_delDownloadItemByUrl(myUrl) {
-		let _newDownloadItems = [];
-		if (this._downloadItems) {
-			logger.debug('downloadHandler._delDownloadItemByUrl old array ' + this._downloadItems.length);
-			this._downloadItems.forEach((_item) => {
-				// getURLChain()[0] is the first url called
-				if (_item.getURLChain()[0] !== myUrl) {
-					_newDownloadItems.push(_item);
-				}
-			});
-		}
-		this._downloadItems = _newDownloadItems;
-		logger.debug('downloadHandler._delDownloadItemByUrl new array ' + this._downloadItems.length);
-	}
-
-	/**
-	 * Find and return item from downloadUrls array
-	 * which matches with myUrl input
-	 *
-	 * @function _getDownloadFileByUrl
-	 * @param {string} myUrl
-	 * @returns {DownloadItem | null}
-	 * @private
-	 */
-	_getDownloadByUrl(myUrl) {
-		let _result = null;
-		if (this._downloadUrls) {
-			logger.debug('downloadHandler._getDownloadByUrl items.length ' + this._downloadUrls.length);
-			this._downloadUrls.forEach((_downloadUrl) => {
-				if (_downloadUrl.url === myUrl) {
-					_result = _downloadUrl;
-				}
-			});
-		}
-		logger.debug('downloadHandler._getDownloadByUrl ' + _result);
-		return _result;
-	}
-
-	/**
-	 * Del from downloadUrls array
-	 * if one url in chain is like myUrl
-	 *
-	 * @function _delDownloadByUrl
-	 * @param {string} myUrl
-	 * @returns {void}
-	 * @private
-	 */
-	_delDownloadByUrl(myUrl) {
-		let _newDownloadUrls = [];
-		if (this._downloadUrls) {
-			logger.debug('downloadHandler._delDownloadByUrl old array ' + this._downloadUrls.length);
-			this._downloadUrls.forEach((_downloadUrl) => {
-				// getURLChain()[0] is the first url called
-				if (_downloadUrl.url !== myUrl) {
-					_newDownloadUrls.push(_downloadUrl);
-				}
-			});
-		}
-		this._downloadUrls = _newDownloadUrls;
-		logger.debug('downloadHandler._delDownloadByUrl new array ' + this._downloadUrls.length);
-	}
-
-	/**
 	 * Start download file with myUrl
 	 *
 	 * @function _startDownloadFile
@@ -271,32 +193,33 @@ class DownloadHandler {
 	 */
 	_startDownloadFile(myUrl, myRequest) {
 		logger.debug('downloadHandler.startDownloadFile');
-		let _item = this._getDownloadByUrl(myUrl);
-		if (_item !== null && _item.isPaused) {
-			logger.debug('downloadHandler.startDownloadFile item already exists > resume it !');
-			this._resumeDownloadUrl(_item);
-		} else {
-			logger.debug('downloadHandler.startDownloadFile item null > download it !');
-			logger.debug(myRequest);
-			if (typeof myRequest === 'undefined') {
-				let _url = URL.parse(myUrl);
-				let _path = _url.pathname + (_url.search == null ? '' : _url.search);
-				myRequest = {
-					host: _url.host,
-					hostname: _url.hostname,
-					protocol: _url.protocol,
-					port: _url.port,
-					path: _path,
-					method: 'GET'
+		let _download = this._getInDownloads(myUrl);
+		if (_download !== null) {
+			if (_download.isCancelled) return;
+			if (_download.isPaused) {
+				logger.debug('downloadHandler.startDownloadFile item already exists > resume it !');
+				//this._resumeDownloadUrl(_item);
+			} else {
+				logger.debug('downloadHandler.startDownloadFile item null > download it !');
+				logger.debug(myRequest);
+				if (typeof myRequest === 'undefined') {
+					let _url = URL.parse(myUrl);
+					let _path = _url.pathname + (_url.search == null ? '' : _url.search);
+					myRequest = {
+						host: _url.host,
+						hostname: _url.hostname,
+						protocol: _url.protocol,
+						port: _url.port,
+						path: _path,
+						method: 'GET'
+					};
+				}
+				let _downloadUrl = {
+					url: myUrl,
+					request: myRequest
 				};
+				this._startDownloadUrl(_downloadUrl);
 			}
-			let _downloadUrl = {
-				url: myUrl,
-				request: myRequest
-			};
-			this._downloadUrls.push(_downloadUrl);
-			logger.debug(this._downloadUrls.length);
-			this._startDownloadUrl(_downloadUrl);
 		}
 	}
 
@@ -323,11 +246,8 @@ class DownloadHandler {
 				_that._saveRessource(_resp, myDownloadUrl);
 			});
 		}
-		let _downloadReq = {
-			downloadUrl: myDownloadUrl,
-			request: _req
-		};
-		this._downloadRequests.push(_downloadReq);
+		let _download = this._getInDownloads(myDownloadUrl.url);
+		_download.request = _req;
 
 		_req.on('error', (e) => {
 			if (e.code !== 'HPE_INVALID_CONSTANT') {
@@ -358,6 +278,12 @@ class DownloadHandler {
 
 		let _fileName = this._getFileNameFromHeaders(myResponse, myDownloadUrl);
 		let _filePath = settings.get('downloadPath') + '/' + _fileName;
+		// TODO make it better
+		if (fs.existsSync(_filePath)) {
+			let _newFileName = _fileName.substring(0, _fileName.lastIndexOf('.')) + '(' + new Date().getTime() + ').' + _fileName.substring(_fileName.lastIndexOf('.') + 1);
+			_fileName = _newFileName;
+			_filePath = settings.get('downloadPath') + '/' + _fileName;
+		}
 		logger.debug('downloadHandler._saveRessource _filePath:' + _filePath);
 
 		let _wstream = fs.createWriteStream(_filePath + '.filepart');
@@ -381,20 +307,22 @@ class DownloadHandler {
 		myResponse.on('end', function () {
 			_wstream.end();
 			logger.debug('downloadHandler._saveRessource end');
-			if (_that.mainWindow && _that.mainWindow.getBrowserWindow()) {
-				_that.mainWindow.getBrowserWindow().webContents.send('downloadCompleted', {
-					url: myDownloadUrl.url,
-					path: _filePath
-				});
-			} else {
-				notifier.notify('Download completed', {
-					icon: path.join(assetsPath, 'ngeo-window.png'),
-					message: 'The file ' + _fileName + ' is completed !',
-					buttons: ['OK']
-				});
+			if (_bytesDone === _bytesTotal) {
+				if (_that.mainWindow && _that.mainWindow.getBrowserWindow()) {
+					_that.mainWindow.getBrowserWindow().webContents.send('downloadCompleted', {
+						url: myDownloadUrl.url,
+						path: _filePath
+					});
+				} else {
+					notifier.notify('Download completed', {
+						icon: path.join(assetsPath, 'ngeo-window.png'),
+						message: 'The file ' + _fileName + ' is completed !',
+						buttons: ['OK']
+					});
+				}
+				fs.renameSync(_filePath + '.filepart', _filePath);
+				_that._delInDownloads(myDownloadUrl.url);
 			}
-			fs.renameSync(_filePath + '.filepart', _filePath);
-			_that._delDownloadByUrl(myDownloadUrl.url);
 		})
 
 	}
@@ -449,6 +377,39 @@ class DownloadHandler {
 			}
 		}
 		return _size;
+	}
+
+	_addInDownloads(myDownload) {
+		// logger.debug('downloadHandler._addInDownloads');
+		if (this._getInDownloads(myDownload.url) === null) {
+			this._downloads.push(myDownload);
+		}
+		// logger.debug('downloadHandler._addInDownloads length=' + this._downloads.length);
+	}
+
+	_getInDownloads(myUrl) {
+		// logger.debug('downloadHandler._getInDownloads');
+		let _result = null;
+		this._downloads.forEach((_elem) => {
+			if (_elem.url === myUrl) {
+				_result = _elem;
+			}
+		});
+		// logger.debug('downloadHandler._getInDownloads return ' + _result);
+		return _result;
+	}
+
+	_delInDownloads(myUrl) {
+		// logger.debug('downloadHandler._delInDownloads');
+		// logger.debug('downloadHandler._delInDownloads before length=' + this._downloads.length);
+		let _newDownloads = [];
+		this._downloads.forEach((_elem) => {
+			if (_elem.url !== myUrl) {
+				_newDownloads.push(_elem);
+			}
+		});
+		this._downloads = _newDownloads;
+		// logger.debug('downloadHandler._delInDownloads after length=' + this._downloads.length);
 	}
 
 }

@@ -117,7 +117,14 @@ export class DarStatusService {
 	 * @see component <dar-status-item>
 	 */
 	cancelDownload(myDar: DarStatus) {
-		this._electronService.ipcRenderer.send('cancelDownload', myDar);
+		myDar.productStatuses.forEach((_product) => {
+			if (+_product.percentageCompleted < 100) {
+				_product.percentageCompleted = '0';
+				_product.loadedSize = '0';
+				_product.mode = 'determinate';
+				this._electronService.ipcRenderer.send('cancelDownload', _product.productURL);
+			}
+		});
 	}
 
 	/**

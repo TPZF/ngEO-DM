@@ -40,7 +40,8 @@ class TopWindow {
 
 			logger.debug('_browserWindow.willDownload');
 
-			_that.downloadHandler._downloadItems.push(item);
+			let _download = _that.downloadHandler._getInDownloads(item.getURLChain()[0]);
+			_download.item = item;
 
 			// Set the save path, making Electron not to prompt a save dialog.
 			let _path = settings.get('downloadPath') + '/';
@@ -53,7 +54,8 @@ class TopWindow {
 				if (item.getURLChain().length > 1) {
 					let _lastURL = item.getURLChain()[item.getURLChain().length - 1];
 					if (_lastURL.indexOf(configuration.getConf().ecp.serviceprovider.host) > -1) {
-						_that.downloadHandler._delDownloadItemByUrl(item.getURLChain()[0]);
+						delete _download.item;
+						_that.downloadHandler.startEcpDownload(item.getURLChain()[0]);
 						item.cancel();
 						return;
 					}
@@ -81,7 +83,7 @@ class TopWindow {
 			item.once('done', (event, state) => {
 				if (state === 'completed') {
 					logger.info('Completed for ' + item.getURLChain()[0]);
-					_that.downloadHandler._delDownloadItemByUrl(item.getURLChain()[0]);
+					_that.downloadHandler._delInDownloads(item.getURLChain()[0]);
 					if (_that._mainWindow && _that._mainWindow.getBrowserWindow()) {
 						logger.debug('send downloadFileCompleted to mainWindow...');
 						_that._mainWindow.getBrowserWindow().webContents.send('downloadFileCompleted', {
@@ -92,9 +94,8 @@ class TopWindow {
 					}
 				} else {
 					logger.error(`Download failed for ${item.getURLChain()[0]}: ${state}`);
-					if (state === 'cancelled') {
-						_that.downloadHandler.startEcpDownload(item.getURLChain()[0]);
-					} else {
+					if (state !== 'cancelled') {
+						_that.downloadHandler._delInDownloads(item.getURLChain()[0]);
 						if (_that._mainWindow && _that._mainWindow.getBrowserWindow()) {
 							logger.debug('send downloadFileError to mainWindow...');
 							_that._mainWindow.getBrowserWindow().webContents.send('downloadFileError', {
