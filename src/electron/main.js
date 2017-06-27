@@ -67,12 +67,12 @@ class DownloadManager {
 			const urlLatestDownloadManager = `${configuration.getConf().qsHost}/downloadManagers/releases/latest`;
 			if (!AutoUpdaterHandler.CHECKED) {
 				logger.debug('urlLatestDownloadManager=' + urlLatestDownloadManager);
-				this.mainWindow._autoUpdater = new AutoUpdaterHandler(this.mainWindow);
-				this.mainWindow._autoUpdater.init(urlLatestDownloadManager);
+				this.mainWindow.autoUpdater = new AutoUpdaterHandler(this.mainWindow);
+				this.mainWindow.autoUpdater.init(urlLatestDownloadManager);
 			}
 
 			// download - map to topWindow
-			this.topWindow._downloadHandler = new DownloadHandler(this.topWindow, this.mainWindow);
+			this.topWindow.downloadHandler = new DownloadHandler(this.topWindow, this.mainWindow);
 
 		});
 
