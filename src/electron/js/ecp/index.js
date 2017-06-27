@@ -2,6 +2,7 @@ const https = require('https');
 const url = require('url');
 const fs = require('fs');
 const btoa = require('btoa');
+const logger = require('./../utils/logger');
 
 const HTTPS_PORT = 443;
 
@@ -27,16 +28,16 @@ function _getSoapForUrl(myOptions) {
 
 	return new Promise((resolve, reject) => {
 
-		myOptions.logger.debug('----------------------------------------------------------------------');
-		myOptions.logger.debug('ECP _getSoapForUrl');
-		myOptions.logger.debug('----------------------------------------------------------------------');
-		myOptions.logger.debug(myOptions.url);
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP _getSoapForUrl');
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug(myOptions.url);
 
 		let _url;
 		try {
 			_url = url.parse(myOptions.url);
 		} catch (e) {
-			myOptions.logger.error('ECP _getSoapForUrl error', e);
+			logger.error('ECP _getSoapForUrl error', e);
 			reject({
 				url: myOptions.url,
 				errorMsg: e
@@ -70,7 +71,7 @@ function _getSoapForUrl(myOptions) {
 			});
 		});
 		_req.on('error', (e) => {
-			myOptions.logger.error('ECP _getSoapForUrl error ' + e);
+			logger.error('ECP _getSoapForUrl error ' + e);
 			reject({
 				url: myOptions.url,
 				errorMsg: e
@@ -93,10 +94,10 @@ function _getSoapForUrl(myOptions) {
 function _postBasicAuthenticationWithSoapOnIdP(myPromiseResponse) {
 
 	return new Promise((resolve, reject) => {
-		myPromiseResponse.options.logger.debug('----------------------------------------------------------------------');
-		myPromiseResponse.options.logger.debug('ECP _postBasicAuthenticationWithSoapOnIdP');
-		myPromiseResponse.options.logger.debug('----------------------------------------------------------------------');
-		myPromiseResponse.options.logger.debug('ECP headers:\n' + JSON.stringify(myPromiseResponse.response.headers));
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP _postBasicAuthenticationWithSoapOnIdP');
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP headers:\n' + JSON.stringify(myPromiseResponse.response.headers));
 
 		let _headerStart = myPromiseResponse.body.indexOf(HEADER_START_STRING);
 		let _headerEnd = myPromiseResponse.body.indexOf(HEADER_END_STRING);
@@ -106,12 +107,12 @@ function _postBasicAuthenticationWithSoapOnIdP(myPromiseResponse) {
 		let _rsEnd = _header.indexOf(RS_END_STRING);
 		// Get the relay state
 		let _relayState = _header.slice(_rsStart, _rsEnd + RS_END_STRING.length);
-		myPromiseResponse.options.logger.debug('ECP _relayState: ' + _relayState);
+		logger.debug('ECP _relayState: ' + _relayState);
 		let _samlResponseWithoutHeaderPrefix = myPromiseResponse.body.slice(0, _headerStart);
 		let _samlResponseWithoutHeaderPostfix = myPromiseResponse.body.slice(_headerEnd + HEADER_END_STRING.length);
 		// Form an xml doc without the sent header
 		let _idpRequest = _samlResponseWithoutHeaderPrefix + _samlResponseWithoutHeaderPostfix;
-		myPromiseResponse.options.logger.debug('ECP _idpRequest: ' + _idpRequest);
+		logger.debug('ECP _idpRequest: ' + _idpRequest);
 
 		// base64 encode the user:pass combination for BASIC AUTH
 		//var _base64UserPwd = btoa(name + ':' + password);
@@ -119,7 +120,7 @@ function _postBasicAuthenticationWithSoapOnIdP(myPromiseResponse) {
 		if (myPromiseResponse.options.credentials && myPromiseResponse.options.credentials.username && myPromiseResponse.options.credentials.password) {
 			_base64UserPwd = btoa(myPromiseResponse.options.credentials.username + ':' + myPromiseResponse.options.credentials.password);
 		}
-		myPromiseResponse.options.logger.debug('ECP _base64UserPwd: ' + _base64UserPwd);
+		logger.debug('ECP _base64UserPwd: ' + _base64UserPwd);
 
 		// options
 		let _options = {
@@ -154,7 +155,7 @@ function _postBasicAuthenticationWithSoapOnIdP(myPromiseResponse) {
 		});
 		_req.write(_idpRequest);
 		_req.on('error', (e) => {
-			myPromiseResponse.options.logger.error('ECP _postBasicAuthenticationWithSoapOnIdP error ' + e);
+			logger.error('ECP _postBasicAuthenticationWithSoapOnIdP error ' + e);
 			reject({
 				url: myPromiseResponse.options.url,
 				errorMsg: e
@@ -175,10 +176,10 @@ function _postBasicAuthenticationWithSoapOnIdP(myPromiseResponse) {
 function _postAuthenticationOnServiceProvider(myPromiseResponse) {
 
 	return new Promise((resolve, reject) => {
-		myPromiseResponse.options.logger.debug('----------------------------------------------------------------------');
-		myPromiseResponse.options.logger.debug('ECP _postAuthenticationOnServiceProvider');
-		myPromiseResponse.options.logger.debug('----------------------------------------------------------------------');
-		myPromiseResponse.options.logger.debug('ECP headers:\n' + JSON.stringify(myPromiseResponse.response.headers));
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP _postAuthenticationOnServiceProvider');
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP headers:\n' + JSON.stringify(myPromiseResponse.response.headers));
 
 		let _stringRelayState = myPromiseResponse.relayState + '';
 
@@ -224,7 +225,7 @@ function _postAuthenticationOnServiceProvider(myPromiseResponse) {
 		});
 		_req.write(_soap);
 		_req.on('error', (e) => {
-			myPromiseResponse.options.logger.error('ECP _postAuthenticationOnServiceProvider error ' + e);
+			logger.error('ECP _postAuthenticationOnServiceProvider error ' + e);
 			reject({
 				url: myPromiseResponse.options.url,
 				errorMsg: e
@@ -245,14 +246,14 @@ function _postAuthenticationOnServiceProvider(myPromiseResponse) {
 function _getRedirectAttrChecker(myPromiseResponse) {
 
 	return new Promise((resolve, reject) => {
-		myPromiseResponse.options.logger.debug('----------------------------------------------------------------------');
-		myPromiseResponse.options.logger.debug('ECP _getRedirectAttrChecker');
-		myPromiseResponse.options.logger.debug('----------------------------------------------------------------------');
-		myPromiseResponse.options.logger.debug('ECP headers:\n' + JSON.stringify(myPromiseResponse.response.headers));
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP _getRedirectAttrChecker');
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP headers:\n' + JSON.stringify(myPromiseResponse.response.headers));
 
 		// Get the shibb session cookie
 		let _shibbSessionHeaderCookie = myPromiseResponse.response.headers['set-cookie'];
-		myPromiseResponse.options.logger.debug('ECP shibbSessionHeaderCookie \n' + _shibbSessionHeaderCookie + '\n');
+		logger.debug('ECP shibbSessionHeaderCookie \n' + _shibbSessionHeaderCookie + '\n');
 
 		if (typeof _shibbSessionHeaderCookie === 'undefined') {
 			reject({
@@ -292,7 +293,7 @@ function _getRedirectAttrChecker(myPromiseResponse) {
 			});
 		});
 		_req.on('error', (e) => {
-			myPromiseResponse.options.logger.error('ECP _getRedirectAttrChecker error ' + e);
+			logger.error('ECP _getRedirectAttrChecker error ' + e);
 			reject({
 				url: myPromiseResponse.options.url,
 				errorMsg: e
@@ -313,10 +314,10 @@ function _getRedirectAttrChecker(myPromiseResponse) {
 function _getRedirectECPHook(myPromiseResponse) {
 
 	return new Promise((resolve, reject) => {
-		myPromiseResponse.options.logger.debug('----------------------------------------------------------------------');
-		myPromiseResponse.options.logger.debug('ECP _getRedirectECPHook');
-		myPromiseResponse.options.logger.debug('----------------------------------------------------------------------');
-		myPromiseResponse.options.logger.debug('ECP headers:\n' + JSON.stringify(myPromiseResponse.response.headers));
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP _getRedirectECPHook');
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP headers:\n' + JSON.stringify(myPromiseResponse.response.headers));
 
 		// Retrieve the rediction location
 		var _redirectionPath = myPromiseResponse.response.headers['location'];
@@ -350,7 +351,7 @@ function _getRedirectECPHook(myPromiseResponse) {
 			});
 		});
 		_req.on('error', (e) => {
-			myPromiseResponse.options.logger.error('ECP _getRedirectECPHook error ' + e);
+			logger.error('ECP _getRedirectECPHook error ' + e);
 			reject({
 				url: myPromiseResponse.options.url,
 				errorMsg: e
@@ -370,18 +371,18 @@ function _getRedirectECPHook(myPromiseResponse) {
 function _getRedirectToRessource(myPromiseResponse) {
 
 	return new Promise((resolve, reject) => {
-		myPromiseResponse.options.logger.debug('----------------------------------------------------------------------');
-		myPromiseResponse.options.logger.debug('ECP _getRedirectToRessource');
-		myPromiseResponse.options.logger.debug('----------------------------------------------------------------------');
-		myPromiseResponse.options.logger.debug('ECP headers:\n' + JSON.stringify(myPromiseResponse.response.headers));
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP _getRedirectToRessource');
+		logger.debug('----------------------------------------------------------------------');
+		logger.debug('ECP headers:\n' + JSON.stringify(myPromiseResponse.response.headers));
 
 		let _redirectionPath = myPromiseResponse.response.headers['location'];
 		// Remove the https host from the URL
 		_redirectionPath = _redirectionPath.slice(HTTPS_STRING.length + myPromiseResponse.options.configuration.ecp.serviceprovider.host.length);
 
-		myPromiseResponse.options.logger.debug('ECP redirectionPath ' + _redirectionPath);
+		logger.debug('ECP redirectionPath ' + _redirectionPath);
 		let _fileName = _redirectionPath.slice(_redirectionPath.lastIndexOf('/') + 1);
-		myPromiseResponse.options.logger.debug('ECP fileName ' + _fileName);
+		logger.debug('ECP fileName ' + _fileName);
 
 
 		// options
@@ -411,9 +412,6 @@ function _getRedirectToRessource(myPromiseResponse) {
  * @public
  */
 function downloadURL(myOptions) {
-	if (!myOptions.logger) {
-		myOptions.logger = console;
-	}
 	if (myOptions.url && myOptions.url !== '') {
 		return _getSoapForUrl(myOptions)
 			.then((_resp) => {
