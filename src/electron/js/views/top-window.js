@@ -1,47 +1,46 @@
 'use strict';
 
+// ELECTRON
 const { BrowserWindow, Notification } = require('electron');
+
+// SETTINGS + CONF + LOGGER
 const settings = require('electron-settings');
-const fs = require('fs');
-const notifier = require('electron-notifications');
+const configuration = require('./../handlers/configuration');
+const logger = require('./../utils/logger');
+
+// ASSETS
 const path = require('path');
-
-const configuration = require('../handlers/configuration');
-const logger = require('../utils/logger');
-
-const rootPath = path.join(__dirname, '../..');
+const rootPath = path.join(__dirname, './../..');
 const assetsPath = path.join(rootPath, 'webapp/assets');
 
 class TopWindow {
 
 	constructor() {
-		this.downloadItems = [];
-		this.downloadUrls = [];
-		this.downloadRequests = [];
+		this.downloadHandler = null;
 		this.createWindow();
-		this.initWindowEvents();
+		this.initBrowserWindowEvents();
 	}
 
 	createWindow() {
 		// Initialize the window to our specified dimensions
-		this._bw = new BrowserWindow({
+		this._browserWindow = new BrowserWindow({
 			show: false
 		});
 	}
 
 	getBrowserWindow() {
-		return this._bw;
+		return this._browserWindow;
 	}
 
-	initWindowEvents() {
+	initBrowserWindowEvents() {
 
 		let _that = this;
 
-		this._bw.webContents.session.on('will-download', (event, item, webContents) => {
+		this._browserWindow.webContents.session.on('will-download', (event, item, webContents) => {
 
-			logger.debug('_bw.willDownload');
+			logger.debug('_browserWindow.willDownload');
 
-			_that._downloadHandler._downloadItems.push(item);
+			_that.downloadHandler._downloadItems.push(item);
 
 			// Set the save path, making Electron not to prompt a save dialog.
 			let _path = settings.get('downloadPath') + '/';
@@ -54,7 +53,7 @@ class TopWindow {
 				if (item.getURLChain().length > 1) {
 					let _lastURL = item.getURLChain()[item.getURLChain().length - 1];
 					if (_lastURL.indexOf(configuration.getConf().ecp.serviceprovider.host) > -1) {
-						_that._downloadHandler._delDownloadItemByUrl(item.getURLChain()[0]);
+						_that.downloadHandler._delDownloadItemByUrl(item.getURLChain()[0]);
 						item.cancel();
 						return;
 					}
@@ -82,7 +81,7 @@ class TopWindow {
 			item.once('done', (event, state) => {
 				if (state === 'completed') {
 					logger.info('Completed for ' + item.getURLChain()[0]);
-					_that._downloadHandler._delDownloadItemByUrl(item.getURLChain()[0]);
+					_that.downloadHandler._delDownloadItemByUrl(item.getURLChain()[0]);
 					if (_that._mainWindow && _that._mainWindow.getBrowserWindow()) {
 						logger.debug('send downloadFileCompleted to mainWindow...');
 						_that._mainWindow.getBrowserWindow().webContents.send('downloadFileCompleted', {
@@ -94,11 +93,11 @@ class TopWindow {
 				} else {
 					logger.error(`Download failed for ${item.getURLChain()[0]}: ${state}`);
 					if (state === 'cancelled') {
-						_that._downloadHandler.startEcpDownload(item.getURLChain()[0]);
+						_that.downloadHandler.startEcpDownload(item.getURLChain()[0]);
 					} else {
 						if (_that._mainWindow && _that._mainWindow.getBrowserWindow()) {
 							logger.debug('send downloadFileError to mainWindow...');
-							_that.mainWindow.getBrowserWindow().webContents.send('downloadFileError', {
+							_that._mainWindow.getBrowserWindow().webContents.send('downloadFileError', {
 								url: item.getURLChain()[0]
 							});
 						}
@@ -117,15 +116,22 @@ class TopWindow {
 	 *
 	 * @function startDownload
 	 * @param {string} myUrl
-	 * @param {object} myMainWindow
+	 * @param {object} myMainWindow - send ipc message on main window
 	 */
 	_startDownload(myUrl, myMainWindow) {
 		if (!this._mainWindow) {
 			this._mainWindow = myMainWindow;
 		}
-		this._downloadHandler.startDownload(myUrl, myMainWindow);
+		this.downloadHandler.startDownload(myUrl);
 	}
 
+	_pauseDownload(myUrl, myMainWindow) {
+		this.downloadHandler.pauseDownload(myUrl);
+	}
+
+	_cancelDownload(myUrl, myMainWindow) {
+		this.downloadHandler.cancelDownload(myUrl);
+	}
 
 }
 
