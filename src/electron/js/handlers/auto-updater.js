@@ -8,7 +8,7 @@ class AutoUpdaterHandler {
 
 	constructor(myMainWindow) {
 		this._autoUpdater = autoUpdater;
-		this._mainWindow = myMainWindow;
+		this.mainWindow = myMainWindow;
 		this.initListeners();
 	}
 
@@ -22,7 +22,7 @@ class AutoUpdaterHandler {
 
 		this._autoUpdater.on('update-available', () => {
 			logger.info('AutoUpdaterHandler.event#update-available');
-			dialog.showMessageBox(this._mainWindow.getBrowserWindow(), {
+			dialog.showMessageBox(this.mainWindow.getBrowserWindow(), {
 				type: 'warning',
 				buttons: ['Update now', 'Cancel'],
 				title: 'A new update is available...',
@@ -37,7 +37,7 @@ class AutoUpdaterHandler {
 		this._autoUpdater.on('update-not-available', () => {
 			logger.info('AutoUpdaterHandler.event#update-not-available...');
 			if (AutoUpdaterHandler.CHECKED) {
-				dialog.showMessageBox(this._mainWindow.getBrowserWindow(), {
+				dialog.showMessageBox(this.mainWindow.getBrowserWindow(), {
 					type: 'info',
 					title: 'Check for update',
 					message: 'Check for update ?',
