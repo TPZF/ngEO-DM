@@ -1,18 +1,22 @@
 'use strict';
 
+// ELECTRON
 const { app, dialog, Menu, nativeImage, Tray, ipcMain } = require('electron');
 
+// ASSETS
 const path = require('path');
-const MainWindow = require('./main-window');
 const assetsPath = path.join(__dirname, '../../webapp/assets');
 const logger = require('../utils/logger');
 
+/**
+ * @class AppTray
+ */
 class AppTray {
 
 	constructor(myTopWindow, myMainWindow, myAppVersion) {
-		this._topWindow = myTopWindow;
-		this._mainWindow = myMainWindow;
-		this._appVersion = myAppVersion;
+		this.topWindow = myTopWindow;
+		this.mainWindow = myMainWindow;
+		this.appVersion = myAppVersion;
 		this.createTray();
 	}
 
@@ -52,16 +56,16 @@ class AppTray {
 	showMainWindow() {
 		logger.debug('AppTray.showMainWindow()');
 		// if mainWindow is null -> recreate it
-		if (this._mainWindow.getBrowserWindow() == null) {
-			this._mainWindow.createWindow();
+		if (this.mainWindow.getBrowserWindow() == null) {
+			this.mainWindow.createWindow();
 		} else {
-			this._mainWindow.getBrowserWindow().show();
+			this.mainWindow.getBrowserWindow().show();
 		}
 	}
 
 	checkForUpdates() {
-		if (this._mainWindow._autoUpdater) {
-			this._mainWindow._autoUpdater.checkForUpdates();
+		if (this.mainWindow.autoUpdater) {
+			this.mainWindow.autoUpdater.checkForUpdates();
 		}
 	}
 
@@ -77,12 +81,12 @@ class AppTray {
 			buttons: ['Close'],
 			title: 'About',
 			icon: _iconImage,
-			message: `The download manager is software which is retrieved and run in standalone.\nIt is used to the download of ngeo product data.\nVersion: ${this._appVersion}`
+			message: `The download manager is software which is retrieved and run in standalone.\nIt is used to the download of ngeo product data.\nVersion: ${this.appVersion}`
 		};
-		if (this._mainWindow.getBrowserWindow()) {
+		if (this.mainWindow.getBrowserWindow()) {
 			// attach dialog box to mainWindow, making it modal
 			dialog.showMessageBox(
-				this._mainWindow.getBrowserWindow(),
+				this.mainWindow.getBrowserWindow(),
 				_options
 			);
 		} else {
