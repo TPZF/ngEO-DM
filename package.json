@@ -15,7 +15,7 @@
 		"package": "node package.js",
 		"package-all": "npm run package -- --all",
 		"electron": "TODO_DEV=true electron --enable-logging src/electron",
-		"electron-windows": "electron --enable-logging src/electron && TODO_DEV=true ",
+		"electron-windows": "SET TODO_DEV=true&& electron --enable-logging src/electron",
 		"webpack-test": "webpack --config webpack.test.js --progress --profile",
 		"test": "karma start",
 		"postinstall": "install-app-deps",
