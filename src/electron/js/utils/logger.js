@@ -11,7 +11,7 @@
 const Logger = require('electron-log');
 const configuration = require('../handlers/configuration');
 
-Logger.transports.file.level = configuration.getConf().log.level;
+Logger.transports.file.level = 'warn'; //configuration.getConf().log.level;
 Logger.transports.file.format = configuration.getConf().log.format;
 Logger.transports.file.maxSize = configuration.getConf().log.maxSize;
 

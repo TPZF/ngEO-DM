@@ -240,6 +240,7 @@ class DownloadHandler {
 		let _req;
 		if (myDownloadUrl.url.indexOf('https') === 0) {
 			_req = https.request(myDownloadUrl.request, (_resp) => {
+				logger.debug('downloadHandler._startDownloadUrl https resp');
 				_that._saveRessource(_resp, myDownloadUrl);
 			});
 		} else {
@@ -270,6 +271,7 @@ class DownloadHandler {
 		});
 		_req.end();
 
+		logger.debug('downloadHandler._startDownloadUrl _req=' + _req);
 		let _download = this._getInDownloads(myDownloadUrl.url, myDownloadUrl.darName);
 		logger.debug('downloadHandler._startDownloadUrl _download=' + _download);
 		_download.requestXhr = _req;
@@ -449,20 +451,17 @@ class DownloadHandler {
 	}
 
 	_createFolderForPath(myPath) {
-		fs.access(myPath, (err) => {
+		logger.debug('downloadHandler._createFolderForPath(' + myPath + ')');
+		try {
+			fs.accessSync(myPath);
+		}
+		catch(err) {
+			logger.debug('downloadHandler._createFolderForPath err=' + JSON.stringify(err) + '');
 			if (err && err.code === 'ENOENT') {
-				fs.mkdir(myPath, (err) => {
-					if (err) {
-						logger.error('Cannot create directory for download : ' + myPath);
-						return;
-					}
-					logger.debug('Create directory for download : ' + myPath);
-					return;
-				});
-				return;
+				logger.debug('Create directory for download : ' + myPath);
+				fs.mkdirSync(myPath);
 			}
-			logger.debug('No need to create directory for download : ' + myPath);
-		});
+		}
 	}
 
 	_cleanName(myName) {
