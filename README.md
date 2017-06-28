@@ -83,8 +83,6 @@ It generates in dist folder
 
 **Get a certificate for codesigning** : Go to apple web site - Create a certificate with Developer ID option - Use CSR of your device
 
-**Sign app** `codesign --deep --force --verbose --sign "<identity>" ngeo-downloadmanager.app` : Where "identity" is the common name for certificate
-
 **Verify signature**
 
 ```
