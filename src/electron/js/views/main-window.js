@@ -32,6 +32,8 @@ class MainWindow {
 	 * Create window, init all events (IPC, browser) and load webapp
 	 *
 	 * @function createWindow
+	 * @public
+	 * @see {@link app-tray.js}
 	 */
 	createWindow() {
 
@@ -49,23 +51,25 @@ class MainWindow {
 				minHeight: 600
 			});
 
-			this.initIPCEvents();
-			this.initBrowserWindowEvents();
-			this.load();
+			this._initIPCEvents();
+			this._initBrowserWindowEvents();
+			this._load();
 		}
 	}
 
 	/**
 	 * @function getBrowserWindow
+	 * @public
 	 */
 	getBrowserWindow() {
 		return this._browserWindow;
 	}
 
 	/**
-	 * @function initIPCEvents
+	 * @function _initIPCEvents
+	 * @private
 	 */
-	initIPCEvents() {
+	_initIPCEvents() {
 
 		//
 		ipcMain.on('OpenPath', (event, arg) => {
@@ -80,16 +84,16 @@ class MainWindow {
 		// download url
 		// -------------------------------------------
 		//	start
-		ipcMain.on('startDownload', (event, myUrl) => {
-			_that.topWindow._startDownload(myUrl, _that);
+		ipcMain.on('startDownload', (event, myUrl, myDarName) => {
+			_that.topWindow.startDownload(myUrl, myDarName, _that);
 		});
 
-		ipcMain.on('pauseDownload', (event, myUrl) => {
-			_that.topWindow._pauseDownload(myUrl, _that);
+		ipcMain.on('stopDownload', (event, myUrl, myDarName) => {
+			_that.topWindow.stopDownload(myUrl, myDarName);
 		});
 
-		ipcMain.on('cancelDownload', (event, myUrl) => {
-			_that.topWindow._cancelDownload(myUrl, _that);
+		ipcMain.on('cleanDownload', (event, myUrl, myDarName) => {
+			_that.topWindow.cleanDownload(myUrl, myDarName);
 		});
 
 		// -------------------------------------------
@@ -114,7 +118,7 @@ class MainWindow {
 				}
 			}
 		});
-		ipcMain.on('settings-getall', (event, arg) => {
+		ipcMain.on('settings-getall', (event) => {
 			event.returnValue = settings.getAll();
 		});
 		ipcMain.on('settings-set', (event, key, value) => {
@@ -132,9 +136,10 @@ class MainWindow {
 	/**
 	 * init browser window events
 	 *
-	 * @function initBrowserWindowEvents
+	 * @function _initBrowserWindowEvents
+	 * @private
 	 */
-	initBrowserWindowEvents() {
+	_initBrowserWindowEvents() {
 		// Show window when ready to show
 		this._browserWindow.once('ready-to-show', () => {
 			logger.debug('MainWindow event ready-to-show');
@@ -148,22 +153,21 @@ class MainWindow {
 			this._browserWindow = null;
 			ipcMain.removeAllListeners('OpenPath');
 			ipcMain.removeAllListeners('startDownload');
-			ipcMain.removeAllListeners('pauseDownload');
-			ipcMain.removeAllListeners('cancelDownload');
+			ipcMain.removeAllListeners('stopDownload');
+			ipcMain.removeAllListeners('cleanDownload');
 		});
 	}
 
 	/**
-	 * load angular app
-	 * @function load
+	 * Load angular app and devtools if devmode
+	 *
+	 * @function _load
+	 * @private
 	 */
-	load() {
-
+	_load() {
 		logger.debug('MainWindow.load');
-
 		// Tell Electron where to load the entry point from
 		this._browserWindow.loadURL("file://" + rootPath + "/index.html");
-
 		// Open the DevTools.
 		if (configuration.isDevMode) {
 			logger.debug('MainWindow in dev mode > openDevTools');
