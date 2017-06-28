@@ -64,11 +64,11 @@ class DownloadManager {
 			})
 
 			// auto updater - map to mainWindow to modal dialog box if new update
-			const urlLatestDownloadManager = `${configuration.getConf().qsHost}/downloadManagers/releases/latest`;
+			//const urlLatestDownloadManager = `${configuration.getConf().qsHost}/downloadManagers/releases/latest`;
 			if (!AutoUpdaterHandler.CHECKED) {
-				logger.debug('urlLatestDownloadManager=' + urlLatestDownloadManager);
+				//logger.debug('urlLatestDownloadManager=' + urlLatestDownloadManager);
 				this.mainWindow.autoUpdater = new AutoUpdaterHandler(this.mainWindow);
-				this.mainWindow.autoUpdater.init(urlLatestDownloadManager);
+				this.mainWindow.autoUpdater.checkForUpdates();
 			}
 
 			// download - map to topWindow

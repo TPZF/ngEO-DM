@@ -1,8 +1,9 @@
 'use strict';
 
 const { dialog } = require('electron');
-const autoUpdater = require('electron-simple-updater');
-const logger = require('./../utils/logger');
+//const autoUpdater = require('electron-simple-updater');
+const { autoUpdater } = require('electron-updater')
+const logger = require('../utils/logger');
 
 class AutoUpdaterHandler {
 
@@ -41,8 +42,9 @@ class AutoUpdaterHandler {
 			});
 		});
 
-		this._autoUpdater.on('update-not-available', () => {
+		this._autoUpdater.on('update-not-available', (e) => {
 			logger.info('AutoUpdaterHandler.event#update-not-available...');
+			logger.debug(e);
 			if (AutoUpdaterHandler.CHECKED) {
 				dialog.showMessageBox(this.mainWindow.getBrowserWindow(), {
 					type: 'info',
@@ -57,16 +59,21 @@ class AutoUpdaterHandler {
 
 		this._autoUpdater.on('update-downloaded', (e) => {
 			logger.info(e);
-			this._autoUpdater.quitAndInstall();
+			dialog.showMessageBox(this.mainWindow.getBrowserWindow(), {
+				type: 'warning',
+				buttons: ['Update now', 'Cancel'],
+				title: 'A new version is available...',
+				message: 'A new version is available, upgrade now?'
+			}, function (buttonIndex) {
+				if (buttonIndex == 0) {
+					_that._autoUpdater.quitAndInstall();
+				}
+			});
 		});
 	}
 
 	checkForUpdates() {
 		this._autoUpdater.checkForUpdates();
-	}
-
-	init(myUrl) {
-		this._autoUpdater.init(myUrl);
 	}
 }
 

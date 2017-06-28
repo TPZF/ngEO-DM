@@ -1,15 +1,15 @@
 {
-  "name": "ngeo-downloadmanager",
-  "description": "Simple download manager application buit with Electron and Angular",
-  "version": "0.2.1",
-  "author": "Telespazio France",
-  "main": "main.js",
-  "dependencies": {
-    "btoa": "^1.1.2",
-    "electron-log": "^2.2.6",
-    "electron-notifications": "^1.0.0",
-    "electron-settings": "^3.0.14",
-    "electron-simple-updater": "^1.2.0",
-    "url": "^0.11.0"
-  }
+	"name": "ngeo-downloadmanager",
+	"description": "Simple download manager application buit with Electron and Angular",
+	"version": "0.2.0",
+	"author": "Telespazio France",
+	"main": "main.js",
+	"dependencies": {
+		"btoa": "^1.1.2",
+		"electron-log": "^2.2.6",
+		"electron-notifications": "^1.0.0",
+		"electron-settings": "^3.0.14",
+		"electron-updater": "^2.4.3",
+		"url": "^0.11.0"
+	}
 }

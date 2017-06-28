@@ -1,6 +1,6 @@
 {
 	"name": "ngeo-downloadmanager",
-	"version": "0.2.1",
+	"version": "0.2.0",
 	"author": "Telespazio France - 2017",
 	"description": "ngEO Download Manager",
 	"main": "src/electron/main.js",
@@ -21,7 +21,7 @@
 		"postinstall": "install-app-deps",
 		"start": "electron src/electron --enable-logging",
 		"dev": "NODE_ENV='development' npm run start",
-		"build-windows-dist": "build -w --x64 --ia32",
+		"build-windows-dist": "build -w --ia32",
 		"build-mac-dist": "build -m --x64",
 		"build-linux-dist": "build -l --x64"
 	},
@@ -106,6 +106,15 @@
 		"webpack-dev-server": "^2.2.1"
 	},
 	"build": {
+		"publish": [
+			{
+				"url": "http://localhost:3000/ngeo/downloadManagers/releases/${os}/latest",
+				"provider": "generic",
+				"channel": "latest"
+			}
+		],
+		"npmRebuild": true,
+		"artifactName": " ${productName}-${version}.${ext}",
 		"appId": "int.esa.ngeo.download.manager",
 		"directories": {
 			"output": "dist",
