@@ -1,12 +1,11 @@
 'use strict';
 
 // ELECTRON
-const { dialog, Menu, nativeImage, Tray, ipcMain } = require('electron');
+const { dialog, Menu, nativeImage, Tray } = require('electron');
 
 // ASSETS
 const path = require('path');
 const assetsPath = path.join(__dirname, '../../webapp/assets');
-const logger = require('../utils/logger');
 
 /**
  * @class AppTray
@@ -17,10 +16,14 @@ class AppTray {
 		this.topWindow = myTopWindow;
 		this.mainWindow = myMainWindow;
 		this.appVersion = myAppVersion;
-		this.createTray();
+		this._createTray();
 	}
 
-	createTray() {
+	/**
+	 * @function _createTray
+	 * @private
+	 */
+	_createTray() {
 
 		let _image;
 		if (process.platform === 'win32') {
@@ -35,12 +38,10 @@ class AppTray {
 		this._tray = new Tray(_image);
 		this._tray.setToolTip('ngEO Download manager');
 
-		ipcMain.on('refreshIcon', () => this.refreshIcon());
-
 		const _contextMenu = Menu.buildFromTemplate([
-			{ label: 'Show window', type: 'normal', click: () => this.showMainWindow() },
-			{ label: 'Check for update', type: 'normal', click: () => this.checkForUpdates() },
-			{ label: 'About...', type: 'normal', click: () => this.showAbout() },
+			{ label: 'Show window', type: 'normal', click: () => this._showMainWindow() },
+			{ label: 'Check for update', type: 'normal', click: () => this._checkForUpdates() },
+			{ label: 'About...', type: 'normal', click: () => this._showAbout() },
 			{ label: 'Quit', accelerator: 'CommandOrControl+Q', role: 'quit' }
 		]);
 
@@ -49,12 +50,13 @@ class AppTray {
 
 	}
 
-	setTitle(myTitle) {
-		this._tray.setTitle(myTitle);
-	}
-
-	showMainWindow() {
-		logger.debug('AppTray.showMainWindow()');
+	/**
+	 * show main window if not displays
+	 *
+	 * @function _showMainWindow
+	 * @private
+	 */
+	_showMainWindow() {
 		// if mainWindow is null -> recreate it
 		if (this.mainWindow.getBrowserWindow() == null) {
 			this.mainWindow.createWindow();
@@ -63,7 +65,13 @@ class AppTray {
 		}
 	}
 
-	checkForUpdates() {
+	/**
+	 * Check for updates with auto updater component
+	 *
+	 * @function _checkForUpdates
+	 * @private
+	 */
+	_checkForUpdates() {
 		if (this.mainWindow.autoUpdater) {
 			this.mainWindow.autoUpdater.checkForUpdates();
 		}
@@ -72,9 +80,10 @@ class AppTray {
 	/**
 	 * Display about message box
 	 *
-	 * @function showAbout
+	 * @function _showAbout
+	 * @private
 	 */
-	showAbout() {
+	_showAbout() {
 		const _iconImage = nativeImage.createFromPath(path.join(assetsPath, 'ngeo-dialog.png'));
 		const _options = {
 			type: 'info',
@@ -96,9 +105,6 @@ class AppTray {
 		}
 	}
 
-	refreshIcon() {
-		//this._tray.setImage();
-	}
 }
 
 module.exports = AppTray;
