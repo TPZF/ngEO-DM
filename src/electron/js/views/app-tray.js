@@ -1,7 +1,7 @@
 'use strict';
 
 // ELECTRON
-const { app, dialog, Menu, nativeImage, Tray, ipcMain } = require('electron');
+const { dialog, Menu, nativeImage, Tray, ipcMain } = require('electron');
 
 // ASSETS
 const path = require('path');
