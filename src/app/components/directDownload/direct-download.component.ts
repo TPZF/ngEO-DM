@@ -35,7 +35,7 @@ export class DirectDownloadComponent implements OnDestroy, OnInit {
 	download() {
 		this._fileDownload.productURL = this._urlInput;
 		this._fileDownload.mode = 'indeterminate';
-		this._electronService.ipcRenderer.send('startDownload', this._fileDownload.productURL);
+		this._electronService.ipcRenderer.send('startDownload', this._fileDownload.productURL, 'direct');
 	}
 
 	openProductFile() {

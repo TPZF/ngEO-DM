@@ -4,13 +4,13 @@
 	</h3>
 	<div class="menu-actions">
 		<md-button-toggle-group [(ngModel)]="_newStatus">
-			<md-button-toggle value="0">
+			<md-button-toggle value="-10" title="Clean downloads">
+				<md-icon>delete_forever</md-icon>
+			</md-button-toggle>
+			<md-button-toggle value="0" (click)="_newStatus='0'" title="Stop downloads" *ngIf="darStatus.status==10">
 				<md-icon>stop</md-icon>
 			</md-button-toggle>
-			<md-button-toggle value="5" *ngIf="darStatus.status!=0">
-				<md-icon>pause</md-icon>
-			</md-button-toggle>
-			<md-button-toggle value="10">
+			<md-button-toggle value="10" (click)="_newStatus='10'" title="Start/resume downloads" *ngIf="darStatus.status==0">
 				<md-icon>play_arrow</md-icon>
 			</md-button-toggle>
 		</md-button-toggle-group>

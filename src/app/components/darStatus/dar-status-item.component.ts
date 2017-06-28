@@ -50,23 +50,16 @@ export class DarStatusItemComponent implements OnDestroy, OnInit, DoCheck {
 		if (+this._newStatus === 0 && +this.darStatus.status === 10) {
 			// click on stop after start
 			this.darStatus.status = 0;
-			this._darStatusService.cancelDownload(this.darStatus);
-		} else if (+this._newStatus === 5 && +this.darStatus.status === 10) {
-			// click on pause after start
-			this.darStatus.status = 5;
-			this._darStatusService.pauseDownload(this.darStatus);
-		} else if (+this._newStatus === 0 && +this.darStatus.status === 5) {
-			// click on stop after pause
-			this.darStatus.status = 0;
-			this._darStatusService.cancelDownload(this.darStatus);
+			this._darStatusService.stopDownload(this.darStatus);
 		} else if (+this._newStatus === 10 && +this.darStatus.status === 0) {
 			// click on start after stop
 			this.darStatus.status = 10;
 			this._darStatusService.startDownload(this.darStatus);
-		} else if (+this._newStatus === 10 && +this.darStatus.status === 5) {
-			// click on start after pause
-			this.darStatus.status = 10;
-			this._darStatusService.startDownload(this.darStatus);
+		} else if (+this._newStatus === -10) {
+			// click on delete
+			this._newStatus = '0';
+			this.darStatus.status = 0;
+			this._darStatusService.cleanDownload(this.darStatus);
 		} else {
 			this._newStatus = this._darStatusService.checkDownload(this.darStatus, this._newStatus);
 		}

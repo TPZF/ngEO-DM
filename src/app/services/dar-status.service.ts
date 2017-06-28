@@ -103,40 +103,39 @@ export class DarStatusService {
 	 * @see component <dar-status-item>
 	 */
 	startDownload(myDar: DarStatus) {
+		let _darName = myDar.name ? myDar.name : myDar.ID;
 		myDar.productStatuses.forEach((_product) => {
 			_product.percentageCompleted = '0';
 			_product.loadedSize = '0';
 			_product.mode = 'indeterminate';
-			this._electronService.ipcRenderer.send('startDownload', _product.productURL);
+			this._electronService.ipcRenderer.send('startDownload', _product.productURL, _darName);
 		});
 	}
 
 	/**
-	 * @function cancelDownload
+	 * @function stopDownload
 	 * @param {DarStatus} myDar
 	 * @see component <dar-status-item>
 	 */
-	cancelDownload(myDar: DarStatus) {
+	stopDownload(myDar: DarStatus) {
+		let _darName = myDar.name ? myDar.name : myDar.ID;
 		myDar.productStatuses.forEach((_product) => {
 			if (+_product.percentageCompleted < 100) {
-				_product.percentageCompleted = '0';
-				_product.loadedSize = '0';
-				_product.mode = 'determinate';
-				this._electronService.ipcRenderer.send('cancelDownload', _product.productURL);
+				this._electronService.ipcRenderer.send('stopDownload', _product.productURL, _darName);
 			}
 		});
 	}
 
 	/**
-	 * @function pauseDownload
+	 * @function cleanDownload
 	 * @param {DarStatus} myDar
 	 * @see component <dar-status-item>
 	 */
-	pauseDownload(myDar: DarStatus) {
+	cleanDownload(myDar: DarStatus) {
+		let _darName = myDar.name ? myDar.name : myDar.ID;
 		myDar.productStatuses.forEach((_product) => {
 			if (+_product.percentageCompleted < 100) {
-				_product.mode = 'indeterminate';
-				this._electronService.ipcRenderer.send('pauseDownload', _product.productURL);
+				this._electronService.ipcRenderer.send('cleanDownload', _product.productURL, _darName);
 			}
 		});
 	}
