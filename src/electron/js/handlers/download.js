@@ -7,13 +7,13 @@ const URL = require('url');
 const notifier = require('electron-notifications');
 const settings = require('electron-settings');
 
-const configuration = require('../handlers/configuration');
-const ecp = require('../ecp');
+const configuration = require('./configuration');
+const ecp = require('./../ecp');
 
 const path = require('path');
-const rootPath = path.join(__dirname, '../..');
+const rootPath = path.join(__dirname, './../..');
 const assetsPath = path.join(rootPath, 'webapp/assets');
-const logger = require('../utils/logger');
+const logger = require('./../utils/logger');
 
 class DownloadHandler {
 
@@ -31,6 +31,8 @@ class DownloadHandler {
 	 * @param {string} myUrl
 	 */
 	startDownload(myUrl, myDarName) {
+		logger.debug('--------------------------------------------------------------------------');
+		logger.debug('--------------------------------------------------------------------------');
 		logger.debug('downloadHandler.startDownload(' + myUrl + ', ' + myDarName + ')');
 		// set path
 		let _path = settings.get('downloadPath') + '/' + this._cleanName(myDarName);
@@ -153,7 +155,7 @@ class DownloadHandler {
 					'Cookie': this.shibb
 				}
 			};
-			logger.debug('downloadHandler.startEcpDownload shibb _options:' + _options);
+			logger.debug('downloadHandler.startEcpDownload shibb _options:' + JSON.stringify(_options));
 			this._startDownloadFile(myUrl, myDarName, _options);
 		} else {
 			// put credentials, path, configuration, logger and url in options
@@ -232,7 +234,8 @@ class DownloadHandler {
 
 		let _that = this;
 
-		logger.debug('downloadHandler._startDownloadUrl ' + myDownloadUrl.url);
+		logger.debug('downloadHandler._startDownloadUrl url=' + myDownloadUrl.url);
+
 		// request
 		let _req;
 		if (myDownloadUrl.url.indexOf('https') === 0) {
@@ -241,19 +244,19 @@ class DownloadHandler {
 			});
 		} else {
 			_req = http.request(myDownloadUrl.request, (_resp) => {
+				logger.debug('downloadHandler._startDownloadUrl http resp');
 				_that._saveRessource(_resp, myDownloadUrl);
 			});
 		}
-		let _download = this._getInDownloads(myDownloadUrl.url, myDownloadUrl.darName);
-		_download.requestXhr = _req;
-		_download.request = myDownloadUrl.request;
-
 		_req.on('error', (e) => {
 			if (e.code === 'HPE_INVALID_CONSTANT') {
+				logger.error('downloadHandler._startDownloadUrl HPE_INVALID_CONSTANT for ' + myDownloadUrl.url);
 				return;
 			}
 			if (e.code === 'ECONNRESET') {
 				// abort called by stopDownload
+				logger.error('downloadHandler._startDownloadUrl ECONNRESET for ' + myDownloadUrl.url);
+				delete _download.requestXhr;
 				return;
 			}
 			_download.status = 'error';
@@ -266,6 +269,13 @@ class DownloadHandler {
 			}
 		});
 		_req.end();
+
+		let _download = this._getInDownloads(myDownloadUrl.url, myDownloadUrl.darName);
+		logger.debug('downloadHandler._startDownloadUrl _download=' + _download);
+		_download.requestXhr = _req;
+		_download.request = myDownloadUrl.request;
+		return;
+
 	}
 
 	/**
@@ -331,7 +341,7 @@ class DownloadHandler {
 					});
 				}
 				fs.renameSync(_filePath + '.filepart', _filePath);
-				_that._delInDownloads(myDownloadUrl.url);
+				_that._delInDownloads(myDownloadUrl.url, myDownloadUrl.darName);
 			}
 		})
 
@@ -444,9 +454,14 @@ class DownloadHandler {
 				fs.mkdir(myPath, (err) => {
 					if (err) {
 						logger.error('Cannot create directory for download : ' + myPath);
+						return;
 					}
+					logger.debug('Create directory for download : ' + myPath);
+					return;
 				});
+				return;
 			}
+			logger.debug('No need to create directory for download : ' + myPath);
 		});
 	}
 
