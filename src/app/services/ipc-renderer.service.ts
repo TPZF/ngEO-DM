@@ -46,7 +46,14 @@ export class IpcRendererService {
 				}
 			});
 		});
-
+		this._electronService.ipcRenderer.on('downloadPaused', (event, downloadItem) => {
+			console.log('downloadPaused', myDownload.productURL);
+			myNgZone.run(() => {
+				if (myDownload.productURL === downloadItem.url) {
+					myDownload.mode = 'determinate';
+				}
+			});
+		});
 		this._electronService.ipcRenderer.on('downloadFileUpdated', (event, downloadItem) => {
 			console.log('downloadFileUpdated');
 			myNgZone.run(() => {
@@ -113,6 +120,16 @@ export class IpcRendererService {
 			});
 		});
 
+		this._electronService.ipcRenderer.on('downloadPaused', (event, downloadItem) => {
+			myNgZone.run(() => {
+				myDarStatus.productStatuses.forEach(_product => {
+					if (_product.productURL === downloadItem.url) {
+						_product.mode = 'determinate';
+					}
+				});
+			});
+		});
+
 		// listener on downloadError
 		this._electronService.ipcRenderer.on('downloadError', (event, downloadItem) => {
 			myNgZone.run(() => {
@@ -170,6 +187,7 @@ export class IpcRendererService {
 	destroyDownload() {
 		// remove listeners to avoid memory leak
 		this._electronService.ipcRenderer.removeAllListeners('downloadError');
+		this._electronService.ipcRenderer.removeAllListeners('downloadPaused');
 		this._electronService.ipcRenderer.removeAllListeners('downloadUpdated');
 		this._electronService.ipcRenderer.removeAllListeners('downloadCompleted');
 		this._electronService.ipcRenderer.removeAllListeners('downloadFileError');
