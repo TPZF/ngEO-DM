@@ -30,97 +30,98 @@ class DownloadHandler {
 	 * @function startDownload
 	 * @param {string} myUrl
 	 */
-	startDownload(myUrl) {
-		logger.debug('downloadHandler.startDownload(' + myUrl + ')');
-		this._addInDownloads({ url: myUrl, type: 'DownloadItem' });
-		let _download = this._getInDownloads(myUrl);
-		if (typeof _download.item !== 'undefined' && _download.item.isPaused()) {
-			logger.debug('downloadHandler.startDownload item not null > resume it !');
-			_download.item.resume();
-		} else {
-			logger.debug('downloadHandler.startDownload item null > download it !');
-			logger.debug('url: ' + myUrl);
-			// @see top-window.js - will-download
-			this.topWindow.getBrowserWindow().webContents.downloadURL(myUrl);
-		}
-	}
-
-	pauseDownload(myUrl) {
-		// find in _downloads
-		let _download = this._getInDownloads(myUrl);
-		// if not found else end !
-		if (_ind === -1) return;
-		// if already paused
-		let setPaused = false;
-		if (!this._downloads[_ind].isPaused) {
-			this._downloads[_ind].isPaused = true;
-			setPaused = true;
-		}
-		if (!setPaused) return;
-		logger.debug('downloadHandler.cancelDownload pause it');
-		/*
-		this.logger.debug('downloadHandler.pauseDownload setPause=' + setPause);
-		let _item = null;
-		let _start = new Date();
-		let _end = new Date();
-		while (_item === null && (_end.getTime() - _start.getTime() < 1000)) {
-			_item = this._getDownloadItemByUrl(myUrl);
-			_item = this._getDownloadByUrl(myUrl);
-			_end = new Date();
-		}
-		if (_item === null) {
+	startDownload(myUrl, myDarName) {
+		logger.debug('downloadHandler.startDownload(' + myUrl + ', ' + myDarName + ')');
+		// set path
+		let _path = settings.get('downloadPath') + '/' + this._cleanName(myDarName);
+		this._createFolderForPath(_path);
+		// set download object
+		let _download = {
+			url: myUrl,
+			darName: myDarName,
+			type: 'DownloadItem',
+			status: 'progressing',
+			pathFolder: _path,
+			created: new Date().getTime()
+		};
+		this._addInDownloads(_download); // only if not exists in _downloads array
+		_download = this._getInDownloads(myUrl, myDarName);
+		if (typeof _download.item !== 'undefined') {
+			if (_download.status === 'paused') {
+				logger.debug('downloadHandler.startDownload item is paused > resume !');
+				_download.status = 'progressing';
+				// @see top-window.js - will-download
+				_download.item.resume();
+				return;
+			}
+			if (_download.status === 'error') {
+				logger.debug('downloadHandler.startDownload item is on error > retry !');
+				_download.status = 'progressing';
+				// @see top-window.js - will-download
+				this.topWindow.getBrowserWindow().webContents.downloadURL(myUrl);
+				return;
+			}
 			return;
 		}
-		if (!_item.isPaused()) {
-			item.pause();
-		} else {
-			if (!_item.isOnPaused) {
-				this._downloadRequests.forEach((dR) => {
-					if (dR.downloadUrl.url === myUrl) {
-						_item.isOnPaused = true;
-						dR.request.abort();
-					}
-				});
-			}
+		if (typeof _download.request !== 'undefined') {
+			logger.debug('downloadHandler.startDownload request > retry !');
+			_download.status = 'progressing';
+			this._startDownloadFile(myUrl, myDarName, _download.request);
+			return;
 		}
-		*/
+		logger.debug('downloadHandler.startDownload item/request null > download it !');
+		_download.status = 'progressing';
+		// @see top-window.js - will-download
+		this.topWindow.getBrowserWindow().webContents.downloadURL(myUrl);
 	}
 
-	cancelDownload(myUrl) {
-		logger.debug('######### downloadHandler.cancelDownload(' + myUrl + ')');
+	stopDownload(myUrl, myDarName) {
+		logger.debug('######### downloadHandler.stopDownload(' + myUrl + ', ' + myDarName + ')');
 		// find in _downloads
-		let _download = this._getInDownloads(myUrl);
+		let _download = this._getInDownloads(myUrl, myDarName);
 		// if not found else end !
 		if (_download === null) return;
-		// find if already cancelled
-		let setCancel = false;
-		logger.debug('######### downloadHandler.cancelDownload isCancelled=' + _download.isCancelled);
-		if (typeof _download.isCancelled === 'undefined') {
-			_download.isCancelled = true;
-			setCancel = true;
+		// find if already stopped
+		let setStop = false;
+		logger.debug('######### downloadHandler.stopDownload status=' + _download.status);
+		if (typeof _download.status === 'undefined') {
+			_download.status = 'paused';
+			setStop = true;
 		} else {
-			setCancel = _download.isCancelled;
+			setStop = (_download.status === 'progressing');
 		}
-		logger.debug('######### downloadHandler.cancelDownload setCancel=' + setCancel);
+		logger.debug('######### downloadHandler.stopDownload setStop=' + setStop);
 		// if already cancelled else end !
-		if (!setCancel) return;
-		logger.debug('######### downloadHandler.cancelDownload cancel it' + _download.type);
+		if (!setStop) return;
+		logger.debug('######### downloadHandler.stopDownload _download.type=' + _download.type);
+		_download.status = 'paused';
 		if (_download.type === 'DownloadItem') {
 			if (typeof _download.item !== 'undefined') {
-				logger.debug('######### downloadHandler.cancelDownload item.cancel');
-				_download.item.cancel();
+				logger.debug('######### downloadHandler.stopDownload item.pause');
+				_download.item.pause();
 			}
 		} else if (_download.type === 'DownloadUrl') {
-			if (typeof _download.request !== 'undefined') {
-				logger.debug('######### downloadHandler.cancelDownload request.abort');
-				_download.request.abort();
-
+			logger.debug('######### downloadHandler.stopDownload _download.request=' + _download.request);
+			if (typeof _download.requestXhr !== 'undefined') {
+				logger.debug('######### downloadHandler.stopDownload requestXhr.abort');
+				_download.requestXhr.abort();
 			}
 		} else {
 			return;
 		}
-		this._delInDownloads(myUrl);
+		if (this.mainWindow && this.mainWindow.getBrowserWindow()) {
+			this.mainWindow.getBrowserWindow().webContents.send('downloadPaused', {
+				url: myUrl
+			});
+		}
+	}
 
+	cancelDownload(myUrl, myDarName) {
+		// find in _downloads
+		let _download = this._getInDownloads(myUrl, myDarName);
+		// if not found else end !
+		if (_download === null) return;
+		// if already paused
 	}
 
 	/**
@@ -128,13 +129,13 @@ class DownloadHandler {
 	 * @function startEcpDownload
 	 * @param {string} myUrl
 	 */
-	startEcpDownload(myUrl) {
+	startEcpDownload(myUrl, myDarName) {
 
 		let _that = this;
 
-		logger.debug('downloadHandler.startEcpDownload(' + myUrl + ')');
+		logger.debug('downloadHandler.startEcpDownload(' + myUrl + ',' + myDarName +')');
 
-		let _download = this._getInDownloads(myUrl);
+		let _download = this._getInDownloads(myUrl, myDarName);
 		_download.type = 'DownloadUrl';
 		// logger.debug('downloadHandler.startEcpDownload settings.get(username):' + settings.get('username') + '');
 		// logger.debug('downloadHandler.startEcpDownload settings.get(username):' + settings.get('password') + '');
@@ -153,7 +154,7 @@ class DownloadHandler {
 				}
 			};
 			logger.debug('downloadHandler.startEcpDownload shibb _options:' + _options);
-			this._startDownloadFile(myUrl, _options);
+			this._startDownloadFile(myUrl, myDarName, _options);
 		} else {
 			// put credentials, path, configuration, logger and url in options
 			_options = {
@@ -170,8 +171,10 @@ class DownloadHandler {
 				.then((_resp) => {
 					logger.debug('downloadHandler _resp' + _resp);
 					_that.shibb = _resp.request.headers['Cookie'];
-					if (!_download.isCancelled) {
-						_that._startDownloadFile(_resp.url, _resp.request);
+					let _download = this._getInDownloads(myUrl, myDarName);
+					logger.debug(_download.status);
+					if (_download.status === 'progressing') {
+						_that._startDownloadFile(_resp.url, myDarName, _resp.request);
 					}
 				})
 				.catch((_err) => {
@@ -189,37 +192,33 @@ class DownloadHandler {
 	 *
 	 * @function _startDownloadFile
 	 * @param {string} myUrl
+	 * @param {string} myDarName
 	 * @param {object} myRequest
 	 */
-	_startDownloadFile(myUrl, myRequest) {
+	_startDownloadFile(myUrl, myDarName, myRequest) {
 		logger.debug('downloadHandler.startDownloadFile');
-		let _download = this._getInDownloads(myUrl);
+		let _download = this._getInDownloads(myUrl, myDarName);
+		logger.debug('downloadHandler.startDownloadFile _download.status=' + _download.status);
 		if (_download !== null) {
-			if (_download.isCancelled) return;
-			if (_download.isPaused) {
-				logger.debug('downloadHandler.startDownloadFile item already exists > resume it !');
-				//this._resumeDownloadUrl(_item);
-			} else {
-				logger.debug('downloadHandler.startDownloadFile item null > download it !');
-				logger.debug(myRequest);
-				if (typeof myRequest === 'undefined') {
-					let _url = URL.parse(myUrl);
-					let _path = _url.pathname + (_url.search == null ? '' : _url.search);
-					myRequest = {
-						host: _url.host,
-						hostname: _url.hostname,
-						protocol: _url.protocol,
-						port: _url.port,
-						path: _path,
-						method: 'GET'
-					};
-				}
-				let _downloadUrl = {
-					url: myUrl,
-					request: myRequest
+			if (_download.status === 'paused') return;
+			if (typeof myRequest === 'undefined') {
+				let _url = URL.parse(myUrl);
+				let _path = _url.pathname + (_url.search == null ? '' : _url.search);
+				myRequest = {
+					host: _url.host,
+					hostname: _url.hostname,
+					protocol: _url.protocol,
+					port: _url.port,
+					path: _path,
+					method: 'GET'
 				};
-				this._startDownloadUrl(_downloadUrl);
 			}
+			let _downloadUrl = {
+				url: myUrl,
+				darName: myDarName,
+				request: myRequest
+			};
+			this._startDownloadUrl(_downloadUrl);
 		}
 	}
 
@@ -234,7 +233,6 @@ class DownloadHandler {
 		let _that = this;
 
 		logger.debug('downloadHandler._startDownloadUrl ' + myDownloadUrl.url);
-		logger.debug('downloadHandler._startDownloadUrl ' + JSON.stringify(myDownloadUrl.request));
 		// request
 		let _req;
 		if (myDownloadUrl.url.indexOf('https') === 0) {
@@ -246,18 +244,25 @@ class DownloadHandler {
 				_that._saveRessource(_resp, myDownloadUrl);
 			});
 		}
-		let _download = this._getInDownloads(myDownloadUrl.url);
-		_download.request = _req;
+		let _download = this._getInDownloads(myDownloadUrl.url, myDownloadUrl.darName);
+		_download.requestXhr = _req;
+		_download.request = myDownloadUrl.request;
 
 		_req.on('error', (e) => {
-			if (e.code !== 'HPE_INVALID_CONSTANT') {
-				logger.error('downloadHandler._startDownloadUrl error ' + JSON.stringify(e));
-				if (_that.mainWindow && _that.mainWindow.getBrowserWindow()) {
-					_that.mainWindow.getBrowserWindow().webContents.send('downloadError', {
-						url: myDownloadUrl.url,
-						errorMsg: e
-					});
-				}
+			if (e.code === 'HPE_INVALID_CONSTANT') {
+				return;
+			}
+			if (e.code === 'ECONNRESET') {
+				// abort called by stopDownload
+				return;
+			}
+			_download.status = 'error';
+			logger.error('downloadHandler._startDownloadUrl error ' + JSON.stringify(e));
+			if (_that.mainWindow && _that.mainWindow.getBrowserWindow()) {
+				_that.mainWindow.getBrowserWindow().webContents.send('downloadError', {
+					url: myDownloadUrl.url,
+					errorMsg: e
+				});
 			}
 		});
 		_req.end();
@@ -276,13 +281,17 @@ class DownloadHandler {
 
 		let _that = this;
 
+		// get download object
+		let _download = _that._getInDownloads(myDownloadUrl.url, myDownloadUrl.darName);
+		_download.status = 'progressing';
+
 		let _fileName = this._getFileNameFromHeaders(myResponse, myDownloadUrl);
-		let _filePath = settings.get('downloadPath') + '/' + _fileName;
+		let _filePath = _download.pathFolder + '/' + _fileName;
 		// TODO make it better
 		if (fs.existsSync(_filePath)) {
 			let _newFileName = _fileName.substring(0, _fileName.lastIndexOf('.')) + '(' + new Date().getTime() + ').' + _fileName.substring(_fileName.lastIndexOf('.') + 1);
 			_fileName = _newFileName;
-			_filePath = settings.get('downloadPath') + '/' + _fileName;
+			_filePath = _download.pathFolder + '/' + _fileName;
 		}
 		logger.debug('downloadHandler._saveRessource _filePath:' + _filePath);
 
@@ -308,6 +317,7 @@ class DownloadHandler {
 			_wstream.end();
 			logger.debug('downloadHandler._saveRessource end');
 			if (_bytesDone === _bytesTotal) {
+				_download.status = 'completed';
 				if (_that.mainWindow && _that.mainWindow.getBrowserWindow()) {
 					_that.mainWindow.getBrowserWindow().webContents.send('downloadCompleted', {
 						url: myDownloadUrl.url,
@@ -381,17 +391,17 @@ class DownloadHandler {
 
 	_addInDownloads(myDownload) {
 		// logger.debug('downloadHandler._addInDownloads');
-		if (this._getInDownloads(myDownload.url) === null) {
+		if (this._getInDownloads(myDownload.url, myDownload.darName) === null) {
 			this._downloads.push(myDownload);
 		}
 		// logger.debug('downloadHandler._addInDownloads length=' + this._downloads.length);
 	}
 
-	_getInDownloads(myUrl) {
+	_getInDownloads(myUrl, myDarName) {
 		// logger.debug('downloadHandler._getInDownloads');
 		let _result = null;
 		this._downloads.forEach((_elem) => {
-			if (_elem.url === myUrl) {
+			if (_elem.url === myUrl && _elem.darName === myDarName) {
 				_result = _elem;
 			}
 		});
@@ -399,17 +409,50 @@ class DownloadHandler {
 		return _result;
 	}
 
-	_delInDownloads(myUrl) {
+	_getLastInDownloads(myUrl) {
+		// logger.debug('downloadHandler._getInDownloads');
+		let _result = null;
+		let _lastDate = new Date().getTime() - 1000*60*60*24*30;
+		this._downloads.forEach((_elem) => {
+			if (_elem.url === myUrl) {
+				if (_elem.created >= _lastDate) {
+					_result = _elem;
+					_lastDate = _elem.created;
+				}
+			}
+		});
+		// logger.debug('downloadHandler._getInDownloads return ' + _result);
+		return _result;
+	}
+
+	_delInDownloads(myUrl, myDarName) {
 		// logger.debug('downloadHandler._delInDownloads');
 		// logger.debug('downloadHandler._delInDownloads before length=' + this._downloads.length);
 		let _newDownloads = [];
 		this._downloads.forEach((_elem) => {
-			if (_elem.url !== myUrl) {
+			if (_elem.url !== myUrl || _elem.darName !== myDarName) {
 				_newDownloads.push(_elem);
 			}
 		});
 		this._downloads = _newDownloads;
 		// logger.debug('downloadHandler._delInDownloads after length=' + this._downloads.length);
+	}
+
+	_createFolderForPath(myPath) {
+		fs.access(myPath, (err) => {
+			if (err && err.code === 'ENOENT') {
+				fs.mkdir(myPath, (err) => {
+					if (err) {
+						logger.error('Cannot create directory for download : ' + myPath);
+					}
+				});
+			}
+		});
+	}
+
+	_cleanName(myName) {
+		myName = myName.replace(/\s+/gi, '-'); // Replace white space with dash
+		return myName.replace(/[^a-zA-Z0-9\-\_\.]/gi, ''); // Strip any special charactere
 	}
 
 }
