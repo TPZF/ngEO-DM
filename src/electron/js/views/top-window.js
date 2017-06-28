@@ -109,7 +109,6 @@ class TopWindow {
 					let _lastURL = item.getURLChain()[item.getURLChain().length - 1];
 					if (_lastURL.indexOf(configuration.getConf().ecp.serviceprovider.host) > -1) {
 						delete _download.item;
-						_that.downloadHandler.startEcpDownload(item.getURLChain()[0], _download.darName);
 						item.cancel();
 						return;
 					}
@@ -139,6 +138,7 @@ class TopWindow {
 				if (state === 'completed') {
 					logger.info('#top-window# _browserWindow.willDownload > Completed for ' + item.getURLChain()[0]);
 					_download.status = 'completed';
+					delete _download.item;
 					if (_that._mainWindow && _that._mainWindow.getBrowserWindow()) {
 						logger.debug('send downloadFileCompleted to mainWindow...');
 						_that._mainWindow.getBrowserWindow().webContents.send('downloadFileCompleted', {
@@ -157,7 +157,9 @@ class TopWindow {
 					logger.error(`#top-window# _browserWindow.willDownload > Download failed for ${item.getURLChain()[0]}: ${state}`);
 					// if state is cancelled then it will be caused by ECP redirect
 					// so it s not an error
-					if (state !== 'cancelled') {
+					if (state === 'cancelled') {
+						_that.downloadHandler.startEcpDownload(item.getURLChain()[0], _download.darName);
+					} else {
 						_download.status = 'error';
 						if (_that._mainWindow && _that._mainWindow.getBrowserWindow()) {
 							logger.debug('#top-window# _browserWindow.willDownload > send downloadFileError to mainWindow...');
