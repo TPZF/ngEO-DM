@@ -114,7 +114,7 @@
 			}
 		],
 		"npmRebuild": true,
-		"artifactName": " ${productName}-${version}.${ext}",
+		"artifactName": "${productName}-${version}.${ext}",
 		"appId": "int.esa.ngeo.download.manager",
 		"directories": {
 			"output": "dist",
