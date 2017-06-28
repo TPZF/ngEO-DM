@@ -1,6 +1,19 @@
 <div>
-    <main>
-        <ngeo-navbar></ngeo-navbar>
-        <router-outlet></router-outlet>
-    </main>
+	<main>
+		<ngeo-navbar></ngeo-navbar>
+		<router-outlet></router-outlet>
+	</main>
+</div>
+<div style="padding:3px;position:fixed;opacity:0.9;bottom:10px; right:100px;font-family:Arial;font-size:10px;background-color:black; color:white;"
+ *ngIf="_stats">
+	<p>Statistiques <button style="position: absolute;right:5px;" (click)="closeStats()">x</button></p>
+	<p>Type: {{_stats.type}}</p>
+	<p>Process Memory workingSetSize: {{_stats.processMemory.workingSetSize}}</p>
+	<p>Process Memory peakWorkingSetSize: {{_stats.processMemory.peakWorkingSetSize}}</p>
+	<p>Process Memory privateBytes: {{_stats.processMemory.privateBytes}}</p>
+	<p>Process Memory sharedBytes: {{_stats.processMemory.sharedBytes}}</p>
+	<p>System Memory total: {{_stats.systemMemory.total}}</p>
+	<p>System Memory free: {{_stats.systemMemory.free}}</p>
+	<p>System Memory swapTotal: {{_stats.systemMemory.swapTotal}}</p>
+	<p>System Memory swapFree: {{_stats.systemMemory.swapFree}}</p>
 </div>

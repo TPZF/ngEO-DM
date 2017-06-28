@@ -140,11 +140,26 @@ class MainWindow {
 	 * @private
 	 */
 	_initBrowserWindowEvents() {
+		let _that = this;
 		// Show window when ready to show
 		this._browserWindow.once('ready-to-show', () => {
 			logger.debug('MainWindow event ready-to-show');
 			this._browserWindow.show();
 			this._browserWindow.focus();
+
+			if (configuration.isDevMode) {
+				setInterval(() => {
+					if (_that._browserWindow) {
+						_that._browserWindow.webContents.send('stats', {
+							type: process.type,
+							processMemory: process.getProcessMemoryInfo(),
+							systemMemory: process.getSystemMemoryInfo()
+							/*,
+							io: process.getIOCounters()*/
+						});
+					}
+				}, 1000);
+			}
 		});
 
 		// Clear out the main window when the app is closed
