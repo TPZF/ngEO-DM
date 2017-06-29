@@ -12,7 +12,6 @@ export class ErrorService {
 	 * @public
 	 */
 	public handleError(error: Response | any) {
-		// In a real world app, you might use a remote logging infrastructure
 		let errMsg: string;
 		if (error instanceof Response) {
 			errMsg = `${error.status} - ${error.statusText || ''}`;
