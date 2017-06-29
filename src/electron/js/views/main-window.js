@@ -125,7 +125,7 @@ class MainWindow {
 			logger.debug('ipcMain.settings-set');
 			logger.debug('ipcMain.settings-set key=' + key);
 			logger.debug('ipcMain.settings-set value=' + value);
-			if ((key !== '') && (value !== '')) {
+			if ((key !== '') && (typeof value !== 'undefined')) {
 				settings.set(key, value);
 				event.returnValue = 'done';
 			}
