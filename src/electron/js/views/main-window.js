@@ -182,7 +182,7 @@ class MainWindow {
 	_load() {
 		logger.debug('MainWindow.load');
 		// Tell Electron where to load the entry point from
-		this._browserWindow.loadURL("file://" + rootPath + "/index.html");
+		this._browserWindow.loadURL("file://" + rootPath + "/webapp/index.html");
 		// Open the DevTools.
 		if (configuration.isDevMode) {
 			logger.debug('MainWindow in dev mode > openDevTools');
