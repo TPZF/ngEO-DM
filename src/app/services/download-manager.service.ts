@@ -3,16 +3,21 @@ import { Http, Headers, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
+// SERVICES
 import { ConfigurationService } from './configuration.service';
+import { ElectronService } from 'ngx-electron';
 import { ErrorService } from './error.service';
 import { SettingsService } from './settings.service';
 
+// MODELS
 import { DownloadManager } from './../models/download-manager';
 
 @Injectable()
 export class DownloadManagerService {
 
 	public currentDownloadManager = {};
+
+	private _numberOfConnection: number = 0;
 
 	private baseUrl: string;
 	private downloadManagersUrl: string;
@@ -26,6 +31,7 @@ export class DownloadManagerService {
 	constructor(
 		private _http: Http,
 		private _configurationService: ConfigurationService,
+		private _electronService: ElectronService,
 		private _settingsService: SettingsService,
 		private _errorService: ErrorService
 	) {
@@ -37,12 +43,20 @@ export class DownloadManagerService {
 	 * @function getDownloadManagers
 	 */
 	getDownloadManagers(): Observable<DownloadManager[]> {
+		let _that = this;
 		return this._http
 			.get(this.downloadManagersUrl)
 			.map((response) => {
 				return response.json().downloadmanagers;
 			})
-			.catch(this._errorService.handleError);
+			.catch((err: any, caught: Observable<any>) => {
+				if (err.status === 401 && _that._numberOfConnection < 5) {
+					_that._numberOfConnection++;
+					//_that._authenticationService.login();
+					_that._electronService.ipcRenderer.send('login');
+				}
+				return Observable.throw(err);
+			});
 	}
 
 	/**

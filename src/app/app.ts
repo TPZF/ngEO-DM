@@ -21,7 +21,6 @@ import { Md2Module } from 'md2';
  * Services
  */
 import { NgeoService } from './services/ngeo.service';
-import { AuthenticationService } from './services/authentication.service';
 import { ConfigurationService } from './services/configuration.service';
 import { DarStatusService } from './services/dar-status.service';
 import { DownloadManagerService } from './services/download-manager.service';
@@ -69,7 +68,6 @@ import { routes } from './app.routes';
 	],
 	providers: [
 		NgeoService,
-		AuthenticationService,
 		ConfigurationService,
 		DarStatusService,
 		DownloadManagerService,
