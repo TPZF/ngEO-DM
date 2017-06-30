@@ -1,7 +1,11 @@
 {
 	"name": "ngeo-downloadmanager",
 	"version": "0.2.0",
-	"author": "Telespazio France - 2017",
+	"author": {
+		"name": "Telespazio France - 2017",
+		"email": "ngeo.support@telespazio.com",
+		"url": "http://www.telespazio.com/"
+	},
 	"description": "ngEO Download Manager",
 	"main": "src/electron/main.js",
 	"scripts": {
@@ -127,7 +131,11 @@
 		},
 		"linux": {
 			"icon": "src/electron/webapp/assets/icons/",
-			"target": "AppImage"
+			"target": [
+				"rpm",
+				"deb",
+				"AppImage"
+			]
 		}
 	},
 	"engines": {
