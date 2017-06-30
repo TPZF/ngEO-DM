@@ -89,47 +89,47 @@ class TopWindow {
 	 * @public
 	 * @see {@link main-window.js#ipcLogin}
 	 */
-	login() {
-		let _that = this;
-		if (typeof this._loginWindow === 'undefined') {
-			logger.debug('topWindow.login new BroserWindow');
-			this._loginWindow = new BrowserWindow({
-				icon: path.join(assetsPath, 'ngeo-window.png'),
-				parent: this.getBrowserWindow(),
-				backgroundColor: '#FFFFFF',
-				show: false,
-				x: 100,
-				y: 100,
-				minWidth: 800,
-				minHeight: 600
-			});
-			this._loginWindow.on('page-title-updated', (event, title) => {
-				if (title === 'EO Data Service') {
-					logger.log('Authentication completed');
-					_that._loginWindow.close();
-				}
-			});
-			this._loginWindow.once('ready-to-show', () => {
-				logger.debug('LoginWindow event ready-to-show');
-				this._loginWindow.show();
-				this._loginWindow.focus()
-			});
-			this._loginWindow.once('closed', () => {
-				logger.debug('LoginWindow event closed');
-				delete this._loginWindow;
-			});
-			this._loginWindow.loadURL("https://eodata-service.user.eocloud.eu/protected/index.php");
-		}
-		// session.defaultSession.cookies.get({}, (error, cookies) => {
-		// 	logger.log(error, cookies)
-		// })
+	// login() {
+	// 	let _that = this;
+	// 	if (typeof this._loginWindow === 'undefined') {
+	// 		logger.debug('topWindow.login new BroserWindow');
+	// 		this._loginWindow = new BrowserWindow({
+	// 			icon: path.join(assetsPath, 'ngeo-window.png'),
+	// 			parent: this.getBrowserWindow(),
+	// 			backgroundColor: '#FFFFFF',
+	// 			show: false,
+	// 			x: 100,
+	// 			y: 100,
+	// 			minWidth: 800,
+	// 			minHeight: 600
+	// 		});
+	// 		this._loginWindow.on('page-title-updated', (event, title) => {
+	// 			if (title === 'EO Data Service') {
+	// 				logger.log('Authentication completed');
+	// 				_that._loginWindow.close();
+	// 			}
+	// 		});
+	// 		this._loginWindow.once('ready-to-show', () => {
+	// 			logger.debug('LoginWindow event ready-to-show');
+	// 			this._loginWindow.show();
+	// 			this._loginWindow.focus()
+	// 		});
+	// 		this._loginWindow.once('closed', () => {
+	// 			logger.debug('LoginWindow event closed');
+	// 			delete this._loginWindow;
+	// 		});
+	// 		this._loginWindow.loadURL("https://eodata-service.user.eocloud.eu/protected/index.php");
+	// 	}
+	// 	// session.defaultSession.cookies.get({}, (error, cookies) => {
+	// 	// 	logger.log(error, cookies)
+	// 	// })
 
-		// // Query all cookies associated with a specific url.
-		// session.defaultSession.cookies.get({ url: 'https://eodata-service.user.eocloud.eu' }, (error, cookies) => {
-		// 	logger.log(error, cookies)
-		// })
+	// 	// // Query all cookies associated with a specific url.
+	// 	// session.defaultSession.cookies.get({ url: 'https://eodata-service.user.eocloud.eu' }, (error, cookies) => {
+	// 	// 	logger.log(error, cookies)
+	// 	// })
 
-	}
+	// }
 	/**
 	 * Init event like will-download, used by DownloadItem when downloadURL is called
 	 * @see {@link js/download.js}

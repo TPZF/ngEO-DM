@@ -50,11 +50,11 @@ export class DownloadManagerService {
 				return response.json().downloadmanagers;
 			})
 			.catch((err: any, caught: Observable<any>) => {
-				if (err.status === 401 && _that._numberOfConnection < 5) {
-					_that._numberOfConnection++;
-					//_that._authenticationService.login();
-					_that._electronService.ipcRenderer.send('login');
-				}
+				// if (err.status === 401 && _that._numberOfConnection < 5) {
+				// 	_that._numberOfConnection++;
+				// 	//_that._authenticationService.login();
+				// 	_that._electronService.ipcRenderer.send('login');
+				// }
 				return Observable.throw(err);
 			});
 	}

@@ -26,7 +26,6 @@ class MainWindow {
 		this.topWindow = myTopWindow;
 		this._browserWindow = null;
 		this.createWindow();
-		this._ipcLogin = this._ipcLogin.bind(this);
 	}
 
 	/**
@@ -184,10 +183,10 @@ class MainWindow {
 	 * @param {*} event
 	 * @private
 	 */
-	_ipcLogin(event) {
-		logger.debug('ipcMain.login');
-		this.topWindow.login();
-	}
+	// _ipcLogin(event) {
+	// 	logger.debug('ipcMain.login');
+	// 	this.topWindow.login();
+	// }
 
 	/**
 	 * Init all IPC event listeners
@@ -212,7 +211,7 @@ class MainWindow {
 		this._ipcSettingsGetBound = this._ipcSettingsGet.bind(this);
 		this._ipcSettingGetAllBound = this._ipcSettingGetAll.bind(this);
 		this._ipcSettingSetBound = this._ipcSettingSet.bind(this);
-		this._ipcLoginBound = this._ipcLogin.bind(this);
+		// this._ipcLoginBound = this._ipcLogin.bind(this);
 
 		// -------------------------------------------
 		// download url
@@ -231,7 +230,7 @@ class MainWindow {
 		// -------------------------------------------
 		// login
 		// -------------------------------------------
-		ipcMain.on('login', this._ipcLoginBound);
+		// ipcMain.on('login', this._ipcLoginBound);
 		// -------------------------------------------
 	}
 
@@ -276,7 +275,7 @@ class MainWindow {
 			ipcMain.removeListener('settings-get', this._ipcSettingsGetBound);
 			ipcMain.removeListener('settings-getall', this._ipcSettingGetAllBound);
 			ipcMain.removeListener('settings-set', this._ipcSettingSetBound);
-			ipcMain.removeListener('login', this._ipcLoginBound);
+			// ipcMain.removeListener('login', this._ipcLoginBound);
 			// -------------------------------------------
 		});
 	}
