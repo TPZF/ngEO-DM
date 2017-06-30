@@ -2,6 +2,13 @@
 
 Application used with ngEO-LWS designed to manage download subscriptions.
 
+## Supported Platforms
+
+* OS X Yosemite and higher
+* Windows 7 (with .NET Framework 4.5.2), 8.0, 8.1 and 10 (32-bit and 64-bit)
+* Linux (Debian): Ubuntu Desktop 14.04, Debian 7
+* Linux (Red Hat): Red Hat Enterprise Linux 7, CentOS 7, Fedora 23
+
 ## Install - 3 steps
 
 * `npm install` - install modules for project : electron, electron-packager, webpack, angular, etc
