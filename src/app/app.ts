@@ -10,7 +10,6 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
-import { ProgressHttpModule } from 'angular-progress-http';
 import { NgxElectronModule } from 'ngx-electron';
 /**
  * Material design
@@ -27,12 +26,10 @@ import { ConfigurationService } from './services/configuration.service';
 import { DarStatusService } from './services/dar-status.service';
 import { DownloadManagerService } from './services/download-manager.service';
 import { ECPService } from './services/ecp.service';
-import { EoSsoService } from './services/eo-sso.service';
 import { ErrorService } from './services/error.service';
 import { IpcRendererService } from './services/ipc-renderer.service';
 import { ProductService } from './services/product.service';
 import { SettingsService } from './services/settings.service';
-import { SsoService } from './services/sso.service';
 
 /**
  * Components
@@ -45,7 +42,6 @@ import { ProductStatusItemComponent } from './components/darStatus/product-statu
 import { DownloadManagerDetailsComponent } from './components/downloadManager/download-manager-details.component';
 import { DownloadManagerListComponent } from './components/downloadManager/download-manager-list.component';
 import { SettingsComponent } from './components/settings/settings.component';
-import { LoginComponent } from './components/login/login.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SearchComponent } from './components/search/search.component';
 import { DirectDownloadComponent } from './components/directDownload/direct-download.component';
@@ -68,7 +64,6 @@ import { routes } from './app.routes';
 		MaterialModule.forRoot(),
 		Md2Module.forRoot(),
 		NgxElectronModule,
-		ProgressHttpModule,
 		ReactiveFormsModule,
 		RouterModule.forRoot(routes, { useHash: true })
 	],
@@ -79,12 +74,10 @@ import { routes } from './app.routes';
 		DarStatusService,
 		DownloadManagerService,
 		ECPService,
-		EoSsoService,
 		ErrorService,
 		IpcRendererService,
 		ProductService,
-		SettingsService,
-		SsoService
+		SettingsService
 	],
 	declarations: [
 		AppComponent,
@@ -96,7 +89,6 @@ import { routes } from './app.routes';
 		DownloadManagerListComponent,
 		FileSizePipe,
 		SettingsComponent,
-		LoginComponent,
 		NavbarComponent,
 		ProductStatusItemComponent,
 		SearchComponent
