@@ -111,7 +111,7 @@
 	"build": {
 		"publish": [
 			{
-				"url": "http://localhost:3000/ngeo/downloadManagers/releases/${os}/latest",
+				"url": "http://http://ngeo-light.evo-pdgs.com/ngeo-qs/ngeo/downloadManagers/releases/${os}/latest",
 				"provider": "generic",
 				"channel": "latest"
 			}
